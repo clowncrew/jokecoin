@@ -19,18 +19,18 @@ BitcoinUnits::BitcoinUnits(QObject* parent) : QAbstractListModel(parent),
 QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
 {
     QList<BitcoinUnits::Unit> unitlist;
-    unitlist.append(PIV);
-    unitlist.append(mPIV);
-    unitlist.append(uPIV);
+    unitlist.append(JOKE);
+    unitlist.append(mJOKE);
+    unitlist.append(uJOKE);
     return unitlist;
 }
 
 bool BitcoinUnits::valid(int unit)
 {
     switch (unit) {
-    case PIV:
-    case mPIV:
-    case uPIV:
+    case JOKE:
+    case mJOKE:
+    case uJOKE:
         return true;
     default:
         return false;
@@ -40,12 +40,12 @@ bool BitcoinUnits::valid(int unit)
 QString BitcoinUnits::id(int unit)
 {
     switch (unit) {
-    case PIV:
-        return QString("pivx");
-    case mPIV:
-        return QString("mpivx");
-    case uPIV:
-        return QString::fromUtf8("upivx");
+    case JOKE:
+        return QString("jokecoin");
+    case mJOKE:
+        return QString("mjokecoin");
+    case uJOKE:
+        return QString::fromUtf8("ujokecoin");
     default:
         return QString("???");
     }
@@ -55,23 +55,23 @@ QString BitcoinUnits::name(int unit)
 {
     if (Params().NetworkID() == CBaseChainParams::MAIN) {
         switch (unit) {
-        case PIV:
-            return QString("PIV");
-        case mPIV:
-            return QString("mPIV");
-        case uPIV:
-            return QString::fromUtf8("μPIV");
+        case JOKE:
+            return QString("JOKE");
+        case mJOKE:
+            return QString("mJOKE");
+        case uJOKE:
+            return QString::fromUtf8("μJOKE");
         default:
             return QString("???");
         }
     } else {
         switch (unit) {
-        case PIV:
-            return QString("tPIV");
-        case mPIV:
-            return QString("mtPIV");
-        case uPIV:
-            return QString::fromUtf8("μtPIV");
+        case JOKE:
+            return QString("tJOKE");
+        case mJOKE:
+            return QString("mtJOKE");
+        case uJOKE:
+            return QString::fromUtf8("μtJOKE");
         default:
             return QString("???");
         }
@@ -82,23 +82,23 @@ QString BitcoinUnits::description(int unit)
 {
     if (Params().NetworkID() == CBaseChainParams::MAIN) {
         switch (unit) {
-        case PIV:
-            return QString("PIV");
-        case mPIV:
-            return QString("Milli-PIV (1 / 1" THIN_SP_UTF8 "000)");
-        case uPIV:
-            return QString("Micro-PIV (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+        case JOKE:
+            return QString("JOKE");
+        case mJOKE:
+            return QString("Milli-JOKE (1 / 1" THIN_SP_UTF8 "000)");
+        case uJOKE:
+            return QString("Micro-JOKE (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
         default:
             return QString("???");
         }
     } else {
         switch (unit) {
-        case PIV:
-            return QString("TestPIVs");
-        case mPIV:
-            return QString("Milli-TestPIV (1 / 1" THIN_SP_UTF8 "000)");
-        case uPIV:
-            return QString("Micro-TestPIV (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+        case JOKE:
+            return QString("TestJOKEs");
+        case mJOKE:
+            return QString("Milli-TestJOKE (1 / 1" THIN_SP_UTF8 "000)");
+        case uJOKE:
+            return QString("Micro-TestJOKE (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
         default:
             return QString("???");
         }
@@ -108,11 +108,11 @@ QString BitcoinUnits::description(int unit)
 qint64 BitcoinUnits::factor(int unit)
 {
     switch (unit) {
-    case PIV:
+    case JOKE:
         return 100000000;
-    case mPIV:
+    case mJOKE:
         return 100000;
-    case uPIV:
+    case uJOKE:
         return 100;
     default:
         return 100000000;
@@ -122,11 +122,11 @@ qint64 BitcoinUnits::factor(int unit)
 int BitcoinUnits::decimals(int unit)
 {
     switch (unit) {
-    case PIV:
+    case JOKE:
         return 8;
-    case mPIV:
+    case mJOKE:
         return 5;
-    case uPIV:
+    case uJOKE:
         return 2;
     default:
         return 0;

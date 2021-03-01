@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef PIVX_GENWIT_H
-#define PIVX_GENWIT_H
+#ifndef JokeCoin_GENWIT_H
+#define JokeCoin_GENWIT_H
 
 
 #include <iostream>
@@ -58,4 +58,4 @@ private:
 };
 
 
-#endif //PIVX_GENWIT_H
+#endif //JokeCoin_GENWIT_H

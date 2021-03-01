@@ -8,10 +8,10 @@ Performs the same check as in Test_02 verifying that zPoS forked blocks that sta
 '''
 
 from test_framework.authproxy import JSONRPCException
-from fake_stake.base_test import PIVX_FakeStakeTest
+from fake_stake.base_test import JokeCoin_FakeStakeTest
 from time import sleep
 
-class zPoSFakeStakeAccepted(PIVX_FakeStakeTest):
+class zPoSFakeStakeAccepted(JokeCoin_FakeStakeTest):
 
 
     def set_test_params(self):
@@ -21,7 +21,7 @@ class zPoSFakeStakeAccepted(PIVX_FakeStakeTest):
         '''
         self.setup_clean_chain = True
         self.num_nodes = 1
-        self.extra_args = [['-staking=1', '-debug=net', '-zpivstake']] * self.num_nodes
+        self.extra_args = [['-staking=1', '-debug=net', '-zjokestake']] * self.num_nodes
 
     def run_test(self):
         self.description = "Performs the same check as in Test_02 verifying that zPoS forked blocks that stake a zerocoin which is spent on mainchain on an higher block are still accepted."

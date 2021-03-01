@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef PIVX_STAKEINPUT_H
-#define PIVX_STAKEINPUT_H
+#ifndef JokeCoin_STAKEINPUT_H
+#define JokeCoin_STAKEINPUT_H
 
 #include "chain.h"
 #include "streams.h"
@@ -26,15 +26,15 @@ public:
     virtual CAmount GetValue() = 0;
     virtual bool CreateTxOuts(CWallet* pwallet, vector<CTxOut>& vout, CAmount nTotal) = 0;
     virtual bool GetModifier(uint64_t& nStakeModifier) = 0;
-    virtual bool IsZPIV() = 0;
+    virtual bool IsZJOKE() = 0;
     virtual CDataStream GetUniqueness() = 0;
     virtual uint256 GetSerialHash() const = 0;
 };
 
 
-// zPIVStake can take two forms
+// zJOKEStake can take two forms
 // 1) the stake candidate, which is a zcmint that is attempted to be staked
-// 2) a staked zpiv, which is a zcspend that has successfully staked
+// 2) a staked zjoke, which is a zcspend that has successfully staked
 class CZPivStake : public CStakeInput
 {
 private:
@@ -62,7 +62,7 @@ public:
     bool CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut = 0) override;
     bool CreateTxOuts(CWallet* pwallet, vector<CTxOut>& vout, CAmount nTotal) override;
     bool MarkSpent(CWallet* pwallet, const uint256& txid);
-    bool IsZPIV() override { return true; }
+    bool IsZJOKE() override { return true; }
     uint256 GetSerialHash() const override { return hashSerial; }
     int GetChecksumHeightFromMint();
     int GetChecksumHeightFromSpend();
@@ -89,9 +89,9 @@ public:
     CDataStream GetUniqueness() override;
     bool CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut = 0) override;
     bool CreateTxOuts(CWallet* pwallet, vector<CTxOut>& vout, CAmount nTotal) override;
-    bool IsZPIV() override { return false; }
+    bool IsZJOKE() override { return false; }
     uint256 GetSerialHash() const override { return uint256(0); }
 };
 
 
-#endif //PIVX_STAKEINPUT_H
+#endif //JokeCoin_STAKEINPUT_H
