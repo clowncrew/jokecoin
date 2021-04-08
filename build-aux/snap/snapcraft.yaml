@@ -128,8 +128,6 @@ parts:
       cd ${SNAPCRAFT_PART_BUILD}
       if [ $PATCH = 1 ]; then
         echo "apply patches:"
-        git apply $SNAPCRAFT_PART_BUILD/build-aux/snap/local/patches/X002-fix-bdb-tmp-folder.patch
-        git apply $SNAPCRAFT_PART_BUILD/build-aux/snap/local/patches/X003-fix-use-snap-instead-of-dirty.patch
         sed -i 's/tar --strip-components/tar --no-same-owner --strip-components/' ${SNAPCRAFT_PART_BUILD}/depends/funcs.mk
       else
         echo "APPLY .patch files during compilation is disabled, skipping"
