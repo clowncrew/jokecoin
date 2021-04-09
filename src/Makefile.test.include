@@ -27,6 +27,14 @@ BITCOIN_TEST_SUITE = \
   test/test_jokecoin.cpp
 # test_jokecoin binary #
 BITCOIN_TESTS =\
+  test/zerocoin_implementation_tests.cpp\
+  test/zerocoin_denomination_tests.cpp\
+  test/zerocoin_transactions_tests.cpp \
+  test/zerocoin_coinspend_tests.cpp \
+  test/zerocoin_bignum_tests.cpp \
+  test/benchmark_zerocoin.cpp \
+  test/tutorial_zerocoin.cpp \
+  test/libzerocoin_tests.cpp \
   test/addrman_tests.cpp \
   test/allocator_tests.cpp \
   test/base32_tests.cpp \
@@ -75,7 +83,7 @@ endif
 
 test_test_jokecoin_SOURCES = $(BITCOIN_TEST_SUITE) $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
 test_test_jokecoin_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_FLAGS)
-test_test_jokecoin_LDADD = $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
+test_test_jokecoin_LDADD = $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBBITCOIN_ZEROCOIN) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 if ENABLE_WALLET
 test_test_jokecoin_LDADD += $(LIBBITCOIN_WALLET)
