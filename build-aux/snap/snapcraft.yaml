@@ -60,12 +60,6 @@ apps:
   tx:
     command: jokecoin-tx
     plugs: [home]
-  test:
-    command: test_jokecoin
-    plugs: [home]
-  testqt:
-    command: test_jokecoin-qt
-    plugs: [home]
 parts:
   jokecoin-core:
     source: https://github.com/clowncrew/jokecoin
@@ -89,7 +83,7 @@ parts:
       SPLASHPNGS=0  # patch pngs to differ visually from those installed from self compilation or other source like deb
       FIXPPCBUILD=1 # if ppc builds fail due to failed qt, apps part will return error and build will fail, 1 = enabled
       EXTRALOG=0    # prints env and all installed files at the end of current script
-      RUNTESTS=1    # run make check after post install part
+      RUNTESTS=0    # run make check after post install part
       echo "-----------------------------------------------"
       echo "+++++++++++++++++++++++++++++++++++++++++++++++"
       echo "SET OVERRIDE VARIABLES IF SET" # checks OVERRIDEBINPREFIX, OVERRIDEDATADIR and OVERRIDECONF
