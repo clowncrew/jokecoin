@@ -1,7 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-set(CMAKE_INCLUDE_CURRENT_DIR OFF)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms)
+set(QT_MINIMUM_VERSION 5.5.1)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/forms ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/forms)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -10,35 +11,53 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif ()
 
+unset(Qt5Enables)
+foreach(comp Widgets Core Gui Network LinguistTools DBus Svg Charts)
+    find_package(Qt5${comp})
+    set(Qt5Enables "${Qt5Enables};Qt5${comp}_FOUND")
+    if(Qt5${comp}_FOUND)
+        MESSAGE(STATUS "FOUND Qt5${comp}")
+        include_directories(${include_directories} ${Qt5${comp}_INCLUDE_DIRS} ${QT_USE_FILE})
+        add_definitions(${Qt5${comp}_DEFINITIONS})
+        list(APPEND Qt5_LIBRARIES ${Qt5${comp}_LIBRARIES})
+    else()
+        MESSAGE(WARNING "Cant find Qt5${comp}")
+    endif()
+endforeach(comp)
+
+if (Qt5Core_FOUND)
+    if (Qt5Core_VERSION VERSION_LESS QT_MINIMUM_VERSION)
+        MESSAGE(FATAL_ERROR "Minimum supported Qt5 version is ${QT_MINIMUM_VERSION}")
+    else()
+        MESSAGE(STATUS "Found Qt5 version: ${Qt5Core_VERSION}")
+    endif()
+else()
+    MESSAGE(FATAL_ERROR "Could not find any Qt5 installation")
+endif()
+
+if (Qt5DBus_FOUND)
+    add_compile_options("-DUSE_DBUS")
+endif()
+
+if (Qt5Charts_FOUND)
+    add_compile_options("-DUSE_QTCHARTS")
+endif()
+
 find_package(Qrcode)
 if (QRCODE_FOUND)
     include_directories ( ${QRCODE_INCLUDE_DIR} )
     link_directories ( ${QRCODE_LIBRARY_DIRS} )
 endif()
 
-if($ENV{target} MATCHES "Windows")
-    find_package(Qt5)
-else()
-    unset(Qt5Enables)
-    foreach(comp Widgets Core Gui Network LinguistTools DBus)
-        find_package(Qt5${comp})
-        set(Qt5Enables "${Qt5Enables};Qt5${comp}_FOUND")
-        if(Qt5${comp}_FOUND)
-            MESSAGE(STATUS "FOUND QT5${comp}")
-            include_directories(${include_directories} ${Qt5${comp}_INCLUDE_DIRS} ${QT_USE_FILE})
-            add_definitions(${Qt5${comp}_DEFINITIONS})
-            list(APPEND Qt5_LIBRARIES ${Qt5${comp}_LIBRARIES})
-        else()
-            MESSAGE(WARNING "Cant find Qt5${comp}")
-        endif()
-    endforeach(comp)
+find_program(MOC_BIN NAMES moc moc-qt5 qt5-moc
+        PATHS /usr/lib/qt5/bin /usr/lib/x86_64-linux-gnu/qt5/bin /usr/local/opt/qt/bin /usr/local/opt/qt5/bin
+        NO_DEFAULT_PATH
+        NO_SYSTEM_ENVIRONMENT_PATH)
+if (MOC_BIN)
+    MESSAGE(STATUS "FOUND MOC ${MOC_BIN}")
+endif ()
 
-    find_package(Qt5DBus)
-    if (Qt5DBus_FOUND)
-        include_directories(${include_directories} "/usr/local/opt/qt5/include/QtDBus/")
-        add_compile_options("-DUSE_DBUS")
-    endif()
-endif()
+add_compile_options("-DQT_NO_KEYWORDS")
 
 # Why isn't this done automatically??
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -49,54 +68,23 @@ file(GLOB LOCAL_QT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 source_group("QtHeaders" FILES ${LOCAL_QT_HEADERS})
 
 find_package(Protobuf REQUIRED)
+if(Protobuf_FOUND)
+    message(STATUS "Found Protobuf compiler: ${Protobuf_PROTOC_EXECUTABLE}")
+    message(STATUS "Found Protobuf library: ${Protobuf_LIBRARIES}")
+endif()
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/paymentrequest.proto)
 
-set(GUI_FORMS
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/addressbookpage.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/askpassphrasedialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/bip38tooldialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/coincontroldialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/governancepage.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/zjokecontroldialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/blockexplorer.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/editaddressdialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/helpmessagedialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/intro.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/masternodelist.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/multisenddialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/obfuscationconfig.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/privacydialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/openuridialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/optionsdialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/overviewpage.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/receivecoinsdialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/receiverequestdialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/rpcconsole.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/sendcoinsdialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/sendcoinsentry.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/signverifymessagedialog.ui
-        ${CMAKE_CURRENT_SOURCE_DIR}/forms/transactiondescdialog.ui
-        )
-
 SET(QT_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/multisenddialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/bantablemodel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/bip38tooldialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/blockexplorer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/bitcoinaddressvalidator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/bitcoinamountfield.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/bitcoingui.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/bitcoinunits.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/clientmodel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/csvmodelwriter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/governancepage.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/guiutil.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/intro.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/multisigdialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/masternodelist.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/networkstyle.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/notificator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/optionsdialog.cpp
@@ -106,52 +94,114 @@ SET(QT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/qvalidatedlineedit.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/qvaluecombobox.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rpcconsole.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/splashscreen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/trafficgraphwidget.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/utilitydialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/addressbookpage.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/addresstablemodel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/askpassphrasedialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/coincontroldialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/zjokecontroldialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/coincontroltreewidget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/privacydialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/proposalframe.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/editaddressdialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/masternodelist.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/openuridialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/overviewpage.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/paymentrequestplus.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/paymentserver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/receivecoinsdialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/receiverequestdialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/recentrequeststablemodel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/sendcoinsdialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/sendcoinsentry.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/signverifymessagedialog.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/transactiondesc.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/transactiondescdialog.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/transactionfilterproxy.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/transactionrecord.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/transactiontablemodel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/transactionview.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/walletframe.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/walletmodel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/walletmodeltransaction.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/walletview.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/jokecoingui.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/loadingdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/pwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/focuseddialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/guitransactionsutils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/snackbar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/navmenuwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/lockunlock.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/receivedialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/furabstractlistitemdelegate.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/txviewholder.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/qtutils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/expandablebutton.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/topbar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/txrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addressfilterproxymodel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/dashboardwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addresslabelrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/contactdropdownrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/contactsdropdown.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/optionbutton.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/mninfodialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/coldstakingmodel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/mnmodel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/masternodewizarddialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/mnrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/masternodeswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/sendchangeaddressdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/sendconfirmdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/sendcustomfeedialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/sendchangeaddressdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/sendmultirow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/send.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addnewaddressdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addnewcontactdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/requestdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/receivewidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/myaddressrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/csrow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addressholder.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/tooltipmenu.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/addresseswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/defaultdialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/coldstakingwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsbackupwallet.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsbittoolwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsconsolewidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsdisplayoptionswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsfaqwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsinformationwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsmainoptionswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsmultisenddialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsmultisendwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingssignmessagewidgets.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingswalletoptionswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingswalletrepairwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsexportcsv.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingswidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/welcomecontentwidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/splash.cpp
         )
+
+# Workaround until the old rpcconsole UI window is fully removed
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings/settingsconsolewidget.cpp PROPERTY SKIP_AUTOMOC ON)
+execute_process(
+        COMMAND ${MOC_BIN} -o moc_settingsconsolewidget.cpp settingsconsolewidget.h
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings
+)
+
+execute_process(
+        COMMAND ${MOC_BIN} -o moc_pfborderimage.cpp pfborderimage.h
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin
+)
+list(APPEND QT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/moc_pfborderimage.cpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(APPEND QT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/macdockiconhandler.mm)
     list(APPEND QT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/macnotificationhandler.mm)
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    list(APPEND QT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/winshutdownmonitor.cpp)
-endif ()
-
 add_library(qt_stuff STATIC ${BitcoinHeaders} ${QtHeaders} ${QT_SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
-target_include_directories(qt_stuff PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(qt_stuff PUBLIC ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/src/leveldb/include
+        ${CMAKE_SOURCE_DIR}/src/univalue/include
+        ${CMAKE_SOURCE_DIR}/src/secp256k1/include
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin
+        ${CMAKE_CURRENT_SOURCE_DIR}/jokecoin/settings
+        ${OPENSSL_INCLUDE_DIR}
+        ${BerkeleyDB_INCLUDE_DIRS}
+        )
 set_property(TARGET qt_stuff PROPERTY CXX_STANDARD 11)
 
 file(GLOB QT_TRANSLATIONS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/locale/*.ts)
@@ -166,34 +216,42 @@ QT5_ADD_RESOURCES(QRC_RESOURCE jokecoin.qrc)
 QT5_ADD_RESOURCES(QRC_LOCALE_RESOURCE jokecoin_locale.qrc)
 
 add_executable(jokecoin-qt jokecoin.cpp ${QM} ${QRC_RESOURCE} ${QRC_LOCALE_RESOURCE})
-add_dependencies(jokecoin-qt translations_target libunivalue libsecp256k1 leveldb leveldb_sse42 memenv)
+add_dependencies(jokecoin-qt translations_target libunivalue libsecp256k1 libzcashrust leveldb crc32c)
+target_include_directories(jokecoin-qt PUBLIC ${ENDIAN_INCLUDES})
 target_link_libraries(jokecoin-qt
         qt_stuff
         univalue
-        SERVER_A UTIL_A WALLET_A CLI_A COMMON_A BITCOIN_CRYPTO_A ZEROCOIN_A
-        leveldb leveldb_sse42 memenv miniupnpc secp256k1
+        SERVER_A UTIL_A WALLET_A CLI_A COMMON_A BITCOIN_CRYPTO_A ZEROCOIN_A SAPLING_A
+        leveldb crc32c secp256k1 rustzcash
         ${BerkeleyDB_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${LIBEVENT_LIB}
-        pthread
+        ${sodium_LIBRARY_RELEASE}
+        -ldl pthread
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(jokecoin-qt "-framework Cocoa")
 endif()
 if(GMP_FOUND)
     target_link_libraries(jokecoin-qt ${GMP_LIBRARY})
+    target_include_directories(jokecoin-qt PUBLIC ${GMP_INCLUDE_DIR})
 endif()
 if(ZMQ_FOUND)
     target_link_libraries(jokecoin-qt ZMQ_A ${ZMQ_LIB})
+    target_include_directories(jokecoin-qt PUBLIC ${ZMQ_INCLUDE_DIR})
 endif()
 if (QRCODE_FOUND)
     target_link_libraries(jokecoin-qt ${QRCODE_LIB})
+    target_include_directories(jokecoin-qt PUBLIC ${QRCODE_INCLUDE_DIR})
+endif()
+if(MINIUPNP_FOUND)
+    target_compile_definitions(jokecoin-qt PUBLIC "-DSTATICLIB -DMINIUPNP_STATICLIB")
+    target_link_libraries(jokecoin-qt ${MINIUPNP_LIBRARY})
+    target_include_directories(jokecoin-qt PUBLIC ${MINIUPNP_INCLUDE_DIR})
 endif()
 
-QT5_USE_Modules(jokecoin-qt Gui)
-QT5_USE_Modules(jokecoin-qt Core)
-QT5_USE_Modules(jokecoin-qt Widgets)
-QT5_USE_Modules(jokecoin-qt Test)
-QT5_USE_Modules(jokecoin-qt PrintSupport)
-QT5_USE_Modules(jokecoin-qt Network)
+target_link_libraries(jokecoin-qt Qt5::Gui Qt5::Core Qt5::Widgets Qt5::Network Qt5::Svg ${QT_LIBRARIES})
 if (Qt5DBus_FOUND)
-    QT5_USE_Modules(jokecoin-qt DBus)
+    target_link_libraries(jokecoin-qt Qt5::DBus ${QT_LIBRARIES})
+endif()
+if (Qt5Charts_FOUND)
+    target_link_libraries(jokecoin-qt Qt5::Charts ${QT_LIBRARIES})
 endif()

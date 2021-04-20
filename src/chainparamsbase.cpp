@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
-// Copyright (c) 2016-2018 The PIVX developers
+// Copyright (c) 2016-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,7 +12,6 @@
 
 #include <boost/assign/list_of.hpp>
 
-using namespace boost::assign;
 
 /**
  * Main network
@@ -57,20 +56,6 @@ public:
 };
 static CBaseRegTestParams regTestParams;
 
-/*
- * Unit test
- */
-class CBaseUnitTestParams : public CBaseMainParams
-{
-public:
-    CBaseUnitTestParams()
-    {
-        networkID = CBaseChainParams::UNITTEST;
-        strDataDir = "unittest";
-    }
-};
-static CBaseUnitTestParams unitTestParams;
-
 static CBaseChainParams* pCurrentBaseParams = 0;
 
 const CBaseChainParams& BaseParams()
@@ -79,25 +64,24 @@ const CBaseChainParams& BaseParams()
     return *pCurrentBaseParams;
 }
 
-void SelectBaseParams(CBaseChainParams::Network network)
+CBaseChainParams& BaseParams(CBaseChainParams::Network network)
 {
     switch (network) {
     case CBaseChainParams::MAIN:
-        pCurrentBaseParams = &mainParams;
-        break;
+        return mainParams;
     case CBaseChainParams::TESTNET:
-        pCurrentBaseParams = &testNetParams;
-        break;
+        return testNetParams;
     case CBaseChainParams::REGTEST:
-        pCurrentBaseParams = &regTestParams;
-        break;
-    case CBaseChainParams::UNITTEST:
-        pCurrentBaseParams = &unitTestParams;
-        break;
+        return regTestParams;
     default:
         assert(false && "Unimplemented network");
-        return;
+        return mainParams;
     }
+}
+
+void SelectBaseParams(CBaseChainParams::Network network)
+{
+    pCurrentBaseParams = &BaseParams(network);
 }
 
 CBaseChainParams::Network NetworkIdFromCommandLine()

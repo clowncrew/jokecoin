@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016-2018 The Bitcoin Core developers
-# Copyright (c) 2018-2019 The PIVX developers
+# Copyright (c) 2018-2019 The JokeCoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -34,6 +34,7 @@ EXCLUDE_DIRS = [
     "src/leveldb/",
     "src/secp256k1/",
     "src/univalue/",
+    "src/crc32c",
 ]
 
 INCLUDE = ['*.h', '*.cpp', '*.cc', '*.c', '*.py']
@@ -121,6 +122,9 @@ EXPECTED_HOLDER_NAMES = [
     "The Dash Core developers\n",
     "The JokeCoin developers\n",
     "The PPCoin developers\n",
+    "The NovaCoin Developers",
+    "The BlackCoin Developers\n",
+    "The Blackcoin More developers\n",
 ]
 
 DOMINANT_STYLE_COMPILED = {}
@@ -418,24 +422,24 @@ def exec_update_header_year(base_directory):
 ################################################################################
 
 UPDATE_USAGE = """
-Updates all the copyright headers of "The PIVX developers" which were
+Updates all the copyright headers of "The JokeCoin developers" which were
 changed in a year more recent than is listed. For example:
 
-// Copyright (c) <firstYear>-<lastYear> The PIVX developers
+// Copyright (c) <firstYear>-<lastYear> The JokeCoin developers
 
 will be updated to:
 
-// Copyright (c) <firstYear>-<lastModifiedYear> The PIVX developers
+// Copyright (c) <firstYear>-<lastModifiedYear> The JokeCoin developers
 
 where <lastModifiedYear> is obtained from the 'git log' history.
 
 This subcommand also handles copyright headers that have only a single year. In those cases:
 
-// Copyright (c) <year> The PIVX developers
+// Copyright (c) <year> The JokeCoin developers
 
 will be updated to:
 
-// Copyright (c) <year>-<lastModifiedYear> The PIVX developers
+// Copyright (c) <year>-<lastModifiedYear> The JokeCoin developers
 
 where the update is appropriate.
 
@@ -468,7 +472,7 @@ def get_header_lines(header, start_year, end_year):
     return [line + '\n' for line in lines]
 
 CPP_HEADER = '''
-// Copyright (c) %s The PIVX developers
+// Copyright (c) %s The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 '''
@@ -477,7 +481,7 @@ def get_cpp_header_lines_to_insert(start_year, end_year):
     return reversed(get_header_lines(CPP_HEADER, start_year, end_year))
 
 PYTHON_HEADER = '''
-# Copyright (c) %s The PIVX developers
+# Copyright (c) %s The JokeCoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 '''
@@ -531,7 +535,7 @@ def insert_cpp_header(filename, file_lines, start_year, end_year):
 def exec_insert_header(filename, style):
     file_lines = read_file_lines(filename)
     if file_already_has_core_copyright(file_lines):
-        sys.exit('*** %s already has a copyright by The PIVX developers'
+        sys.exit('*** %s already has a copyright by The JokeCoin developers'
                  % (filename))
     start_year, end_year = get_git_change_year_range(filename)
     if style == 'python':
@@ -544,7 +548,7 @@ def exec_insert_header(filename, style):
 ################################################################################
 
 INSERT_USAGE = """
-Inserts a copyright header for "The PIVX developers" at the top of the
+Inserts a copyright header for "The JokeCoin developers" at the top of the
 file in either Python or C++ style as determined by the file extension. If the
 file is a Python file and it has a '#!' starting the first line, the header is
 inserted in the line below it.
@@ -558,7 +562,7 @@ where <year_introduced> is according to the 'git log' history. If
 
 "<current_year>"
 
-If the file already has a copyright for "The PIVX developers", the
+If the file already has a copyright for "The JokeCoin developers", the
 script will exit.
 
 Usage:

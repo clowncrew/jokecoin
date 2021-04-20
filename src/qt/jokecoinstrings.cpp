@@ -282,7 +282,7 @@ QT_TRANSLATE_NOOP("jokecoin-core", "Connect to a node to retrieve peer addresses
 QT_TRANSLATE_NOOP("jokecoin-core", "Connection options:"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Copyright (C) 2009-%i The Bitcoin Core Developers"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Copyright (C) 2014-%i The Dash Core Developers"),
-QT_TRANSLATE_NOOP("jokecoin-core", "Copyright (C) 2015-%i The PIVX Core Developers"),
+QT_TRANSLATE_NOOP("jokecoin-core", "Copyright (C) 2015-%i The JokeCoin Core Developers"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Corrupted block database detected"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Could not parse masternode.conf"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Couldn't generate the accumulator witness"),

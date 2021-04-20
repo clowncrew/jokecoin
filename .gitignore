@@ -11,6 +11,7 @@ src/jokecoin
 src/jokecoind
 src/jokecoin-cli
 src/jokecoin-tx
+src/bench/bench_jokecoin
 src/test/test_jokecoin
 src/qt/test/test_jokecoin-qt
 
@@ -88,6 +89,11 @@ jokecoin-qt
 JokeCoin-Qt.app
 background.tiff*
 
+# Rust
+.cargo/.configured-for-*
+.cargo/config
+target/
+
 # Unit-tests
 Makefile.test
 jokecoin-qt_test
@@ -132,3 +138,10 @@ libbitcoinconsensus.pc
 .idea
 CMakeLists.txt
 cmake-build-debug
+
+moc_*
+*.tmp
+ui_*
+build*
+jokecoind.*
+jokecoind-new-gui.*

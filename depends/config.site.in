@@ -13,6 +13,9 @@ fi
 if test -z $with_qt_translationdir; then
   with_qt_translationdir=$depends_prefix/translations
 fi
+if test -z $with_qt_svgdir; then
+  with_qt_svgdir=$depends_prefix/svg
+fi
 if test -z $with_qt_bindir && test -z "@no_qt@"; then
   with_qt_bindir=$depends_prefix/native/bin
 fi
@@ -36,6 +39,9 @@ fi
 if test -z $enable_zmq && test -n "@no_zmq@"; then
   enable_zmq=no
 fi
+
+RUST_TARGET="@rust_target@"
+RUST_VENDORED_SOURCES="$depends_prefix/vendored-sources"
 
 if test x@host_os@ = xdarwin; then
   BREW=no

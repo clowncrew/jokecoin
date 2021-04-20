@@ -131,8 +131,8 @@
         </spacer>
        </item>
        <item>
-        <widget class="QWidget" name="verticalZjokeOptionsWidget" native="true">
-         <layout class="QVBoxLayout" name="verticalZjokeOptionsLayout">
+        <widget class="QWidget" name="verticalZpivOptionsWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalZpivOptionsLayout">
           <property name="margin">
            <number>0</number>
           </property>
@@ -561,8 +561,8 @@ https://www.transifex.com/jokecoin-project/jokecoin-project-translations</string
         </layout>
        </item>
        <item>
-        <widget class="QWidget" name="verticalZjokeDisplayWidget" native="true">
-         <layout class="QVBoxLayout" name="verticalZjokeDisplayLayout">
+        <widget class="QWidget" name="verticalZpivDisplayWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalZpivDisplayLayout">
           <property name="margin">
            <number>0</number>
           </property>

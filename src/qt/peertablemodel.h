@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
-// Copyright (c) 2017-2018 The PIVX developers
+// Copyright (c) 2017-2019 The JokeCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -52,9 +52,10 @@ public:
     void stopAutoRefresh();
 
     enum ColumnIndex {
-        Address = 0,
-        Subversion = 1,
-        Ping = 2
+        NetNodeId = 0,
+        Address = 1,
+        Subversion = 2,
+        Ping = 3
     };
 
     /** @name Methods overridden from QAbstractTableModel
@@ -68,7 +69,7 @@ public:
     void sort(int column, Qt::SortOrder order);
     /*@}*/
 
-public slots:
+public Q_SLOTS:
     void refresh();
 
 private:

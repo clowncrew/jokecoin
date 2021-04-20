@@ -3660,7 +3660,7 @@ https://www.transifex.com/jokecoin-project/jokecoin-project-translations</transl
         <translation>Todos os direitos reservados (C) 2014-%i aos Desenvolvedores do Dash Core</translation>
     </message>
     <message>
-        <source>Copyright (C) 2015-%i The PIVX Core Developers</source>
+        <source>Copyright (C) 2015-%i The JokeCoin Core Developers</source>
         <translation>Todos os direitos reservados (C) 2015-%i aos Desenvolvedores do JokeCoin Core</translation>
     </message>
     <message>

@@ -7,10 +7,11 @@ Release Process
 
 * Update translations (ping Fuzzbawls on Discord) see [translation_process.md](https://github.com/JokeCoin-Project/JokeCoin/blob/master/doc/translation_process.md#synchronising-translations).
 * Update manpages, see [gen-manpages.sh](https://github.com/jokecoin-project/jokecoin/blob/master/contrib/devtools/README.md#gen-manpagessh).
+* Update release candidate version in `configure.ac` (`CLIENT_VERSION_RC`)
 
 ### Before every major and minor release
 
-* Update version in `configure.ac` (don't forget to set `CLIENT_VERSION_IS_RELEASE` to `true`)
+* Update version in `configure.ac` (don't forget to set `CLIENT_VERSION_IS_RELEASE` to `true`) (don't forget to set `CLIENT_VERSION_RC` to `0`)
 * Write release notes (see below)
 
 ### Before every major release
@@ -228,7 +229,6 @@ Create (and optionally verify) the signed Windows binaries:
     ./bin/gsign --signer "$SIGNER" --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../jokecoin/contrib/gitian-descriptors/gitian-win-signer.yml
     ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../jokecoin/contrib/gitian-descriptors/gitian-win-signer.yml
     mv build/out/jokecoin-*win64-setup.exe ../jokecoin-${VERSION}-win64-setup.exe
-    mv build/out/jokecoin-*win32-setup.exe ../jokecoin-${VERSION}-win32-setup.exe
     popd
 
 Commit your signature for the signed macOS/Windows binaries:
@@ -258,8 +258,6 @@ jokecoin-${VERSION}-x86_64-linux-gnu.tar.gz
 jokecoin-${VERSION}-osx64.tar.gz
 jokecoin-${VERSION}-osx.dmg
 jokecoin-${VERSION}.tar.gz
-jokecoin-${VERSION}-win32-setup.exe
-jokecoin-${VERSION}-win32.zip
 jokecoin-${VERSION}-win64-setup.exe
 jokecoin-${VERSION}-win64.zip
 ```

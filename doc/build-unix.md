@@ -35,6 +35,7 @@ These dependencies are required:
  libboost    | Utility            | Library for threading, data structures, etc
  libevent    | Networking         | OS independent asynchronous networking
  libgmp      | Bignum Arithmetic  | Precision arithmetic
+ libsodium   | Sapling Crypto     | A modern, portable, easy to use crypto library
 
 Optional dependencies:
 
@@ -44,7 +45,6 @@ Optional dependencies:
  libdb4.8    | Berkeley DB      | Wallet storage (only needed when wallet enabled)
  qt          | GUI              | GUI toolkit (only needed when GUI enabled)
  protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
- libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
  univalue    | Utility          | JSON parsing and encoding (bundled version will be used unless --with-system-univalue passed to configure)
  libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.0.0)
 
@@ -73,19 +73,15 @@ Build requirements:
 
 Now, you can either build from self-compiled [depends](/depends/README.md) or install the required dependencies:
 
-    sudo apt-get install libssl-dev libgmp-dev libevent-dev libboost-all-dev
-
-**Note:** For Ubuntu versions starting with Bionic (18.04), or Debian versions starting with Stretch, use `libssl1.0-dev`
-above instead of `libssl-dev`. JokeCoin Core does not support the use of OpenSSL 1.1, though compilation is still possible
-by passing `--with-incompatible-ssl` to configure (NOT RECOMMENDED!).
+    sudo apt-get install libssl-dev libgmp-dev libevent-dev libboost-all-dev libsodium-dev cargo
 
 BerkeleyDB is required for the wallet.
 
- **For Ubuntu only:** db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
+ **For Ubuntu only:** db4.8 packages are available [here](https://launchpad.net/~jokecoin/+archive/jokecoin).
  You can add the repository using the following command:
 
     sudo apt-get install software-properties-common
-    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo add-apt-repository ppa:jokecoin/jokecoin
     sudo apt-get update
     sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
@@ -115,11 +111,9 @@ To build without GUI pass `--without-gui`.
 
 To build with Qt 5 you need the following:
 
-    sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler
+    sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 libqt5svg5-dev libqt5charts5-dev qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libqrencode-dev
 
-libqrencode (optional) can be installed with:
-
-    sudo apt-get install libqrencode-dev
+**Note:** Ubuntu versions prior to Bionic (18.04), and Debian version prior to Buster, do not have the `libqt5charts5-dev` package. If you are compiling on one of these older versions, you will need to omit `libqt5charts5-dev` from the above command.
 
 Once these are installed, they will be found by configure and a jokecoin-qt executable will be
 built by default.
@@ -131,7 +125,7 @@ built by default.
 
 Build requirements:
 
-    sudo dnf install which gcc-c++ libtool make autoconf automake compat-openssl10-devel libevent-devel boost-devel libdb4-devel libdb4-cxx-devel gmp-devel python3
+    sudo dnf install which gcc-c++ libtool make autoconf automake compat-openssl10-devel libevent-devel boost-devel libdb4-devel libdb4-cxx-devel gmp-devel libsodium-devel cargo python3
 
 Optional:
 
@@ -139,11 +133,7 @@ Optional:
 
 To build with Qt 5 you need the following:
 
-    sudo dnf install qt5-qttools-devel qt5-qtbase-devel protobuf-devel
-
-libqrencode (optional) can be installed with:
-
-    sudo dnf install qrencode-devel
+    sudo dnf install qt5-qttools-devel qt5-qtbase-devel qt5-qtsvg-devel qt5-qtcharts-devel protobuf-devel qrencode-devel
 
 Notes
 -----

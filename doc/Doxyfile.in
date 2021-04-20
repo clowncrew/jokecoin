@@ -861,7 +861,8 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = src/leveldb \
+EXCLUDE                = src/crc32c \
+                         src/leveldb \
                          src/json \
                          src/test \
                          src/qt/test
@@ -939,7 +940,7 @@ IMAGE_PATH             =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by doxygen.
 
-INPUT_FILTER           =
+INPUT_FILTER           = "sed -r 's/\/\/.*(TODO|FIXME)/\/\/\/ \\todo/i'"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the

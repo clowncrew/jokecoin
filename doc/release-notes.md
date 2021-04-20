@@ -1,21 +1,24 @@
-JokeCoin Core version *3.3.0* is now available from:  <https://github.com/jokecoin-project/jokecoin/releases>
+JokeCoin Core version *4.3.0* is now available from:  <https://github.com/jokecoin-project/jokecoin/releases>
 
 This is a new major version release, including various bug fixes and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at github: <https://github.com/jokecoin-project/jokecoin/issues>
 
 
-Mandatory Update
+Recommended Update
 ==============
 
-JokeCoin Core v3.3.0 is a mandatory update for all users. This release contains new consensus rules and improvements that are not backwards compatible with older versions. Users will have a grace period of approximately one week to update their clients before enforcement of this update goes into effect.
-
-Masternodes will need to be restarted once both the masternode daemon and the controller wallet have been upgraded.
+This version is an optional, but recommended, update for all users and services.
 
 How to Upgrade
 ==============
 
 If you are running an older version, shut it down. Wait until it has completely shut down (which might take a few minutes for older versions), then run the installer (on Windows) or just copy over /Applications/JokeCoin-Qt (on Mac) or jokecoind/jokecoin-qt (on Linux).
+
+Downgrading warning
+-------------------
+
+The chainstate database for this release is not compatible with previous releases, so if you run 4.3.0 and then decide to switch back to any older version, you will need to run the old release with the -reindex option to rebuild the chainstate data structures in the old format.
 
 
 Compatibility
@@ -29,189 +32,194 @@ Apple released it's last Mountain Lion update August 13, 2015, and officially en
 
 JokeCoin Core should also work on most other Unix-like systems but is not frequently tested on them.
 
- 
+
 Notable Changes
 ==============
 
-## zJOKE Public Spends
+Performance Improvements
+------------------------
 
-Recent exploits of the Zerocoin protocol (Wrapped serials and broken P1 proof) required us to enable the zerocoin spork and deactivate zJOKE functionality in order to secure the supply until the pertinent review process was completed.
+Version 4.3.0 contains a number of significant performance improvements, which make Initial Block Download, startup, transaction and block validation much faster:
 
-Moving forward from this undesired situation, we are enabling a secure and chain storage friendly solution for the zerocoin public spend (aka zJOKE to JOKE conversion).
+- The chainstate database (which is used for tracking UTXOs) has been changed from a per-transaction model to a per-output model ([See PR 1801](https://github.com/JokeCoin-Project/JokeCoin/pull/1801)). Advantages of this model are that it:
+  - avoids the CPU overhead of deserializing and serializing the unused outputs;
+  - has more predictable memory usage;
+  - uses simpler code;
+  - is adaptable to various future cache flushing strategies.
+  
+  As a result, validating the blockchain during Initial Block Download (IBD) and reindex is ~30-40% faster, uses 10-20% less memory, and flushes to disk far less frequently. The only downside is that the on-disk database is 15% larger. During the conversion from the previous format a few extra gigabytes may be used.
 
-The explanation of how this works can be found in #891
+- LevelDB has been upgraded to version 1.22 ([See PR 1738](https://github.com/JokeCoin-Project/JokeCoin/pull/1738)). This version contains hardware acceleration for CRC on architectures supporting SSE 4.2. As a result, synchronization and block validation are now faster.
 
-After block `1,880,000` has past, `SPORK_16` will be deactivated to allow zJOKE spends to occur using this new public spend method for version 2 zJOKE (version 1 zJOKE won't be spendable, see note below). zJOKE public spends, as the name suggests, are **NOT** private, they reveal the input mint that is being spent. The minting of **NEW** zJOKE, as well as zJOKE staking will remain disabled for the time being.
+Removal of Priority Estimation
+------------------------------
 
-It is advised that users spend/convert their existing zJOKE to JOKE, which can be done via the GUI or RPC as it was prior to the disabling of zJOKE. Note that with the public spend method, the restriction on the number of denominations per transaction (previously 7) has been lifted, and now allows for several hundred denominations per transaction.
+Estimation of "priority" needed for a transaction to be included within a target number of blocks has been removed.  The rpc calls are deprecated and will either return `-1` or `1e24` appropriately. 
 
-*Note on version 1 zJOKE*: Version 1 zJOKE was only available to me minted between versions v3.0.0 (Oct 6, 2017) and v3.1.0 (May 8, 2018). The announcement that version 1 zJOKE was deprecated went out on May 1, 2018 with a recommendation for users to spend/convert their version 1 zJOKE.
+The format for fee_estimates.dat has also changed to no longer save these priority estimates. It will automatically be converted to the new format which is not readable by prior versions of the software.
 
-Version 1 zJOKE will be made spendable at a later date due to the extra work required in order to make these version 1 mints spendable.
+Dedicated mnping logging category
+---------------------------------
 
-## GUI Changes
+`mnping` related debug log messages have been moved to their own category of the same name. This is to reduce log spam when debugging with the `masternode` category enabled.
 
-### Options Dialog Cleanup
+RPC Changes
+------------
 
-The options/settings UI dialog has been cleaned up to no longer show settings that are wallet related when running in "disable wallet" (`-disablewallet`) mode.
+### Modified input/output for existing commands
 
-### Privacy Tab
+- The new database model no longer stores information about transaction
+  versions of unspent outputs. This means that:
+  - The `gettxout` RPC no longer has a `version` field in the response.
+  - The `gettxoutsetinfo` RPC reports `hash_serialized_2` instead of `hash_serialized`,
+    which does not commit to the transaction versions of unspent outputs, but does
+    commit to the height and coinbase/coinstake information.
+  - The `getutxos` REST path no longer reports the `txvers` field in JSON format,
+    and always reports 0 for transaction versions in the binary format
+- Three filtering options for the `getbalance` command have been reinstated:
+  - `minconf` (numeric) Only include transactions confirmed at least this many times.
+  - `includeWatchonly` (bool) Also include balance in watchonly addresses.
+  - `includeDelegated` (bool) Also include balance delegated to cold stakers.
+- `estimatefee` is now deprecated and replaced by `estimatesmartfee`:
+  - Input argument is the same for `estimatesmartfee`.
+  - Output is now a JSON object with 2 fields: `feerate` and `blocks`
+- The `getrawmempool` RPC command now includes an additional output field:
+  - `modifiedfee` (numeric) transaction fee with fee deltas used for mining priority.::ZZZZexit
+  
 
-Notice text has been added to the privacy tab indicating that zJOKE minting is disabled, as well as the removal of UI elements that supported such functionality. Notice text has also been added indicating that zJOKE spends are currently **NOT** private.
+### Removed commands
 
-## RPC Changes
+The following commands have been removed from the interface:
+- `estimatepriority`
 
-### Removal of Deprecated Commands
-
-The `masternode` and `mnbudget` RPC commands, which were marked as deprecated in JokeCoin Core v2.3.1 (September 19, 2017), have now been completely removed from JokeCoin Core.
-
-Several new commands were added in v2.3.1 to replace the two aforementioned commands, reference the [v2.3.1 Release Notes](https://github.com/JokeCoin-Project/JokeCoin/blob/master/doc/release-notes/release-notes-2.3.1.md#rpc-changes) for further details.
-
-### New `getblockindexstats` Command
-
-A new RPC command (`getblockindexstats`) has been introduced which serves the purpose of obtaining statistical information on a range of blocks. The information returned is as follows:
-  * transaction count (not including coinbase/coinstake txes)
-  * transaction count (including coinbase/coinstake txes)
-  * zJOKE per-denom mint count
-  * zJOKE per-denom spend count
-  * total transaction bytes
-  * total fees in block range
-  * average fee per kB
-
-Command Reference:
-```$xslt
-getblockindexstats height range ( fFeeOnly )
-nReturns aggregated BlockIndex data for blocks
-height, height+1, height+2, ..., height+range-1]
-
-nArguments:
-1. height             (numeric, required) block height where the search starts.
-2. range              (numeric, required) number of blocks to include.
-3. fFeeOnly           (boolean, optional, default=False) return only fee info.
-```
-Result:
-```
-{
-  first_block: x,              (integer) First counted block
-  last_block: x,               (integer) Last counted block
-  txcount: xxxxx,              (numeric) tx count (excluding coinbase/coinstake)
-  txcount_all: xxxxx,          (numeric) tx count (including coinbase/coinstake)
-  mintcount: {              [if fFeeOnly=False]
-        denom_1: xxxx,         (numeric) number of mints of denom_1 occurred over the block range
-        denom_5: xxxx,         (numeric) number of mints of denom_5 occurred over the block range
-         ...                    ... number of mints of other denominations: ..., 10, 50, 100, 500, 1000, 5000
-  },
-  spendcount: {             [if fFeeOnly=False]
-        denom_1: xxxx,         (numeric) number of spends of denom_1 occurred over the block range
-        denom_5: xxxx,         (numeric) number of spends of denom_5 occurred over the block range
-         ...                    ... number of spends of other denominations: ..., 10, 50, 100, 500, 1000, 5000
-  },
-  pubspendcount: {          [if fFeeOnly=False]
-        denom_1: xxxx,         (numeric) number of PUBLIC spends of denom_1 occurred over the block range
-        denom_5: xxxx,         (numeric) number of PUBLIC spends of denom_5 occurred over the block range
-         ...                   ... number of PUBLIC spends of other denominations: ..., 10, 50, 100, 500, 1000, 5000
-  },
-  txbytes: xxxxx,              (numeric) Sum of the size of all txes (zJOKE excluded) over block range
-  ttlfee: xxxxx,               (numeric) Sum of the fee amount of all txes (zJOKE mints excluded) over block range
-  ttlfee_all: xxxxx,           (numeric) Sum of the fee amount of all txes (zJOKE mints included) over block range
-  feeperkb: xxxxx,             (numeric) Average fee per kb (excluding zc txes)
-}
-```
-
-## Build System Changes
-
-### New Architectures for Depends
-
-The depends system has new added support for the `s390x` and `ppc64el` architectures. This is done in order to support the future integration with [Snapcraft](https://www.snapcraft.io), as well as to support any developers who may use systems based on such architectures.
-
-### Basic CMake Support
-
-While the existing Autotools based build system is our standard build system, and will continue to be so, we have added basic support for compiling with CMake on macOS and linux systems.
-
-This is intended to be used in conjunction with IDEs like CLion (which relies heavily on CMake) in order to streamline the development process. Developers can now use, for example, CLion's internal debugger and profiling tools.
-
-Note that it is still required to have relevant dependencies installed on the system for this to function properly.
-
-*3.3.0* Change log
+*4.3.0* Change log
 ==============
 
 Detailed release notes follow. This overview includes changes that affect behavior, not code moves, refactors and string updates. For convenience in locating the code changes and accompanying discussion, both the pull request and git merge commit are mentioned.
 
-### Core
- - #875 `a99c2dd3bb` [Zerocoin] GMP BigNum: Fix limits for random number generators (random-zebra)
- - #888 `0c071c3fd0` [Zerocoin] remove CTransaction::IsZerocoinSpend/IsZerocoinMint (random-zebra)
- - #891 `855408c2c3` [ZJOKE] Zerocoin public coin spend. (furszy)
- - #897 `65bd788945` [zJOKE] Disable zerocoin minting (random-zebra)
- - #899 `4b22a09024` [zJOKE] Disable zJOKE staking (random-zebra)
- - #909 `458b08c8f2` [Consensus] Mainnet public spend enforcement height set. (furszy)
- - #924 `988b33dab8` [Backport] Max tip age to consider a node in IBD status customizable. (furszy)
- - #925 `a9827a0e63` [Consensus] Time checks (warrows)
-
-### Build System
- - #810 `a373fee908` [Depends] Fix archs (fixes s390x and ppc64el builds on snap) (cevap)
- - #906 `8a47747b59` [Build] Add CMake Support (Fuzzbawls)
- - #910 `07c8fb8f88` [Build] Clean all coverage files during make clean (Fuzzbawls)
- - #913 `473976c619` [Depends] Update from upstream (Fuzzbawls)
- - #914 `5a43ea790a` [Gitian] Bump gitian build versions (Fuzzbawls)
- - #917 `b38ef04838` [Build] TravisCI Update (Fuzzbawls)
- - #922 `0f98fd4d3f` [Build] Fix app name casing in mac deploy related files (Fuzzbawls)
-
-### P2P Protocol and Network Code
- - #908 `95b584effd` [NET] Non-running dns servers removed from chainParams. (furszy)
- - #929 `7e8855d910` [Net] Update hard-coded seeds (Fuzzbawls)
- - #930 `5061b486c2` [Net] Add a couple new testnet checkpoints (Fuzzbawls)
+### Core Features
+ - #1666 `5a092159f6` [Core] Base work for the Sapling signatureHash (furszy)
+ - #1746 `128978d45b` [Core] Only include undo.h from main.cpp (random-zebra)
+ - #1768 `6881e1063f` [Core] Use SipHash-2-4 for various non-cryptographic hashes (Pieter Wuille)
+ - #1771 `bda654c5f3` [Core] Use SipHash for node eviction (Pieter Wuille)
+ - #1773 `90ffc6683b` [Core] per-txout model preparation (random-zebra)
+ - #1774 `68df9a7d5b` [Core] Alter assumptions in CCoinsViewCache::BatchWrite (random-zebra)
+ - #1775 `85b5f2eb83` [Core] Remove BIP30 check (random-zebra)
+ - #1777 `3c767c46b5` [Core] ModifyNewCoins saves database lookups (random-zebra)
+ - #1788 `823ba8e334` [Core] Remove priority estimation (random-zebra)
+ - #1793 `af793b7bb9` [Core] Safer modify new coins (Russell Yanofsky)
+ - #1795 `afafd7f6a9` [Core] Use unordered_map for CCoinsMap and fix empty vectors in streams (Pieter Wuille)
+ - #1799 `fcb546ad05` [Core] Remove UTXO cache entries when the tx they were added for is removed (Pieter Wuille)
+ - #1801 `30d353edab` [Core] Per-txout model for chainstate database (random-zebra)
+ - #1804 `5c8b992033` [Core] Use std::unordered_{map,set} (C++11) instead of boost::unordered_* (random-zebra)
 
 ### GUI
- - #874 `23f17ce021` [Qt] Add new budget colors (warrows)
- - #895 `0417d52ef9` [QT] Options UI cleanup (Alko89)
- - #896 `b2fcefee93` [UI] Simplify Qt margins. (warrows)
- - #898 `3d496cc746` [Qt] Fixup duplicate label names (Fuzzbawls)
- - #900 `5f7559bc7b` [UI] Fix improperly parented walletView and segmentation fault on QT 5.10 (Julian Meyer)
- - #928 `2482572f89` [Qt] Update Translations (Fuzzbawls)
-
-### RPC/REST
- - #877 `54c8832d80` [RPC] Remove deprecated masternode/budget RPC commands (Fuzzbawls)
- - #901 `be3aab4a00` [RPC] Fix typos and oversights in listunspent (CaveSpectre11)
- - #911 `484c070b22` [RPC] add 'getblockindexstats' function (random-zebra)
+ - #1754 `93d574170d` [Model] Wallet interface refactor + code cleanup. (furszy)
+ - #1776 `2ad27b1407` [Model] TransactionRecord decomposeTransaction refactoring (furszy)
+ - #1782 `ada4462782` [GUI] Start masternodes polling timer only when is needed. (furszy)
+ - #1805 `f0cc6fcc38` [BUG][GUI] Don't append cold-stake records twice (random-zebra)
+ - #1863 `ad15bce2f5` [Trivial][GUI] Fix init messages (random-zebra)
 
 ### Wallet
- - #813 `80bf51e7c9` [Refactoring] [Move Only] Move wallet files into their own folder (warrows)
- - #916 `a4f02ed946` [Staking] Don't assert if we were beaten to the block (CaveSpectre11)
+ - #1752 `2e32285a70` [Wallet] Simple unused methods cleanup. (furszy)
+ - #1755 `eeb129b477` [wallet] List COutput solvability + wallet_ismine refactoring. (furszy)
+ - #1757 `e2cc4aa411` [Wallet] add cacheable amounts for caching credit/debit values (furszy)
+ - #1759 `dcc92f8157` [Wallet] AvailableCoins remove duplicated watchonly config argument. (furszy)
+ - #1760 `3b030f9978` [Wallet] AvailableCoins code readability improved (furszy)
+ - #1764 `6847d0d648` [Wallet] Securely erase potentially sensitive keys/values (Thomas Snider)
+ - #1767 `8ab63d3e5b` [Wallet] Ignore MarkConflict if block hash is not known (random-zebra)
+ - #1781 `4715915d4c` [Wallet] Acquire cs_main lock before cs_wallet during wallet initialization (random-zebra)
+ - #1783 `abf7c62934` [Wallet] Do not try to resend transactions if the node is importing or in IBD (furszy)
+ - #1787 `4b1f3eb792` [Wallet] Improve usage of fee estimation code (random-zebra)
+ - #1802 `7db7724cff` [Wallet] Make nWalletDBUpdated atomic to avoid a potential race (furszy)
+ - #1810 `49bd99929d` [Wallet] wtx cached balances test coverage + getAvailableCredit problem fix. (furszy)
+ - #1811 `e89e20eca1` [Wallet][Refactoring] wallet/init refactoring backports (random-zebra)
+ - #1817 `6480c7d9bf` [Wallet] Speedup coinstake creation removing redundancies. (furszy)
+ - #1832 `c14d130b48` [Wallet] Cleanup getbalance methods that are not fulfilling any purpose. (furszy)
 
-### Unit Tests
- - #806 `fc6b5a191d` [Test] Create new per-test fixtures (Wladimir J. van der Laan)
- - #902 `8adeeb9727` [Tests] Add tests for CAddrMan (warrows)
+### P2P Protocol and Network Code
+ - #1769 `1e334200bb` [Net] Remove bogus assert on number of oubound connections. (Matt Corallo)
+ - #1780 `5fcad0c139` [Net] cs_vSend-cs_main deadlock detection fixed. (furszy)
+ - #1800 `616b102f8b` [P2P] Improve AlreadyHave (Alex Morcos)
+ - #1812 `777638e7bc` [P2P] Begin Network Encapsulation (random-zebra)
+ - #1835 `cbd9271afb` [Net] Massive network refactoring and speedup (Fuzzbawls)
+
+### RPC/REST
+ - #1753 `e288a4508b` [Trivial] [RPC] Fix listcoldutxos help text (JSKitty)
+ - #1828 `4fc36b59ee` [RPC][BUG] Fix ActivateBestChain calls in reconsider(invalidate)block (random-zebra)
+ - #1831 `28509bf9e8` [RPC] re introducing filtering args in getbalance (furszy)
+
+### Build Systems
+ - #1553 `fddf765132` [Build] Sapling Foundations (Build System + ZIP32) (furszy)
+ - #1703 `2e11030e8b` [Build] Require minimum boost version 1.57.0 (Fuzzbawls)
+ - #1738 `21c467b1eb` [Build] Update leveldb to 1.22+ (Fuzzbawls)
+ - #1750 `544e619ebe` [Trivial] openssl.org dependency download link changed (CryptoDev-Project)
+ - #1770 `32a2e8a031` [Build] Bump minimum libc to 2.17 for release binaries (Fuzzbawls)
+ - #1790 `6e7b9b2a82` [Build] Fix glibc compat (Fuzzbawls)
+ - #1792 `a3da3aa9f5` [Build] allow for empty RUST_TARGET in offline builds (Fuzzbawls)
+ - #1794 `760f426430` [Build] Use syslibs for nightly snap builds (Fuzzbawls)
+ - #1813 `259523cdc2` [CMake] Define MAC_OSX for cmake builds on macOS (Fuzzbawls)
+ - #1823 `d675fa3a1a` [Travis] Lower the build timeout for the functional tests job (random-zebra)
+
+### Layer 2 (MN/Budget)
+ - #1791 `6162df962b` [Masternodes] Missing cs main locks in CalculateScore and GetMasternodeInputAge (furszy)
+ - #1803 `69ec4a3fdf` [Cleanup] masternode-budget tiny cleanup. (furszy)
+ - #1825 `a06c0fd993` [MN] more cleanup over the tier two area. (furszy)
+ - #1826 `961f5373bf` [Refactor] Masternode Budget first refactoring and cleanup (random-zebra)
+ - #1843 `f4d5d34bed` [Bug] Update budget manager best height even if mnSync is incomplete (random-zebra)
+
+### Miner/Block Generation
+ - #1700 `40742084de` [Miner] Move coinbase & coinstake to P2PKH (furszy)
+ - #1809 `959d707bc9` [Miner] decouple zJOKE duplicated serials checks from CreateNewBlock (furszy)
+ - #1816 `0fa40d7695` [Miner] Unifying the disperse coinbase tx flow + further clean up. (furszy)
+ - #1818 `242356d012` [Miner] PoS process (furszy)
 
 ### Miscellaneous
- - #744 `7e52f58b82` [Refactor] Refactor bignum header file into several files (warrows)
- - #808 `8b54f7150b` [Scripts] Add optimize pngs python script (cevap)
- - #824 `3323f26848` [Refactor] Remove stale obfuscation code (Fuzzbawls)
- - #830 `81038da4f8` [Refactor] Remove BOOST_FOREACH (Fuzzbawls)
- - #844 `0a0dcf0d4e` [Refactor] Replace deprecated auto_ptr with unique_ptr (cevap)
- - #856 `da26ddeeb9` [Refactor] Move per-chain budget cycle blocks to chainparams (Fuzzbawls)
- - #879 `5f0d72659c` [Refactor] Rename ui_interface.h file (Fuzzbawls)
- - #890 `fddac44eab` [Refactor] Remove unused setStakeSeen variable (warrows)
- - #903 `68c81c407a` [Log] Handle errors during log message formatting (warrows)
- - #904 `6f597629d8` [zJOKE] Free memory from ToString() (warrows)
- - #912 `5f167c2c7e` [Cleanup] compiler warnings in coinSpend object. (furszy)
- - #919 `c0233e4af6` [zJOKE] Debug missing jump line. (Matias Furszyfer)
- - #920 `a56cc2948d` [Docs] Overhaul documentation files (Fuzzbawls)
- - #921 `893183339e` [Scripts] Overhaul supplemental python/shell scripts (Fuzzbawls)
- - #926 `49a69b8931` [Doc] 3.3.0 Notable Changes (Fuzzbawls)
- - #927 `048d1295dc` [Trivial] Update header copyright years (Fuzzbawls)
- 
+ - #1694 `0604a98bd0` [Backport] Test LowS in standardness (furszy)
+ - #1721 `8e19562dc4` [Validation] Reduce cs_main locks during ConnectTip/SyncWithWallets (furszy)
+ - #1725 `e59d8e59fa` [Backport] mempool score index. (Alex Morcos)
+ - #1735 `ee749c5b9c` [Validation] DisconnectBlock updates. (furszy)
+ - #1785 `277b1114d9` [Bug] lock cs_main for Misbehaving (furszy)
+ - #1796 `6d62df529b` [BUG] Properly copy fCoinStake memeber between CTxInUndo and CCoins (random-zebra)
+ - #1797 `b909e96121` [Refactoring] Break circular dependency main ↔ txdb (random-zebra)
+ - #1806 `b9f30f65f2` [Refactor] Cleanup access to chainActive in a few places (random-zebra)
+ - #1808 `948e1a99c0` [Tests][Trivial] Remove mining in rpc_deprecated test (random-zebra)
+ - #1820 `846dca7b83` [Cleanup] remove unneeded chainActive access. (furszy)
+ - #1821 `4b3fb02dc3` [Cleanup] removing unused GetMasternodeByRank method (furszy)
+ - #1822 `48d7475bd4` [Refactor] Dedicated logging category for masternode pings (random-zebra)
+ - #1824 `6ec609f93d` [Cleanup] IsBlockValueValid refactored properly. (furszy)
+ - #1827 `70bf7203ee` [Cleanup] removed null check comparison against a new object. (furszy)
+ - #1833 `9c06e5d7ce` [Refactor] Remove GetInputAge and GetMasternodeInputAge (random-zebra)
+ - #1853 `e8d13ef4b0` [Cleanup] Removing unused and unneeded functions and members (furszy)
+ - #1855 `3cd52771f2` [Bug] wrong reserveKey when committing budget/proposal collaterals (random-zebra)
+ - #1860 `5aed03f6fe` [Bug] Missing mnping category added to logcategories (furszy)
+
 ## Credits
 
 Thanks to everyone who directly contributed to this release:
+- Alex Morcos
+- Cory Fields
+- CryptoDev-Project
+- Daniel Kraft
+- Ethan Heilman
+- Fuzzbawls
+- Gregory Maxwell
+- JSKitty
+- Jack Grigg
+- Jeremy Rubin
+- Luke Dashjr
+- Matt Corallo
+- Patrick Strateman
+- Pavel Janík
+- Philip Kaufmann
+- Pieter Wuille
+- Russell Yanofsky
+- Suhas Daftuar
+- Thomas Snider
+- Wladimir J. van der Laan
+- furszy
+- jtimon
+- random-zebra
 
- - Alko89
- - CaveSpectre11
- - Fuzzbawls
- - Julian Meyer
- - Matias Furszyfer
- - cevap
- - Wladimir J. van der Laan
- - random-zebra
- - warrows
 
 As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/jokecoin-project-translations/), the QA team during Testing and the Node hosts supporting our Testnet.
