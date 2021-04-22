@@ -18,7 +18,7 @@
 #include "swifttx.h"    // mapTxLockReq
 #include "util.h"
 #include "utilmoneystr.h"
-#include "zpivchain.h"
+#include "zjokechain.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
@@ -38,7 +38,7 @@ bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
 const char * DEFAULT_WALLET_DAT = "wallet.dat";
 
 /**
- * Fees smaller than this (in upiv) are considered zero fee (for transaction creation)
+ * Fees smaller than this (in ujoke) are considered zero fee (for transaction creation)
  * We are ~100 times smaller then bitcoin now (2015-06-23), set minTxFee 10 times higher
  * so it's still 10 times lower comparing to bitcoin.
  * Override with -mintxfee
@@ -1490,7 +1490,7 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, b
     int64_t nNow = GetTime();
     bool fCheckZJOKE = GetBoolArg("-zapwallettxes", false);
     if (fCheckZJOKE)
-        zpivTracker->Init();
+        zjokeTracker->Init();
 
     const Consensus::Params& consensus = Params().GetConsensus();
 
@@ -3909,7 +3909,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         uiInterface.InitMessage(_("Syncing zJOKE wallet..."));
 
         //Load zerocoin mint hashes to memory
-        walletInstance->zpivTracker->Init();
+        walletInstance->zjokeTracker->Init();
         zwalletInstance->LoadMintPoolFromDB();
         zwalletInstance->SyncWithChain();
     }

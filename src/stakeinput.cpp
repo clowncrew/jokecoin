@@ -7,7 +7,7 @@
 #include "chain.h"
 #include "main.h"
 #include "txdb.h"
-#include "zpiv/deterministicmint.h"
+#include "zjoke/deterministicmint.h"
 #include "wallet/wallet.h"
 
 bool CPivStake::InitFromTxIn(const CTxIn& txin)

@@ -147,15 +147,15 @@ UniValue getinfo(const JSONRPCRequest& request)
     }
 
     obj.push_back(Pair("moneysupply",ValueFromAmount(nMoneySupply)));
-    UniValue zpivObj(UniValue::VOBJ);
+    UniValue zjokeObj(UniValue::VOBJ);
     for (auto denom : libzerocoin::zerocoinDenomList) {
         if (mapZerocoinSupply.empty())
-            zpivObj.push_back(Pair(std::to_string(denom), ValueFromAmount(0)));
+            zjokeObj.push_back(Pair(std::to_string(denom), ValueFromAmount(0)));
         else
-            zpivObj.push_back(Pair(std::to_string(denom), ValueFromAmount(mapZerocoinSupply.at(denom) * (denom*COIN))));
+            zjokeObj.push_back(Pair(std::to_string(denom), ValueFromAmount(mapZerocoinSupply.at(denom) * (denom*COIN))));
     }
-    zpivObj.push_back(Pair("total", ValueFromAmount(GetZerocoinSupply())));
-    obj.push_back(Pair("zJOKEsupply", zpivObj));
+    zjokeObj.push_back(Pair("total", ValueFromAmount(GetZerocoinSupply())));
+    obj.push_back(Pair("zJOKEsupply", zjokeObj));
 
 #ifdef ENABLE_WALLET
     if (pwalletMain) {

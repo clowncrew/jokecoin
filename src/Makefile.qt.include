@@ -386,15 +386,15 @@ RES_ICONS = \
   qt/jokecoin/res/img/ic-radio-liliac-on.svg \
   qt/jokecoin/res/img/img-empty-staking-off.svg \
   qt/jokecoin/res/img/ic-arrow-drop-down.svg \
-  qt/jokecoin/res/img/ic-coin-piv.svg \
+  qt/jokecoin/res/img/ic-coin-joke.svg \
   qt/jokecoin/res/img/ic-receive-off.svg \
   qt/jokecoin/res/img/img-empty-staking-on.svg \
   qt/jokecoin/res/img/ic-arrow-drop-up-white.svg \
-  qt/jokecoin/res/img/ic-coin-zpiv.png \
+  qt/jokecoin/res/img/ic-coin-zjoke.png \
   qt/jokecoin/res/img/ic-receive-on.svg \
   qt/jokecoin/res/img/img-empty-transactions.svg \
   qt/jokecoin/res/img/ic-arrow-drop-up.svg \
-  qt/jokecoin/res/img/ic-coin-zpiv.svg \
+  qt/jokecoin/res/img/ic-coin-zjoke.svg \
   qt/jokecoin/res/img/ic-received.svg \
   qt/jokecoin/res/img/img-logo-jokecoin.png \
   qt/jokecoin/res/img/ic-arrow-drop-white-down.svg \

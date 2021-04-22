@@ -10,7 +10,7 @@
 #include "swifttx.h"
 #include "timedata.h"
 #include "wallet/wallet.h"
-#include "zpivchain.h"
+#include "zjokechain.h"
 #include "main.h"
 
 #include <algorithm>
@@ -34,7 +34,7 @@ bool TransactionRecord::decomposeCoinStake(const CWallet* wallet, const CWalletT
     const uint256& hash = wtx.GetHash();
     TransactionRecord sub(hash, wtx.GetTxTime(), wtx.GetTotalSize());
 
-    if (wtx.HasZerocoinSpendInputs() && (fZSpendFromMe || wallet->zpivTracker->HasMintTx(hash))) {
+    if (wtx.HasZerocoinSpendInputs() && (fZSpendFromMe || wallet->zjokeTracker->HasMintTx(hash))) {
         //zJOKE stake reward
         sub.involvesWatchAddress = false;
         sub.type = TransactionRecord::StakeZJOKE;

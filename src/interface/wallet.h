@@ -1,10 +1,10 @@
 // Copyright (c) 2018-2020 The Bitcoin Core developers
-// Copyright (c) 2020 The PIVX developers
+// Copyright (c) 2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
-#ifndef PIVX_INTERFACES_WALLET_H
-#define PIVX_INTERFACES_WALLET_H
+#ifndef JokeCoin_INTERFACES_WALLET_H
+#define JokeCoin_INTERFACES_WALLET_H
 
 #include <amount.h>
 #include "wallet/wallet.h"

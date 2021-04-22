@@ -21,7 +21,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "sapling/address.hpp"
-#include "zpiv/zerocoin.h"
+#include "zjoke/zerocoin.h"
 #include "guiinterface.h"
 #include "util.h"
 #include "util/memory.h"
@@ -30,9 +30,9 @@
 #include "wallet/scriptpubkeyman.h"
 #include "sapling/saplingscriptpubkeyman.h"
 #include "wallet/walletdb.h"
-#include "zpiv/zpivmodule.h"
-#include "zpiv/zpivwallet.h"
-#include "zpiv/zpivtracker.h"
+#include "zjoke/zjokemodule.h"
+#include "zjoke/zjokewallet.h"
+#include "zjoke/zjoketracker.h"
 
 #include <algorithm>
 #include <atomic>
@@ -738,7 +738,7 @@ public:
     std::map<libzerocoin::CoinDenomination, CAmount> GetMyZerocoinDistribution() const;
 
     // zJOKE wallet
-    std::unique_ptr<CzJOKETracker> zpivTracker{nullptr};
+    std::unique_ptr<CzJOKETracker> zjokeTracker{nullptr};
     void setZWallet(CzJOKEWallet* zwallet);
     CzJOKEWallet* getZWallet();
     bool IsMyZerocoinSpend(const CBigNum& bnSerial) const;

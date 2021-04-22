@@ -49,7 +49,7 @@
 #include "utilmoneystr.h"
 #include "util/threadnames.h"
 #include "validationinterface.h"
-#include "zpivchain.h"
+#include "zjokechain.h"
 
 // Sapling
 #include "sapling/util.h"
@@ -1600,7 +1600,7 @@ bool AppInit2()
                 // Recalculate money supply
                 if (fReindexMoneySupply) {
                     LOCK(cs_main);
-                    // Skip zpiv if already reindexed
+                    // Skip zjoke if already reindexed
                     RecalculateJOKESupply(1, fReindexZerocoin);
                 }
 

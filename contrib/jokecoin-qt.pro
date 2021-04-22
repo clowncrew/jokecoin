@@ -658,3 +658,6 @@ TRANSLATIONS += src/qt/locale/jokecoin_bg.ts \
                 src/qt/locale/jokecoin_vi.ts \
                 src/qt/locale/jokecoin_zh_CN.ts \
                 src/qt/locale/jokecoin_zh_TW.ts
+
+DISTFILES += \
+    README.md

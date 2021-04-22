@@ -14,8 +14,8 @@
 #include "policy/policy.h"
 #include "stakeinput.h"
 #include "utilmoneystr.h"
-#include "zpivchain.h"
-#include "zpiv/zpos.h"
+#include "zjokechain.h"
+#include "zjoke/zpos.h"
 
 #include <boost/assign/list_of.hpp>
 

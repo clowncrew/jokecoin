@@ -32,7 +32,7 @@
 #include "spork.h"
 #include "invalid.h"
 #include "policy/policy.h"
-#include "zpivchain.h"
+#include "zjokechain.h"
 
 
 #include <boost/thread.hpp>

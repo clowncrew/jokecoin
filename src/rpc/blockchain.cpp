@@ -21,8 +21,8 @@
 #include "utilstrencodings.h"
 #include "hash.h"
 #include "wallet/wallet.h"
-#include "zpiv/zpivmodule.h"
-#include "zpivchain.h"
+#include "zjoke/zjokemodule.h"
+#include "zjokechain.h"
 
 #include <stdint.h>
 #include <fstream>
