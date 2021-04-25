@@ -1127,12 +1127,12 @@ deleted file mode 100644
 -
 -### P2P Protocol and Network Code
 -- #286 `85c0f53` [Main] Change sporkDB from smart ptr to ptr. (presstab)
--- #292 `feadab4` Additional checks for double spending of zPiv serials. (presstab)
+-- #292 `feadab4` Additional checks for double spending of zJoke serials. (presstab)
 -
 -### Wallet
 -- #271 `5e9a086` [Wallet] Remove unused member wallet in UnlockContext inner class (Jon Spock)
--- #280 `fdc182d` [Wallet] Fix zPiv spending errors. (presstab)
--- #282 `310f216` [Wallet] Count pending zPiv balance for automint. (presstab)
+-- #280 `fdc182d` [Wallet] Fix zJoke spending errors. (presstab)
+-- #282 `310f216` [Wallet] Count pending zJoke balance for automint. (presstab)
 -- #290 `004d7b6` Include both pending and mature zerocoins for automint calculations (presstab)
 -
 -### GUI
@@ -1141,7 +1141,7 @@ deleted file mode 100644
 -- #270 `bd2328e` [Qt] Make lock icon clickable to toggle wallet lock state (Fuzzbawls)
 -- #273 `f31136e` [Qt] Fix UI tab order and shortcuts (Mrs-X)
 -- #287 `74a1c3c` [Qt] Don't allow the Esc key to close the privacy tab (Fuzzbawls)
--- #291 `cb314e6` [Qt] zPiv control quantity/amount fixes (rejectedpromise)
+-- #291 `cb314e6` [Qt] zJoke control quantity/amount fixes (rejectedpromise)
 -
 -### Miscellaneous
 -- #266 `2d97b54` [Scripts] Fix location for aarch64 outputs in gitian-build.sh (Fuzzbawls)
@@ -1206,26 +1206,26 @@ deleted file mode 100644
 -Notable Changes
 -===============
 -
--Refactoring of zPiv Spend Validation Code
+-Refactoring of zJoke Spend Validation Code
 ----------------------
--zPiv spend validation was too rigid and did not give enough slack for reorganizations. Many staking wallets were unable to reorganize back to the correct blockchain when they had an orphan stake which contained a zPiv spend. zPiv double spending validation has been refactored to properly account for reorganization.
+-zJoke spend validation was too rigid and did not give enough slack for reorganizations. Many staking wallets were unable to reorganize back to the correct blockchain when they had an orphan stake which contained a zJoke spend. zJoke double spending validation has been refactored to properly account for reorganization.
 -
 -Money Supply Calculation Fix
 ----------------------
--Coin supply incorrectly was counting spent zPiv as newly minted coins that are added to the coin supply, thus resulting in innacurate coin supply data.
+-Coin supply incorrectly was counting spent zJoke as newly minted coins that are added to the coin supply, thus resulting in innacurate coin supply data.
 -
 -
 -Better Filtering of Transactions in Stake Miner
 ----------------------
--The stake miner code now filters out zPiv double spends that were on rare occasions being slipped into blocks (and being rejected by peers when broadcast to the network).
+-The stake miner code now filters out zJoke double spends that were on rare occasions being slipped into blocks (and being rejected by peers when broadcast to the network).
 -
 -More Responsive Shutdown Requests
 ----------------------
 -When computationally expensive accumulator calculations are being performed and the user requests to close the application, the wallet will exit much sooner than before.
 -
--More Extensive Display of zPiv Confirmation/Maturity Status
+-More Extensive Display of zJoke Confirmation/Maturity Status
 ----------------------
--Within the Privacy Dialog of the QT wallet, the _Zerocoin Stats_ section now displays both the confirmation and maturity status of minted zPiv's. Previously this was only able to be viewed within the zPiv Control dialog. The main Overview tab of the QT wallet now splits zPiv balance into subcategories: _Unconfirmed_, _Immature_, and _Mature_.
+-Within the Privacy Dialog of the QT wallet, the _Zerocoin Stats_ section now displays both the confirmation and maturity status of minted zJoke's. Previously this was only able to be viewed within the zJoke Control dialog. The main Overview tab of the QT wallet now splits zJoke balance into subcategories: _Unconfirmed_, _Immature_, and _Mature_.
 -
 -3.0.4 Change log
 -=================
@@ -1236,7 +1236,7 @@ deleted file mode 100644
 -git merge commit are mentioned.
 -
 -### P2P Protocol and Network Code
--- #301 `b8392cd` Refactor zPiv tx counting code. Add a final check in ConnectBlock() (presstab)
+-- #301 `b8392cd` Refactor zJoke tx counting code. Add a final check in ConnectBlock() (presstab)
 -- #306 `77dd55c` [Core] Don't send not-validated blocks (Mrs-X)
 -- #312 `5d79bea` [Main] Update last checkpoint data (Fuzzbawls)
 -- #329 `19b38b2` Update checkpoints. (presstab)
@@ -1244,7 +1244,7 @@ deleted file mode 100644
 -
 -### Wallet
 -- #308 `bd8a982` [Minting] Clear mempool after invalid block from miner (presstab)
--- #316 `ed192cf` [Minting] Better filtering of zPiv serials in miner. (presstab)
+-- #316 `ed192cf` [Minting] Better filtering of zJoke serials in miner. (presstab)
 -
 -### GUI
 -- #317 `b27cb72` [UI] Wallet repair option to resync from scratch (Mrs-X)
@@ -1363,7 +1363,7 @@ deleted file mode 100644
 -
 -### Wallet
 -- #308 `bd8a982` [Minting] Clear mempool after invalid block from miner (presstab)
--- #316 `ed192cf` [Minting] Better filtering of zPiv serials in miner. (presstab)
+-- #316 `ed192cf` [Minting] Better filtering of zJoke serials in miner. (presstab)
 -
 -### GUI
 -- #278 `46f4960` [QT] Multisignature GUI (rejectedpromise)
@@ -1912,7 +1912,7 @@ deleted file mode 100644
 - - #473 `9e2ed8f0f` [Qt] Make toolbar icons bigger (Mrs-X)
 - - #462 `c62eabe7b` [Qt] Consistent trx colors for Overview + Transaction tabs (Mrs-X)
 - - #472 `b7929bdcf` [Qt] Minor changes and fixes (Mrs-X)
-- - #467 `7099831bd` [Qt] Clear PrivacyDialog "zPiv Selected" labels after sending. (presstab)
+- - #467 `7099831bd` [Qt] Clear PrivacyDialog "zJoke Selected" labels after sending. (presstab)
 - - #465 `d8e21774d` [Qt] Added controls to the options dialog for enable or disable auto-minting and set required level (lex-dev3)
 - - #464 `59fd7d378` [Qt] setstakesplitthreshold value set in Qt GUI (lex-dev3)
 - - #452 `219b68dc9` [Qt] Complete re-design of Qt-wallet (Mrs-X)

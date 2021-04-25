@@ -3515,7 +3515,7 @@ https://www.transifex.com/jokecoin-project/jokecoin-project-translations</transl
     </message>
 </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>Quantity</source>
         <translation>Quantia</translation>

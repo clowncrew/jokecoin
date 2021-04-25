@@ -4916,7 +4916,7 @@ Var tålmodig...</translation>
     </message>
 </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>Select zJOKE to Spend</source>
         <translation>Välj zJOKE att Spendera</translation>

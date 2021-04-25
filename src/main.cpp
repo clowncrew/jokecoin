@@ -4005,8 +4005,8 @@ bool AcceptBlock(const CBlock& block, CValidationState& state, CBlockIndex** ppi
 
             // Now that this loop if completed. Check if we have zJOKE inputs.
             if(hasZJOKEInputs) {
-                for (const CTxIn& zPivInput : zJOKEInputs) {
-                    libzerocoin::CoinSpend spend = TxInToZerocoinSpend(zPivInput);
+                for (const CTxIn& zJokeInput : zJOKEInputs) {
+                    libzerocoin::CoinSpend spend = TxInToZerocoinSpend(zJokeInput);
 
                     // First check if the serials were not already spent on the forked blocks.
                     CBigNum coinSerial = spend.getCoinSerialNumber();
@@ -4046,8 +4046,8 @@ bool AcceptBlock(const CBlock& block, CValidationState& state, CBlockIndex** ppi
             }
         } else {
             if(!isBlockFromFork)
-                for (const CTxIn& zPivInput : zJOKEInputs) {
-                        libzerocoin::CoinSpend spend = TxInToZerocoinSpend(zPivInput);
+                for (const CTxIn& zJokeInput : zJOKEInputs) {
+                        libzerocoin::CoinSpend spend = TxInToZerocoinSpend(zJokeInput);
                         if (!ContextualCheckZerocoinSpend(stakeTxIn, &spend, pindex->nHeight, UINT256_ZERO))
                             return state.DoS(100,error("%s: main chain ContextualCheckZerocoinSpend failed for tx %s", __func__,
                                     stakeTxIn.GetHash().GetHex()), REJECT_INVALID, "bad-txns-invalid-zjoke");

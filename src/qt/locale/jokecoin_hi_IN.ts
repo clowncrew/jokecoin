@@ -324,7 +324,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     </context>
 <context>
     <name>jokecoin-core</name>

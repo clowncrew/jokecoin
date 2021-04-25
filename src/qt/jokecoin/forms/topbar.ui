@@ -108,7 +108,7 @@
              <number>0</number>
             </property>
             <item alignment="Qt::AlignTop">
-             <widget class="QLabel" name="labelAmountTopPiv">
+             <widget class="QLabel" name="labelAmountTopJoke">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -337,7 +337,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="labelAmountPiv">
+                <widget class="QLabel" name="labelAmountJoke">
                  <property name="text">
                   <string notr="true">480.0685 JOKE</string>
                  </property>
@@ -360,7 +360,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="labelPendingPiv">
+                  <widget class="QLabel" name="labelPendingJoke">
                    <property name="text">
                     <string notr="true">6.943 JOKE</string>
                    </property>
@@ -394,7 +394,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="labelImmaturePiv">
+                  <widget class="QLabel" name="labelImmatureJoke">
                    <property name="text">
                     <string notr="true">10 JOKE</string>
                    </property>

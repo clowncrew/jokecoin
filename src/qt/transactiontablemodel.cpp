@@ -199,7 +199,7 @@ public:
     static bool HasZcTxesIfNeeded(const TransactionRecord& record) {
         return (record.type == TransactionRecord::ZerocoinMint ||
                 record.type == TransactionRecord::ZerocoinSpend ||
-                record.type == TransactionRecord::ZerocoinSpend_Change_zPiv ||
+                record.type == TransactionRecord::ZerocoinSpend_Change_zJoke ||
                 record.type == TransactionRecord::ZerocoinSpend_FromMe);
     }
 
@@ -490,7 +490,7 @@ QString TransactionTableModel::formatTxType(const TransactionRecord* wtx) const
         return tr("Spent z%1").arg(CURRENCY_UNIT.c_str());
     case TransactionRecord::RecvFromZerocoinSpend:
         return tr("Received %1 from z%1").arg(CURRENCY_UNIT.c_str());
-    case TransactionRecord::ZerocoinSpend_Change_zPiv:
+    case TransactionRecord::ZerocoinSpend_Change_zJoke:
         return tr("Minted Change as z%1 from z%1 Spend").arg(CURRENCY_UNIT.c_str());
     case TransactionRecord::ZerocoinSpend_FromMe:
         return tr("Converted z%1 to %1").arg(CURRENCY_UNIT.c_str());
@@ -543,7 +543,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord* wtx, b
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
     case TransactionRecord::ZerocoinMint:
-    case TransactionRecord::ZerocoinSpend_Change_zPiv:
+    case TransactionRecord::ZerocoinSpend_Change_zJoke:
     case TransactionRecord::StakeZJOKE:
         return tr("Anonymous");
     case TransactionRecord::P2CSDelegation:

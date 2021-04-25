@@ -4327,11 +4327,11 @@ Vær tålmodig...</translation>
     </message>
     <message>
         <source>Spent zJOKE</source>
-        <translation>Brugt zPiv</translation>
+        <translation>Brugt zJoke</translation>
     </message>
     <message>
         <source>Received JOKE from zJOKE</source>
-        <translation>Modtaget Piv fra zPiv</translation>
+        <translation>Modtaget Joke fra zJoke</translation>
     </message>
     <message>
         <source>Minted Change as zJOKE from zJOKE Spend</source>
@@ -4558,7 +4558,7 @@ Vær tålmodig...</translation>
     </message>
     <message>
         <source>Received JOKE from zJOKE</source>
-        <translation>Modtaget Piv fra zPiv</translation>
+        <translation>Modtaget Joke fra zJoke</translation>
     </message>
     <message>
         <source>Zerocoin Spend, Change in zJOKE</source>
@@ -4630,7 +4630,7 @@ Vær tålmodig...</translation>
     </message>
 </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>Select zJOKE to Spend</source>
         <translation>Vælg zJOKE for at bruge</translation>
@@ -4709,7 +4709,7 @@ Vær tålmodig...</translation>
     </message>
     <message>
         <source>Enable automatic wallet backups triggered after each zJOKE minting (0-1, default: %u)</source>
-        <translation>Aktivér automatiske wallet-sikkerhedskopier udløst efter hver zPiv-mintning (0-1, standard: %u)</translation>
+        <translation>Aktivér automatiske wallet-sikkerhedskopier udløst efter hver zJoke-mintning (0-1, standard: %u)</translation>
     </message>
     <message>
         <source>Enable or disable staking functionality for JOKE inputs (0-1, default: %u)</source>

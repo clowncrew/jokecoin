@@ -52,9 +52,9 @@ DashboardWidget::DashboardWidget(JokeCoinGUI* parent) :
 
     // Staking Information
     setCssSubtitleScreen(ui->labelMessage);
-    setCssProperty(ui->labelSquarePiv, "square-chart-joke");
-    setCssProperty(ui->labelSquarezPiv, "square-chart-zjoke");
-    setCssProperty(ui->labelPiv, "text-chart-joke");
+    setCssProperty(ui->labelSquareJoke, "square-chart-joke");
+    setCssProperty(ui->labelSquarezJoke, "square-chart-zjoke");
+    setCssProperty(ui->labelJoke, "text-chart-joke");
     setCssProperty(ui->labelZjoke, "text-chart-zjoke");
 
     // Staking Amount
@@ -62,7 +62,7 @@ DashboardWidget::DashboardWidget(JokeCoinGUI* parent) :
     fontBold.setWeight(QFont::Bold);
 
     setCssProperty(ui->labelChart, "legend-chart");
-    setCssProperty(ui->labelAmountPiv, "text-stake-joke-disable");
+    setCssProperty(ui->labelAmountJoke, "text-stake-joke-disable");
     setCssProperty(ui->labelAmountZjoke, "text-stake-zjoke-disable");
 
     setCssProperty({ui->pushButtonAll,  ui->pushButtonMonth, ui->pushButtonYear}, "btn-check-time");
@@ -532,7 +532,7 @@ const QMap<int, std::pair<qint64, qint64>> DashboardWidget::getAmountBy()
         QModelIndex modelIndex = stakesFilter->index(i, TransactionTableModel::ToAddress);
         qint64 amount = llabs(modelIndex.data(TransactionTableModel::AmountRole).toLongLong());
         QDate date = modelIndex.data(TransactionTableModel::DateRole).toDateTime().date();
-        bool isPiv = modelIndex.data(TransactionTableModel::TypeRole).toInt() != TransactionRecord::StakeZJOKE;
+        bool isJoke = modelIndex.data(TransactionTableModel::TypeRole).toInt() != TransactionRecord::StakeZJOKE;
 
         int time = 0;
         switch (chartShow) {
@@ -553,12 +553,12 @@ const QMap<int, std::pair<qint64, qint64>> DashboardWidget::getAmountBy()
                 return amountBy;
         }
         if (amountBy.contains(time)) {
-            if (isPiv) {
+            if (isJoke) {
                 amountBy[time].first += amount;
             } else
                 amountBy[time].second += amount;
         } else {
-            if (isPiv) {
+            if (isJoke) {
                 amountBy[time] = std::make_pair(amount, 0);
             } else {
                 amountBy[time] = std::make_pair(0, amount);
@@ -596,14 +596,14 @@ bool DashboardWidget::loadChartData(bool withMonthNames)
             std::pair <qint64, qint64> pair = chartData->amountsByCache[num];
             joke = (pair.first != 0) ? pair.first / 100000000 : 0;
             zjoke = (pair.second != 0) ? pair.second / 100000000 : 0;
-            chartData->totalPiv += pair.first;
+            chartData->totalJoke += pair.first;
             chartData->totalZjoke += pair.second;
         }
 
         chartData->xLabels << ((withMonthNames) ? monthsNames[num - 1] : QString::number(num));
 
-        chartData->valuesPiv.append(joke);
-        chartData->valueszPiv.append(zjoke);
+        chartData->valuesJoke.append(joke);
+        chartData->valueszJoke.append(zjoke);
 
         int max = std::max(joke, zjoke);
         if (max > chartData->maxValue) {
@@ -674,20 +674,20 @@ void DashboardWidget::onChartRefreshed()
     series->attachAxis(axisX);
     series->attachAxis(axisY);
 
-    set0->append(chartData->valuesPiv);
-    set1->append(chartData->valueszPiv);
+    set0->append(chartData->valuesJoke);
+    set1->append(chartData->valueszJoke);
 
     // Total
     nDisplayUnit = walletModel->getOptionsModel()->getDisplayUnit();
-    if (chartData->totalPiv > 0 || chartData->totalZjoke > 0) {
-        setCssProperty(ui->labelAmountPiv, "text-stake-joke");
+    if (chartData->totalJoke > 0 || chartData->totalZjoke > 0) {
+        setCssProperty(ui->labelAmountJoke, "text-stake-joke");
         setCssProperty(ui->labelAmountZjoke, "text-stake-zjoke");
     } else {
-        setCssProperty(ui->labelAmountPiv, "text-stake-joke-disable");
+        setCssProperty(ui->labelAmountJoke, "text-stake-joke-disable");
         setCssProperty(ui->labelAmountZjoke, "text-stake-zjoke-disable");
     }
-    forceUpdateStyle({ui->labelAmountPiv, ui->labelAmountZjoke});
-    ui->labelAmountPiv->setText(GUIUtil::formatBalance(chartData->totalPiv, nDisplayUnit));
+    forceUpdateStyle({ui->labelAmountJoke, ui->labelAmountZjoke});
+    ui->labelAmountJoke->setText(GUIUtil::formatBalance(chartData->totalJoke, nDisplayUnit));
     ui->labelAmountZjoke->setText(GUIUtil::formatBalance(chartData->totalZjoke, nDisplayUnit, true));
 
     series->append(set0);

@@ -1525,7 +1525,7 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, b
             }
 
             // Will try to rescan it if zJOKE upgrade is active.
-            doZPivRescan(pindex, block, setAddedToWallet, consensus, fCheckZJOKE);
+            doZJokeRescan(pindex, block, setAddedToWallet, consensus, fCheckZJOKE);
 
             pindex = chainActive.Next(pindex);
             if (GetTime() >= nNow + 60) {
@@ -2703,7 +2703,7 @@ bool CWallet::CreateCoinStake(
     bool fKernelFound = false;
     int nAttempts = 0;
     for (const COutput &out : *availableCoins) {
-        CPivStake stakeInput;
+        CJokeStake stakeInput;
         stakeInput.SetPrevout((CTransaction) *out.tx, out.i);
 
         //new block came in, move on

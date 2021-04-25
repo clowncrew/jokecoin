@@ -298,19 +298,19 @@ void PrivacyDialog::on_pushButtonSpendzJOKE_clicked()
     sendzJOKE();
 }
 
-void PrivacyDialog::on_pushButtonZPivControl_clicked()
+void PrivacyDialog::on_pushButtonZJokeControl_clicked()
 {
     if (!walletModel || !walletModel->getOptionsModel())
         return;
 
-    ZPivControlDialog* zPivControl = new ZPivControlDialog(this);
-    zPivControl->setModel(walletModel);
-    zPivControl->exec();
+    ZJokeControlDialog* zJokeControl = new ZJokeControlDialog(this);
+    zJokeControl->setModel(walletModel);
+    zJokeControl->exec();
 }
 
-void PrivacyDialog::setZPivControlLabels(int64_t nAmount, int nQuantity)
+void PrivacyDialog::setZJokeControlLabels(int64_t nAmount, int nQuantity)
 {
-    ui->labelzPivSelected_int->setText(QString::number(nAmount));
+    ui->labelzJokeSelected_int->setText(QString::number(nAmount));
     ui->labelQuantitySelected_int->setText(QString::number(nQuantity));
 }
 
@@ -414,8 +414,8 @@ void PrivacyDialog::sendzJOKE()
     // use mints from zJOKE selector if applicable
     vector<CMintMeta> vMintsToFetch;
     vector<CZerocoinMint> vMintsSelected;
-    if (!ZPivControlDialog::setSelectedMints.empty()) {
-        vMintsToFetch = ZPivControlDialog::GetSelectedMints();
+    if (!ZJokeControlDialog::setSelectedMints.empty()) {
+        vMintsToFetch = ZJokeControlDialog::GetSelectedMints();
 
         for (auto& meta : vMintsToFetch) {
             CZerocoinMint mint;
@@ -473,8 +473,8 @@ void PrivacyDialog::sendzJOKE()
     }
 
     // Clear zjoke selector in case it was used
-    ZPivControlDialog::setSelectedMints.clear();
-    ui->labelzPivSelected_int->setText(QString("0"));
+    ZJokeControlDialog::setSelectedMints.clear();
+    ui->labelzJokeSelected_int->setText(QString("0"));
     ui->labelQuantitySelected_int->setText(QString("0"));
 
     // Some statistics for entertainment
@@ -492,7 +492,7 @@ void PrivacyDialog::sendzJOKE()
 
     CAmount nValueOut = 0;
     for (const CTxOut& txout: wtxNew.vout) {
-        strStats += tr("value out: ") + FormatMoney(txout.nValue).c_str() + " Piv, ";
+        strStats += tr("value out: ") + FormatMoney(txout.nValue).c_str() + " Joke, ";
         nValueOut += txout.nValue;
 
         strStats += tr("address: ");

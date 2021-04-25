@@ -4601,7 +4601,7 @@ Please be patient...</source>
     </message>
 </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>Select zJOKE to Spend</source>
         <translation>Изберете zJOKE за Изпращане</translation>

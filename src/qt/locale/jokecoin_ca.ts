@@ -1896,7 +1896,7 @@
     </message>
     </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>Quantity</source>
         <translation>Quantitat</translation>

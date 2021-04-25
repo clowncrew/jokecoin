@@ -2129,7 +2129,7 @@ Nesubrendusios: patvirtintos, bet mažiau nei 1 konvertacijos to pačio nominalo
     </message>
     <message>
         <source>zJOKE Control</source>
-        <translation>zPiv Kontrolė</translation>
+        <translation>zJoke Kontrolė</translation>
     </message>
     <message>
         <source>zJOKE Selected:</source>
@@ -3298,7 +3298,7 @@ Nesubrendusios: patvirtintos, bet mažiau nei 1 konvertacijos to pačio nominalo
     </message>
     </context>
 <context>
-    <name>ZPivControlDialog</name>
+    <name>ZJokeControlDialog</name>
     <message>
         <source>0</source>
         <translation>0</translation>

@@ -94,7 +94,7 @@ bool CWallet::GetDeterministicSeed(const uint256& hashSeed, uint256& seedOut)
     return error("%s: Failed to %s\n", __func__, strErr);
 }
 
-void CWallet::doZPivRescan(const CBlockIndex* pindex, const CBlock& block,
+void CWallet::doZJokeRescan(const CBlockIndex* pindex, const CBlock& block,
         std::set<uint256>& setAddedToWallet, const Consensus::Params& consensus, bool fCheckZJOKE)
 {
     //If this is a zapwallettx, need to read zjoke
@@ -328,7 +328,7 @@ bool CWallet::CreateZerocoinMintTransaction(const CAmount nValue,
 
 
     //any change that is less than 0.0100000 will be ignored and given as an extra fee
-    //also assume that a zerocoinspend that is minting the change will not have any change that goes to Piv
+    //also assume that a zerocoinspend that is minting the change will not have any change that goes to Joke
     CAmount nChange = nValueIn - nTotalValue; // Fee already accounted for in nTotalValue
     if (nChange > 1 * CENT) {
         // Fill a vout to ourself using the largest contributing address

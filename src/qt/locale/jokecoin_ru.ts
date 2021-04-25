@@ -6539,7 +6539,7 @@ JokeCoin Core Wallet</source>
     </message>
     <message>
         <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Значение ниже наименьшего доступного номинала (= 1) zPiv</translation>
+        <translation>Значение ниже наименьшего доступного номинала (= 1) zJoke</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

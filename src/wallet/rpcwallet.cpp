@@ -4041,7 +4041,7 @@ UniValue mintzerocoin(const JSONRPCRequest& request)
             HelpRequiringPassphrase() + "\n"
 
             "\nArguments:\n"
-            "1. amount      (numeric, required) Enter an amount of Piv to convert to zJOKE\n"
+            "1. amount      (numeric, required) Enter an amount of Joke to convert to zJOKE\n"
             "2. utxos       (string, optional) A json array of objects.\n"
             "                   Each object needs the txid (string) and vout (numeric)\n"
             "  [\n"
