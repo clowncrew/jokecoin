@@ -231,7 +231,7 @@ class CRegTestParams : public CTestNetParams {
 public: CRegTestParams() {
         networkID = CBaseChainParams::REGTEST;
         strNetworkID = "regtest";
-        genesis = CreateGenesisBlock(1454124731, 2402015, 0x1e0ffff0, 1, 250 * COIN);
+        genesis = CreateGenesisBlock(1614602714, 21336943, 0x1e0ffff0, 1, 100 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x00000785a8752330bc13b72f9ede0039f0b4378834ba8894cf2bf7bd408c21eb"));
         assert(genesis.hashMerkleRoot == uint256S("0xafcc0078a384cc21ed8bb0bbe432f738c7fda818e82e730810ff5a33aa8df028"));
