@@ -18,24 +18,21 @@
 #include <utility>
 #include <vector>
 
-#include <boost/function.hpp>
-
 class CCoinsViewDBCursor;
 class uint256;
 
-//! Compensate for extra memory peak (x1.5-x1.9) at flush time.
-static constexpr int DB_PEAK_USAGE_FACTOR = 2;
 //! No need to periodic flush if at least this much space still available.
-static constexpr int MAX_BLOCK_COINSDB_USAGE = 10 * DB_PEAK_USAGE_FACTOR;
-
+static constexpr int MAX_BLOCK_COINSDB_USAGE = 10;
 //! -dbcache default (MiB)
 static const int64_t nDefaultDbCache = 100;
+//! -dbbatchsize default (bytes)
+static const int64_t nDefaultDbBatchSize = 16 << 20;
 //! max. -dbcache in (MiB)
 static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
 //! min. -dbcache in (MiB)
 static const int64_t nMinDbCache = 4;
 
-struct CDiskTxPos : public CDiskBlockPos
+struct CDiskTxPos : public FlatFilePos
 {
     unsigned int nTxOffset; // after header
 
@@ -44,11 +41,11 @@ struct CDiskTxPos : public CDiskBlockPos
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(*(CDiskBlockPos*)this);
+        READWRITEAS(FlatFilePos, *this);
         READWRITE(VARINT(nTxOffset));
     }
 
-    CDiskTxPos(const CDiskBlockPos& blockIn, unsigned int nTxOffsetIn) : CDiskBlockPos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn)
+    CDiskTxPos(const FlatFilePos& blockIn, unsigned int nTxOffsetIn) : FlatFilePos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn)
     {
     }
 
@@ -59,7 +56,7 @@ struct CDiskTxPos : public CDiskBlockPos
 
     void SetNull()
     {
-        CDiskBlockPos::SetNull();
+        FlatFilePos::SetNull();
         nTxOffset = 0;
     }
 };
@@ -76,12 +73,27 @@ public:
     bool GetCoin(const COutPoint& outpoint, Coin& coin) const override;
     bool HaveCoin(const COutPoint& outpoint) const override;
     uint256 GetBestBlock() const override;
-    bool BatchWrite(CCoinsMap& mapCoins, const uint256& hashBlock) override;
+    std::vector<uint256> GetHeadBlocks() const override;
     CCoinsViewCursor* Cursor() const override;
 
     //! Attempt to update from an older database format. Returns whether an error occurred.
     bool Upgrade();
     size_t EstimateSize() const override;
+
+    bool BatchWrite(CCoinsMap& mapCoins,
+                    const uint256& hashBlock,
+                    const uint256& hashSaplingAnchor,
+                    CAnchorsSaplingMap& mapSaplingAnchors,
+                    CNullifiersMap& mapSaplingNullifiers) override;
+
+    // Sapling, the implementation of the following functions can be found in sapling_txdb.cpp.
+    bool GetSaplingAnchorAt(const uint256 &rt, SaplingMerkleTree &tree) const override;
+    bool GetNullifier(const uint256 &nf) const override;
+    uint256 GetBestAnchor() const override;
+    bool BatchWriteSapling(const uint256& hashSaplingAnchor,
+                           CAnchorsSaplingMap& mapSaplingAnchors,
+                           CNullifiersMap& mapSaplingNullifiers,
+                           CDBBatch& batch);
 };
 
 /** Specialization of CCoinsViewCursor to iterate over a CCoinsViewDB */
@@ -100,7 +112,7 @@ public:
 private:
     CCoinsViewDBCursor(CDBIterator* pcursorIn, const uint256& hashBlockIn):
         CCoinsViewCursor(hashBlockIn), pcursor(pcursorIn) {}
-    boost::scoped_ptr<CDBIterator> pcursor;
+    std::unique_ptr<CDBIterator> pcursor;
     std::pair<char, COutPoint> keyTmp;
 
     friend class CCoinsViewDB;
@@ -129,10 +141,7 @@ public:
     bool ReadFlag(const std::string& name, bool& fValue);
     bool WriteInt(const std::string& name, int nValue);
     bool ReadInt(const std::string& name, int& nValue);
-    bool LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256&)> insertBlockIndex);
-    bool ReadLegacyBlockIndex(const uint256& blockHash, CLegacyBlockIndex& biRet);
-    bool WriteMoneySupply(const int64_t& nSupply);
-    bool ReadMoneySupply(int64_t& nSupply) const;
+    bool LoadBlockIndexGuts(std::function<CBlockIndex*(const uint256&)> insertBlockIndex);
 };
 
 /** Zerocoin database (zerocoin/) */
@@ -146,21 +155,11 @@ private:
     void operator=(const CZerocoinDB&);
 
 public:
-    /** Write zJOKE mints to the zerocoinDB in a batch */
-    bool WriteCoinMintBatch(const std::vector<std::pair<libzerocoin::PublicCoin, uint256> >& mintInfo);
-    bool ReadCoinMint(const CBigNum& bnPubcoin, uint256& txHash);
-    bool ReadCoinMint(const uint256& hashPubcoin, uint256& hashTx);
     /** Write zJOKE spends to the zerocoinDB in a batch */
     bool WriteCoinSpendBatch(const std::vector<std::pair<libzerocoin::CoinSpend, uint256> >& spendInfo);
     bool ReadCoinSpend(const CBigNum& bnSerial, uint256& txHash);
-    bool ReadCoinSpend(const uint256& hashSerial, uint256 &txHash);
-    bool EraseCoinMint(const CBigNum& bnPubcoin);
     bool EraseCoinSpend(const CBigNum& bnSerial);
-    bool WipeCoins(std::string strType);
 
-    /** Map supply [denom] --> supply     */
-    bool WriteZCSupply(const std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS);
-    bool ReadZCSupply(std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS) const;
     /** Accumulators (only for zPoS IBD): [checksum, denom] --> block height **/
     bool WriteAccChecksum(const uint32_t& nChecksum, const libzerocoin::CoinDenomination denom, const int nHeight);
     bool ReadAccChecksum(const uint32_t& nChecksum, const libzerocoin::CoinDenomination denom, int& nHeightRet);

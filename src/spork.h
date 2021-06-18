@@ -9,12 +9,11 @@
 #include "base58.h"
 #include "hash.h"
 #include "key.h"
-#include "main.h"
 #include "messagesigner.h"
 #include "net.h"
 #include "sporkid.h"
 #include "sync.h"
-#include "util.h"
+#include "util/system.h"
 
 #include "protocol.h"
 
@@ -57,10 +56,9 @@ public:
     // override CSignedMessage functions
     uint256 GetSignatureHash() const override;
     std::string GetStrMessage() const override;
-    const CTxIn GetVin() const override { return CTxIn(); };
 
-    // override GetPublicKey - gets Params().SporkPubkey()
-    const CPubKey GetPublicKey(std::string& strErrorRet) const override;
+    // - gets Params().SporkPubkey()
+    const CPubKey GetPublicKey() const;
     const CPubKey GetPublicKeyOld() const;
 
     void Relay();
@@ -110,8 +108,10 @@ public:
 
     void ProcessSpork(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     int64_t GetSporkValue(SporkId nSporkID);
-    void ExecuteSpork(SporkId nSporkID, int nValue);
+    // Create/Sign/Relay the spork message, and update the maps
     bool UpdateSpork(SporkId nSporkID, int64_t nValue);
+    // Add spork message to mapSporks and mapSporksActive
+    void AddOrUpdateSporkMessage(const CSporkMessage& spork);
 
     bool IsSporkActive(SporkId nSporkID);
     std::string GetSporkNameByID(SporkId id);
@@ -119,6 +119,12 @@ public:
 
     bool SetPrivKey(std::string strPrivKey);
     std::string ToString() const;
+
+    // Process SPORK message, returning the banning score (or 0 if no banning is needed)
+    int ProcessSporkMsg(CDataStream& vRecv);
+    int ProcessSporkMsg(CSporkMessage& spork);
+    // Process GETSPORKS message
+    void ProcessGetSporks(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 };
 
 #endif

@@ -1,34 +1,40 @@
-JokeCoin Core version *4.3.0* is now available from:  <https://github.com/jokecoin-project/jokecoin/releases>
+(note: this is a temporary file, to be added-to by anybody, and moved to release-notes at release time)
+
+JokeCoin Core version *version* is now available from:  <https://github.com/jokecoin-project/jokecoin/releases>
 
 This is a new major version release, including various bug fixes and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at github: <https://github.com/jokecoin-project/jokecoin/issues>
 
 
-Recommended Update
-==============
-
-This version is an optional, but recommended, update for all users and services.
-
 How to Upgrade
 ==============
 
 If you are running an older version, shut it down. Wait until it has completely shut down (which might take a few minutes for older versions), then run the installer (on Windows) or just copy over /Applications/JokeCoin-Qt (on Mac) or jokecoind/jokecoin-qt (on Linux).
 
-Downgrading warning
--------------------
+Sapling Parameters
+==================
 
-The chainstate database for this release is not compatible with previous releases, so if you run 4.3.0 and then decide to switch back to any older version, you will need to run the old release with the -reindex option to rebuild the chainstate data structures in the old format.
+In order to run, JokeCoin Core now requires two files, `sapling-output.params` and `sapling-spend.params` (with total size ~50 MB), to be saved in a specific location.
 
+For the following packages, no action is required by the user:
+- macOS release `dmg` binaries will use the params that are bundled into the .app bundle.
+- Windows installer `.exe` will automatically copy the files in the proper location.
+- Linux `PPA/Snap` installs will automatically copy the files in the proper location.
+
+For the other packages, the user must save the param files in the proper location, before being able to run JokeCoin v5.0.0:
+- macOS/Linux `tar.gz` tarballs include a bash script (`install-params.sh`) to copy the parameters in the appropriate location.
+- Windows `.zip` users need to manually copy the files from the `share/jokecoin` folder to the `%APPDATA%\JokeCoinParams` directory.
+- self compilers can run the script from the repository sources (`params/install-params.sh`), or copy the files directly from the `params` subdirectory.
 
 Compatibility
 ==============
 
-JokeCoin Core is extensively tested on multiple operating systems using the Linux kernel, macOS 10.10+, and Windows 7 and later.
+JokeCoin Core is extensively tested on multiple operating systems using the Linux kernel, macOS 10.12+, and Windows 7 and later.
 
 Microsoft ended support for Windows XP on [April 8th, 2014](https://www.microsoft.com/en-us/WindowsForBusiness/end-of-xp-support), No attempt is made to prevent installing or running the software on Windows XP, you can still do so at your own risk but be aware that there are known instabilities and issues. Please do not report issues about Windows XP to the issue tracker.
 
-Apple released it's last Mountain Lion update August 13, 2015, and officially ended support on [December 14, 2015](http://news.fnal.gov/2015/10/mac-os-x-mountain-lion-10-8-end-of-life-december-14/). JokeCoin Core software starting with v3.2.0 will no longer run on MacOS versions prior to Yosemite (10.10). Please do not report issues about MacOS versions prior to Yosemite to the issue tracker.
+From JokeCoin Core 6.0 onwards, macOS versions earlier than 10.12 are no longer supported.
 
 JokeCoin Core should also work on most other Unix-like systems but is not frequently tested on them.
 
@@ -36,190 +42,253 @@ JokeCoin Core should also work on most other Unix-like systems but is not freque
 Notable Changes
 ==============
 
-Performance Improvements
-------------------------
+(Developers: add your notes here as part of your pull requests whenever possible)
 
-Version 4.3.0 contains a number of significant performance improvements, which make Initial Block Download, startup, transaction and block validation much faster:
 
-- The chainstate database (which is used for tracking UTXOs) has been changed from a per-transaction model to a per-output model ([See PR 1801](https://github.com/JokeCoin-Project/JokeCoin/pull/1801)). Advantages of this model are that it:
-  - avoids the CPU overhead of deserializing and serializing the unused outputs;
-  - has more predictable memory usage;
-  - uses simpler code;
-  - is adaptable to various future cache flushing strategies.
-  
-  As a result, validating the blockchain during Initial Block Download (IBD) and reindex is ~30-40% faster, uses 10-20% less memory, and flushes to disk far less frequently. The only downside is that the on-disk database is 15% larger. During the conversion from the previous format a few extra gigabytes may be used.
+Cold-Staking Re-Activation
+--------------------------
+JokeCoin Core v6.0.0 includes a fix for the vulnerability identified within the cold-staking protocol (see PR [#2258](https://github.com/JokeCoin-Project/JokeCoin/pull/2258)).
+Therefore the feature will be re-enabled on the network, via `SPORK_19`, shortly after the upgrade enforcement.
 
-- LevelDB has been upgraded to version 1.22 ([See PR 1738](https://github.com/JokeCoin-Project/JokeCoin/pull/1738)). This version contains hardware acceleration for CRC on architectures supporting SSE 4.2. As a result, synchronization and block validation are now faster.
+### Protocol changes
 
-Removal of Priority Estimation
-------------------------------
+A new opcode (`0xd2`) is introduced (see PR [#2275](https://github.com/JokeCoin-Project/JokeCoin/pull/2275)). It enforces the same rules as the legacy cold-staking opcode, but without allowing a "free" script for the last output of the transaction.
+This is in accord with the consensus change introduced with the "Deterministic Masternodes" update, as masternode/budget payments are now outputs of the *coinbase* transaction (rather than the *coinstake*), therefore a "free" output for the coinstake is no longer needed.
+The new opcode takes the name of `OP_CHECKCOLDSTAKEVERIFY`, and the legacy opcode (`0xd1`) is renamed to `OP_CHECKCOLDSTAKEVERIFY_LOF` (last-output-free).
+Scripts with the old opcode are still accepted on the network (the restriction on the last-output is enforced after the script validation in this case), but the client creates new delegations with the new opcode, by default, after the upgrade enforcement.
 
-Estimation of "priority" needed for a transaction to be included within a target number of blocks has been removed.  The rpc calls are deprecated and will either return `-1` or `1e24` appropriately. 
 
-The format for fee_estimates.dat has also changed to no longer save these priority estimates. It will automatically be converted to the new format which is not readable by prior versions of the software.
+Multi-wallet support
+--------------------
 
-Dedicated mnping logging category
----------------------------------
+JokeCoin Core now supports loading multiple, separate wallets (See [PR #2337](https://github.com/JokeCoin-Project/JokeCoin/pull/2337)). The wallets are completely separated, with individual balances, keys and received transactions.
 
-`mnping` related debug log messages have been moved to their own category of the same name. This is to reduce log spam when debugging with the `masternode` category enabled.
+Multi-wallet is enabled by using more than one `-wallet` argument when starting JokeCoin client, either on the command line or in the jokecoin.conf config file.
 
-RPC Changes
-------------
+**In jokecoin-qt, only the first wallet will be displayed and accessible for creating and signing transactions.** GUI selectable multiple wallets will be supported in a future version. However, even in 6.0 other loaded wallets will remain synchronized to the node's current tip in the background.
 
-### Modified input/output for existing commands
+JokeCoin Core 6.0.0 contains the following changes to the RPC interface and jokecoin-cli for multi-wallet:
 
-- The new database model no longer stores information about transaction
-  versions of unspent outputs. This means that:
-  - The `gettxout` RPC no longer has a `version` field in the response.
-  - The `gettxoutsetinfo` RPC reports `hash_serialized_2` instead of `hash_serialized`,
-    which does not commit to the transaction versions of unspent outputs, but does
-    commit to the height and coinbase/coinstake information.
-  - The `getutxos` REST path no longer reports the `txvers` field in JSON format,
-    and always reports 0 for transaction versions in the binary format
-- Three filtering options for the `getbalance` command have been reinstated:
-  - `minconf` (numeric) Only include transactions confirmed at least this many times.
-  - `includeWatchonly` (bool) Also include balance in watchonly addresses.
-  - `includeDelegated` (bool) Also include balance delegated to cold stakers.
-- `estimatefee` is now deprecated and replaced by `estimatesmartfee`:
-  - Input argument is the same for `estimatesmartfee`.
-  - Output is now a JSON object with 2 fields: `feerate` and `blocks`
-- The `getrawmempool` RPC command now includes an additional output field:
-  - `modifiedfee` (numeric) transaction fee with fee deltas used for mining priority.::ZZZZexit
-  
+* When running JokeCoin Core with a single wallet, there are **no** changes to the RPC interface or `jokecoin-cli`. All RPC calls and `jokecoin-cli` commands continue to work as before.
+* When running JokeCoin Core with multi-wallet, all *node-level* RPC methods continue to work as before. HTTP RPC requests should be send to the normal `<RPC IP address>:<RPC port>` endpoint, and `jokecoin-cli` commands should be run as before. A *node-level* RPC method is any method which does not require access to the wallet.
+* When running JokeCoin Core with multi-wallet, *wallet-level* RPC methods must specify the wallet for which they're intended in every request. HTTP RPC requests should be send to the `<RPC IP address>:<RPC port>/wallet/<wallet name>` endpoint, for example `127.0.0.1:8332/wallet/wallet1.dat`. `jokecoin-cli` commands should be run with a `-rpcwallet` option, for example `jokecoin-cli -rpcwallet=wallet1.dat getbalance`.
 
-### Removed commands
+* A new *node-level* `listwallets` RPC method is added to display which wallets are currently loaded. The names returned by this method are the same as those used in the HTTP endpoint and for the `rpcwallet` argument.
 
-The following commands have been removed from the interface:
-- `estimatepriority`
+The `getwalletinfo` RPC method returns the name of the wallet used for the query.
 
-*4.3.0* Change log
+Note that while multi-wallet is now fully supported, the RPC multi-wallet interface should be considered unstable for version 6.0.0, and there may backwards-incompatible changes in future versions.
+
+
+GUI changes
+-----------
+
+### RPC-Console
+
+The GUI RPC-Console now accepts "parenthesized syntax", nested commands, and simple queries (see [PR #2282](https://github.com/JokeCoin-Project/JokeCoin/pull/2282).
+A new command `help-console` (available only on the GUI console) documents how to use it:
+
+```
+This console accepts RPC commands using the standard syntax.
+    example:    getblockhash 0
+
+This console can also accept RPC commands using parenthesized syntax.
+    example:    getblockhash(0)
+
+Commands may be nested when specified with the parenthesized syntax.
+    example:    getblock(getblockhash(0) true)
+
+A space or a comma can be used to delimit arguments for either syntax.
+    example:    getblockhash 0
+                getblockhash,0
+
+Named results can be queried with a non-quoted key string in brackets.
+    example:    getblock(getblockhash(0) true)[tx]
+
+Results without keys can be queried using an integer in brackets.
+    example:    getblock(getblockhash(0),true)[tx][0]
+```
+
+
+Support for JSON-RPC Named Arguments
+------------------------------------
+
+Commands sent over the JSON-RPC interface and through the `jokecoin-cli` binary can now use named arguments. This follows the [JSON-RPC specification](http://www.jsonrpc.org/specification) for passing parameters by-name with an object.
+`jokecoin-cli` has been updated to support this by parsing `name=value` arguments when the `-named` option is given.
+
+Some examples:
+
+```
+    src/jokecoin-cli -named help command="help"
+    src/jokecoin-cli -named getblockhash height=0
+    src/jokecoin-cli -named getblock blockhash=000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+    src/jokecoin-cli -named sendtoaddress address="DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" amount="1.0" comment="donation"
+```
+
+The order of arguments doesn't matter in this case. Named arguments are also useful to leave out arguments that should stay at their default value.
+The RPC server remains fully backwards compatible with positional arguments.
+
+
+Low-level RPC changes
+---------------------
+
+### Query options for listunspent RPC
+
+- The `listunspent` RPC now takes a `query_options` argument (see [PR #2317](https://github.com/JokeCoin-Project/JokeCoin/pull/2317)), which is a JSON object
+  containing one or more of the following members:
+  - `minimumAmount` - a number specifying the minimum value of each UTXO
+  - `maximumAmount` - a number specifying the maximum value of each UTXO
+  - `maximumCount` - a number specifying the minimum number of UTXOs
+  - `minimumSumAmount` - a number specifying the minimum sum value of all UTXOs
+
+- The `listunspent` RPC also takes an additional boolean argument `include_unsafe` (true by default) to optionally exclude "unsafe" utxos.
+  An unconfirmed output from outside keys is considered unsafe (see [PR #2351](https://github.com/JokeCoin-Project/JokeCoin/pull/2351)).
+
+- The `listunspent` output also shows whether the utxo is considered safe to spend or not.
+
+- the `stop` RPC no longer accepts the (already deprecated, ignored, and undocumented) optional boolean argument `detach`.
+
+### Subtract fee from recipient amount for RPC
+
+A new argument `subtract_fee_from` is added to `sendmany`/`shieldsendmany` RPC functions.
+It can be used to provide the list of recipent addresses paying the fee.
+```
+subtract_fee_from         (array, optional) 
+A json array with addresses.
+The fee will be equally deducted from the amount of each selected address.
+  [\"address\"          (string) Subtract fee from this address\n"
+   ,...
+  ]
+
+For `fundrawtransaction` a new key (`subtractFeeFromOutputs`) is added to the `options` argument.
+It can be used to specify a list of output indexes.
+```
+subtractFeeFromOutputs    (array, optional)  A json array of integers.
+The fee will be equally deducted from the amount of each specified output.
+The outputs are specified by their zero-based index, before any change output is added.
+  [vout_index,...]
+```
+
+For `sendtoaddress`, the new parameter is called `subtract_fee` and it is a simple boolean.
+
+In all cases those recipients will receive less JOKE than you enter in their corresponding amount field.
+If no outputs/addresses are specified, the sender pays the fee as usual.
+
+### Show wallet's auto-combine settings in getwalletinfo
+
+`getwalletinfo` now has two additional return fields. `autocombine_enabled` (boolean) and `autocombine_threshold` (numeric) that will show the auto-combine threshold and whether or not it is currently enabled.
+
+### Deprecate the autocombine RPC command
+
+The `autocombine` RPC command has been replaced with specific set/get commands (`setautocombinethreshold` and `getautocombinethreshold`, respectively) to bring this functionality further in-line with our RPC standards. Previously, the `autocombine` command gave no user-facing feedback when the setting was changed. This is now resolved with the introduction of the two new commands as detailed below:
+
+* `setautocombinethreshold`
+    ```  
+    setautocombinethreshold enable ( value )
+    This will set the auto-combine threshold value.
+    Wallet will automatically monitor for any coins with value below the threshold amount, and combine them if they reside with the same JokeCoin address
+    When auto-combine runs it will create a transaction, and therefore will be subject to transaction fees.
+    
+    Arguments:
+    1. enable          (boolean, required) Enable auto combine (true) or disable (false)
+    2. threshold       (numeric, optional. required if enable is true) Threshold amount. Must be greater than 1.
+    
+    Result:
+    {
+      "enabled": true|false,     (boolean) true if auto-combine is enabled, otherwise false
+      "threshold": n.nnn,        (numeric) auto-combine threshold in JOKE
+      "saved": true|false        (boolean) true if setting was saved to the database, otherwise false
+    }
+    ```
+
+* `getautocombinethreshold`
+    ```
+    getautocombinethreshold
+    Returns the current threshold for auto combining UTXOs, if any
+
+    Result:
+    {
+      "enabled": true|false,    (boolean) true if auto-combine is enabled, otherwise false
+      "threshold": n.nnn         (numeric) the auto-combine threshold amount in JOKE
+    }
+    ```
+
+Build system changes
+--------------------
+
+The minimum supported miniUPnPc API version is set to 10. This keeps compatibility with Ubuntu 16.04 LTS and Debian 8 `libminiupnpc-dev` packages. Please note, on Debian this package is still vulnerable to [CVE-2017-8798](https://security-tracker.debian.org/tracker/CVE-2017-8798) (in jessie only) and [CVE-2017-1000494](https://security-tracker.debian.org/tracker/CVE-2017-1000494) (both in jessie and in stretch).
+
+OpenSSL is no longer used by JokeCoin Core
+
+
+Configuration changes
+---------------------
+
+### Configuration sections for testnet and regtest
+
+It is now possible for a single configuration file to set different options for different networks. This is done by using sections or by prefixing the option with the network, such as:
+
+    main.uacomment=jokecoin
+    test.uacomment=jokecoin-testnet
+    regtest.uacomment=regtest
+    [main]
+    mempoolsize=300
+    [test]
+    mempoolsize=100
+    [regtest]
+    mempoolsize=20
+
+The `addnode=`, `connect=`, `port=`, `bind=`, `rpcport=`, `rpcbind=`, and `wallet=` options will only apply to mainnet when specified in the configuration file, unless a network is specified.
+
+### Allow to optional specify the directory for the blocks storage
+
+A new init option flag '-blocksdir' will allow one to keep the blockfiles external from the data directory.
+
+### Disable PoW mining RPC Commands
+
+A new configure flag has been introduced to allow more granular control over weather or not the PoW mining RPC commands are compiled into the wallet. By default they are not. This behavior can be overridden by passing `--enable-mining-rpc` to the `configure` script.
+
+### Removed startup options
+
+- `printstakemodifier`
+
+### Logging
+
+The log timestamp format is now ISO 8601 (e.g. "2021-02-28T12:34:56Z").
+
+### Automatic Backup File Naming
+
+The file extension applied to automatic backups is now in ISO 8601 basic notation (e.g. "20210228T123456Z"). The basic notation is used to prevent illegal `:` characters from appearing in the filename.
+
+
+*version* Change log
 ==============
 
 Detailed release notes follow. This overview includes changes that affect behavior, not code moves, refactors and string updates. For convenience in locating the code changes and accompanying discussion, both the pull request and git merge commit are mentioned.
 
-### Core Features
- - #1666 `5a092159f6` [Core] Base work for the Sapling signatureHash (furszy)
- - #1746 `128978d45b` [Core] Only include undo.h from main.cpp (random-zebra)
- - #1768 `6881e1063f` [Core] Use SipHash-2-4 for various non-cryptographic hashes (Pieter Wuille)
- - #1771 `bda654c5f3` [Core] Use SipHash for node eviction (Pieter Wuille)
- - #1773 `90ffc6683b` [Core] per-txout model preparation (random-zebra)
- - #1774 `68df9a7d5b` [Core] Alter assumptions in CCoinsViewCache::BatchWrite (random-zebra)
- - #1775 `85b5f2eb83` [Core] Remove BIP30 check (random-zebra)
- - #1777 `3c767c46b5` [Core] ModifyNewCoins saves database lookups (random-zebra)
- - #1788 `823ba8e334` [Core] Remove priority estimation (random-zebra)
- - #1793 `af793b7bb9` [Core] Safer modify new coins (Russell Yanofsky)
- - #1795 `afafd7f6a9` [Core] Use unordered_map for CCoinsMap and fix empty vectors in streams (Pieter Wuille)
- - #1799 `fcb546ad05` [Core] Remove UTXO cache entries when the tx they were added for is removed (Pieter Wuille)
- - #1801 `30d353edab` [Core] Per-txout model for chainstate database (random-zebra)
- - #1804 `5c8b992033` [Core] Use std::unordered_{map,set} (C++11) instead of boost::unordered_* (random-zebra)
-
 ### GUI
- - #1754 `93d574170d` [Model] Wallet interface refactor + code cleanup. (furszy)
- - #1776 `2ad27b1407` [Model] TransactionRecord decomposeTransaction refactoring (furszy)
- - #1782 `ada4462782` [GUI] Start masternodes polling timer only when is needed. (furszy)
- - #1805 `f0cc6fcc38` [BUG][GUI] Don't append cold-stake records twice (random-zebra)
- - #1863 `ad15bce2f5` [Trivial][GUI] Fix init messages (random-zebra)
 
 ### Wallet
- - #1752 `2e32285a70` [Wallet] Simple unused methods cleanup. (furszy)
- - #1755 `eeb129b477` [wallet] List COutput solvability + wallet_ismine refactoring. (furszy)
- - #1757 `e2cc4aa411` [Wallet] add cacheable amounts for caching credit/debit values (furszy)
- - #1759 `dcc92f8157` [Wallet] AvailableCoins remove duplicated watchonly config argument. (furszy)
- - #1760 `3b030f9978` [Wallet] AvailableCoins code readability improved (furszy)
- - #1764 `6847d0d648` [Wallet] Securely erase potentially sensitive keys/values (Thomas Snider)
- - #1767 `8ab63d3e5b` [Wallet] Ignore MarkConflict if block hash is not known (random-zebra)
- - #1781 `4715915d4c` [Wallet] Acquire cs_main lock before cs_wallet during wallet initialization (random-zebra)
- - #1783 `abf7c62934` [Wallet] Do not try to resend transactions if the node is importing or in IBD (furszy)
- - #1787 `4b1f3eb792` [Wallet] Improve usage of fee estimation code (random-zebra)
- - #1802 `7db7724cff` [Wallet] Make nWalletDBUpdated atomic to avoid a potential race (furszy)
- - #1810 `49bd99929d` [Wallet] wtx cached balances test coverage + getAvailableCredit problem fix. (furszy)
- - #1811 `e89e20eca1` [Wallet][Refactoring] wallet/init refactoring backports (random-zebra)
- - #1817 `6480c7d9bf` [Wallet] Speedup coinstake creation removing redundancies. (furszy)
- - #1832 `c14d130b48` [Wallet] Cleanup getbalance methods that are not fulfilling any purpose. (furszy)
 
-### P2P Protocol and Network Code
- - #1769 `1e334200bb` [Net] Remove bogus assert on number of oubound connections. (Matt Corallo)
- - #1780 `5fcad0c139` [Net] cs_vSend-cs_main deadlock detection fixed. (furszy)
- - #1800 `616b102f8b` [P2P] Improve AlreadyHave (Alex Morcos)
- - #1812 `777638e7bc` [P2P] Begin Network Encapsulation (random-zebra)
- - #1835 `cbd9271afb` [Net] Massive network refactoring and speedup (Fuzzbawls)
+### RPC
 
-### RPC/REST
- - #1753 `e288a4508b` [Trivial] [RPC] Fix listcoldutxos help text (JSKitty)
- - #1828 `4fc36b59ee` [RPC][BUG] Fix ActivateBestChain calls in reconsider(invalidate)block (random-zebra)
- - #1831 `28509bf9e8` [RPC] re introducing filtering args in getbalance (furszy)
+### Masternodes/Budget
+
+### Core
 
 ### Build Systems
- - #1553 `fddf765132` [Build] Sapling Foundations (Build System + ZIP32) (furszy)
- - #1703 `2e11030e8b` [Build] Require minimum boost version 1.57.0 (Fuzzbawls)
- - #1738 `21c467b1eb` [Build] Update leveldb to 1.22+ (Fuzzbawls)
- - #1750 `544e619ebe` [Trivial] openssl.org dependency download link changed (CryptoDev-Project)
- - #1770 `32a2e8a031` [Build] Bump minimum libc to 2.17 for release binaries (Fuzzbawls)
- - #1790 `6e7b9b2a82` [Build] Fix glibc compat (Fuzzbawls)
- - #1792 `a3da3aa9f5` [Build] allow for empty RUST_TARGET in offline builds (Fuzzbawls)
- - #1794 `760f426430` [Build] Use syslibs for nightly snap builds (Fuzzbawls)
- - #1813 `259523cdc2` [CMake] Define MAC_OSX for cmake builds on macOS (Fuzzbawls)
- - #1823 `d675fa3a1a` [Travis] Lower the build timeout for the functional tests job (random-zebra)
 
-### Layer 2 (MN/Budget)
- - #1791 `6162df962b` [Masternodes] Missing cs main locks in CalculateScore and GetMasternodeInputAge (furszy)
- - #1803 `69ec4a3fdf` [Cleanup] masternode-budget tiny cleanup. (furszy)
- - #1825 `a06c0fd993` [MN] more cleanup over the tier two area. (furszy)
- - #1826 `961f5373bf` [Refactor] Masternode Budget first refactoring and cleanup (random-zebra)
- - #1843 `f4d5d34bed` [Bug] Update budget manager best height even if mnSync is incomplete (random-zebra)
+### P2P/Network
 
-### Miner/Block Generation
- - #1700 `40742084de` [Miner] Move coinbase & coinstake to P2PKH (furszy)
- - #1809 `959d707bc9` [Miner] decouple zJOKE duplicated serials checks from CreateNewBlock (furszy)
- - #1816 `0fa40d7695` [Miner] Unifying the disperse coinbase tx flow + further clean up. (furszy)
- - #1818 `242356d012` [Miner] PoS process (furszy)
+### Testing
 
-### Miscellaneous
- - #1694 `0604a98bd0` [Backport] Test LowS in standardness (furszy)
- - #1721 `8e19562dc4` [Validation] Reduce cs_main locks during ConnectTip/SyncWithWallets (furszy)
- - #1725 `e59d8e59fa` [Backport] mempool score index. (Alex Morcos)
- - #1735 `ee749c5b9c` [Validation] DisconnectBlock updates. (furszy)
- - #1785 `277b1114d9` [Bug] lock cs_main for Misbehaving (furszy)
- - #1796 `6d62df529b` [BUG] Properly copy fCoinStake memeber between CTxInUndo and CCoins (random-zebra)
- - #1797 `b909e96121` [Refactoring] Break circular dependency main ↔ txdb (random-zebra)
- - #1806 `b9f30f65f2` [Refactor] Cleanup access to chainActive in a few places (random-zebra)
- - #1808 `948e1a99c0` [Tests][Trivial] Remove mining in rpc_deprecated test (random-zebra)
- - #1820 `846dca7b83` [Cleanup] remove unneeded chainActive access. (furszy)
- - #1821 `4b3fb02dc3` [Cleanup] removing unused GetMasternodeByRank method (furszy)
- - #1822 `48d7475bd4` [Refactor] Dedicated logging category for masternode pings (random-zebra)
- - #1824 `6ec609f93d` [Cleanup] IsBlockValueValid refactored properly. (furszy)
- - #1827 `70bf7203ee` [Cleanup] removed null check comparison against a new object. (furszy)
- - #1833 `9c06e5d7ce` [Refactor] Remove GetInputAge and GetMasternodeInputAge (random-zebra)
- - #1853 `e8d13ef4b0` [Cleanup] Removing unused and unneeded functions and members (furszy)
- - #1855 `3cd52771f2` [Bug] wrong reserveKey when committing budget/proposal collaterals (random-zebra)
- - #1860 `5aed03f6fe` [Bug] Missing mnping category added to logcategories (furszy)
+### Cleanup/Refactoring
+
+### Docs/Output
 
 ## Credits
 
 Thanks to everyone who directly contributed to this release:
-- Alex Morcos
-- Cory Fields
-- CryptoDev-Project
-- Daniel Kraft
-- Ethan Heilman
-- Fuzzbawls
-- Gregory Maxwell
-- JSKitty
-- Jack Grigg
-- Jeremy Rubin
-- Luke Dashjr
-- Matt Corallo
-- Patrick Strateman
-- Pavel Janík
-- Philip Kaufmann
-- Pieter Wuille
-- Russell Yanofsky
-- Suhas Daftuar
-- Thomas Snider
-- Wladimir J. van der Laan
-- furszy
-- jtimon
-- random-zebra
 
 
 As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/jokecoin-project-translations/), the QA team during Testing and the Node hosts supporting our Testnet.

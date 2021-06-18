@@ -429,6 +429,25 @@ for staking</translation>
     </message>
 </context>
 <context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>Form</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>0.00 jokecoin</source>
+        <translation>0.00 jokecoin</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
+    </message>
+</context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -624,56 +643,24 @@ for staking</translation>
         <translation>Change Copied</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>highest</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>higher</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>high</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>medium-high</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>medium</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>low-medium</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>low</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>lower</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>lowest</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 locked)</translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation>none</translation>
     </message>
     <message>
         <source>yes</source>
         <translation>yes</translation>
     </message>
     <message>
+        <source>This label turns red, if recipient receives an amount smaller than %1 (transparent) / %2 (shield).</source>
+        <translation>This label turns red, if recipient receives an amount smaller than %1 (transparent) / %2 (shield).</translation>
+    </message>
+    <message>
         <source>Can vary +/- %1 u%2 per input.</source>
         <translation>Can vary +/- %1 u%2 per input.</translation>
+    </message>
+    <message>
+        <source>change in %1</source>
+        <translation>change in %1</translation>
     </message>
     <message>
         <source>delegated to %1 for cold staking</source>
@@ -700,24 +687,8 @@ for staking</translation>
         <translation>Can vary +/- 1 byte per input.</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Transactions with higher priority are more likely to get included into a block.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>This label turns red, if the priority is smaller than "medium".</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>This label turns red, if any recipient receives an amount smaller than %1.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(no label)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>change from %1 (%2)</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -2115,6 +2086,10 @@ https://www.transifex.com/jokecoin-project/jokecoin-project-translations</transl
         <translation>JokeCoin Core client</translation>
     </message>
     <message>
+        <source>Alert!</source>
+        <translation>Alert!</translation>
+    </message>
+    <message>
         <source>Error</source>
         <translation>Error</translation>
     </message>
@@ -2368,6 +2343,14 @@ Address: %4
         <translation>Cold Staking Contact</translation>
     </message>
     <message>
+        <source>Receiving Shielded</source>
+        <translation>Receiving Shielded</translation>
+    </message>
+    <message>
+        <source>Contact Shielded</source>
+        <translation>Contact Shielded</translation>
+    </message>
+    <message>
         <source>Hidden</source>
         <translation>Hidden</translation>
     </message>
@@ -2386,6 +2369,14 @@ Address: %4
     <message>
         <source>Staking Contacts</source>
         <translation>Staking Contacts</translation>
+    </message>
+    <message>
+        <source>Shielded Recv</source>
+        <translation>Shielded Recv</translation>
+    </message>
+    <message>
+        <source>Shielded Contact</source>
+        <translation>Shielded Contact</translation>
     </message>
     <message>
         <source>Date desc</source>
@@ -2410,6 +2401,10 @@ Address: %4
     <message>
         <source>Sent</source>
         <translation>Sent</translation>
+    </message>
+    <message>
+        <source>Shield</source>
+        <translation>Shield</translation>
     </message>
     <message>
         <source>Mined</source>
@@ -2941,12 +2936,20 @@ Address: %4
         <translation>Form</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>No address</translation>
-    </message>
-    <message>
         <source>Scan the QR code or copy the address to receive JOKE</source>
         <translation>Scan the QR code or copy the address to receive JOKE</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
+    </message>
+    <message>
+        <source>Accept transparent or shielded JOKE</source>
+        <translation>Accept transparent or shielded JOKE</translation>
     </message>
     <message>
         <source>Add Label</source>
@@ -2981,8 +2984,10 @@ Address: %4
         <translation>Request payment with a fixed amount</translation>
     </message>
     <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>No available address, try unlocking the wallet</translation>
+        <source>No available address
+try unlocking the wallet</source>
+        <translation>No available address
+try unlocking the wallet</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -3250,6 +3255,41 @@ Address: %4
     </message>
 </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialog</translation>
+    </message>
+    <message>
+        <source>Private message only visible for the recipient(s)</source>
+        <translation>Private message only visible for the recipient(s)</translation>
+    </message>
+    <message>
+        <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>SAVE</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>RESET</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>CANCEL</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -3266,6 +3306,18 @@ Address: %4
     <message>
         <source>Enter label</source>
         <translation>Enter label</translation>
+    </message>
+    <message>
+        <source>Update memo</source>
+        <translation>Update memo</translation>
+    </message>
+    <message>
+        <source>Add encrypted memo</source>
+        <translation>Add encrypted memo</translation>
+    </message>
+    <message>
+        <source>Memo field reset</source>
+        <translation>Memo field reset</translation>
     </message>
 </context>
 <context>
@@ -3315,10 +3367,6 @@ Do you want to continue?</translation>
         <translation>Cannot send, wallet locked</translation>
     </message>
     <message>
-        <source>Cannot create transaction.</source>
-        <translation>Cannot create transaction.</translation>
-    </message>
-    <message>
         <source>WARNING:
 Transaction spends a cold-stake delegation, voiding it.
 These coins will no longer be cold-staked.</source>
@@ -3341,6 +3389,10 @@ These coins will no longer be cold-staked.</translation>
     <message>
         <source>Invalid address in URI</source>
         <translation>Invalid address in URI</translation>
+    </message>
+    <message>
+        <source>Memo</source>
+        <translation>Memo</translation>
     </message>
     <message>
         <source>Custom Fee %1</source>
@@ -3371,16 +3423,88 @@ These coins will no longer be cold-staked.</translation>
         <translation>Parse a payment request</translation>
     </message>
     <message>
+        <source>Shield Coins</source>
+        <translation>Shield Coins</translation>
+    </message>
+    <message>
+        <source>Convert all transparent coins into shielded coins</source>
+        <translation>Convert all transparent coins into shielded coins</translation>
+    </message>
+    <message>
         <source>Unlocked remaining</source>
         <translation>Unlocked remaining</translation>
+    </message>
+    <message>
+        <source>Cannot send memo to address
+%1
+
+Encrypted memo messages are available only for shielded recipients.
+
+Do you wish to proceed without memo?
+</source>
+        <translation>Cannot send memo to address
+%1
+
+Encrypted memo messages are available only for shielded recipients.
+
+Do you wish to proceed without memo?
+</translation>
+    </message>
+    <message>
+        <source>Cannot perform shielded operations, v5 upgrade isn't being enforced yet!</source>
+        <translation>Cannot perform shielded operations, v5 upgrade isn't being enforced yet!</translation>
+    </message>
+    <message>
+        <source>Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)</source>
+        <translation>Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)</translation>
+    </message>
+    <message>
+        <source>On going process being executed, please wait until it's finished to create a new transaction</source>
+        <translation>On going process being executed, please wait until it's finished to create a new transaction</translation>
+    </message>
+    <message>
+        <source>Preparing transaction</source>
+        <translation>Preparing transaction</translation>
     </message>
     <message>
         <source>You don't have any %1 to select.</source>
         <translation>You don't have any %1 to select.</translation>
     </message>
     <message>
+        <source>You are just about to anonymize all of your balance!
+Available %1
+With fee %2
+
+Meaning that you will be able to perform completely
+anonymous transactions
+
+Do you want to continue?
+</source>
+        <translation>You are just about to anonymize all of your balance!
+Available %1
+With fee %2
+
+Meaning that you will be able to perform completely
+anonymous transactions
+
+Do you want to continue?
+</translation>
+    </message>
+    <message>
+        <source>Error generating address to shield JOKEs</source>
+        <translation>Error generating address to shield JOKEs</translation>
+    </message>
+    <message>
+        <source>You don't have any transparent JOKEs to shield.</source>
+        <translation>You don't have any transparent JOKEs to shield.</translation>
+    </message>
+    <message>
         <source>No contacts available, you can go to the contacts screen and add some there!</source>
         <translation>No contacts available, you can go to the contacts screen and add some there!</translation>
+    </message>
+    <message>
+        <source>Add Memo</source>
+        <translation>Add Memo</translation>
     </message>
     <message>
         <source>Save contact</source>
@@ -3861,36 +3985,6 @@ There was an error trying to save the address list to %1. Please try again.</tra
         <translation>What is JokeCoin?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </translation>
-    </message>
-    <message>
         <source>2</source>
         <translation>2</translation>
     </message>
@@ -3945,6 +4039,36 @@ There was an error trying to save the address list to %1. Please try again.</tra
     <message>
         <source>Where should I go if I need support?</source>
         <translation>Where should I go if I need support?</translation>
+    </message>
+    <message>
+        <source>
+                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+                           JokeCoin is a form of digital online money using blockchain technology
+                           that can be easily transferred globally, instantly, and with near
+                           zero fees.  JokeCoin incorporates market leading security &amp;
+                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
+                           to implement Sapling(SHIELD), a zk-SNARKs based privacy protocol.
+                           &lt;/p&gt;&lt;p align="justify"&gt;
+                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
+                           allowing all owners of JokeCoin to participate in earning block rewards
+                           while securing the network with full node wallets, as well as to
+                           run Masternodes to create and vote on proposals.
+                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                         </source>
+        <translation>
+                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+                           JokeCoin is a form of digital online money using blockchain technology
+                           that can be easily transferred globally, instantly, and with near
+                           zero fees.  JokeCoin incorporates market leading security &amp;
+                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
+                           to implement Sapling(SHIELD), a zk-SNARKs based privacy protocol.
+                           &lt;/p&gt;&lt;p align="justify"&gt;
+                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
+                           allowing all owners of JokeCoin to participate in earning block rewards
+                           while securing the network with full node wallets, as well as to
+                           run Masternodes to create and vote on proposals.
+                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                         </translation>
     </message>
     <message>
         <source>
@@ -4071,6 +4195,10 @@ There was an error trying to save the address list to %1. Please try again.</tra
         <translation>Frequently Asked Questions</translation>
     </message>
     <message>
+        <source>Close FAQ</source>
+        <translation>Close FAQ</translation>
+    </message>
+    <message>
         <source>3) How do I stake JOKE?</source>
         <translation>3) How do I stake JOKE?</translation>
     </message>
@@ -4089,10 +4217,6 @@ There was an error trying to save the address list to %1. Please try again.</tra
     <message>
         <source>You can read more here</source>
         <translation>You can read more here</translation>
-    </message>
-    <message>
-        <source>Exit</source>
-        <translation>Exit</translation>
     </message>
 </context>
 <context>
@@ -4204,6 +4328,10 @@ There was an error trying to save the address list to %1. Please try again.</tra
     <message>
         <source>Out:</source>
         <translation>Out:</translation>
+    </message>
+    <message>
+        <source>No available data</source>
+        <translation>No available data</translation>
     </message>
 </context>
 <context>
@@ -4927,6 +5055,14 @@ Are you sure?
         <translation>Form</translation>
     </message>
     <message>
+        <source>transparent</source>
+        <translation>transparent</translation>
+    </message>
+    <message>
+        <source>shielded</source>
+        <translation>shielded</translation>
+    </message>
+    <message>
         <source>Available</source>
         <translation>Available</translation>
     </message>
@@ -5065,6 +5201,26 @@ backup will be created.
     <message>
         <source>Wallet Unlocked</source>
         <translation>Wallet Unlocked</translation>
+    </message>
+    <message>
+        <source>Upgrade to Sapling Wallet</source>
+        <translation>Upgrade to Sapling Wallet</translation>
+    </message>
+    <message>
+        <source>Upgrading to Sapling wallet will enable
+all of the privacy features!
+
+
+NOTE: after the upgrade, a new
+backup will be created.
+</source>
+        <translation>Upgrading to Sapling wallet will enable
+all of the privacy features!
+
+
+NOTE: after the upgrade, a new
+backup will be created.
+</translation>
     </message>
     <message>
         <source>Wallet Unencrypted</source>
@@ -5213,6 +5369,18 @@ backup will be created.
         <translation>Payment to yourself</translation>
     </message>
     <message>
+        <source>Shielding coins to yourself</source>
+        <translation>Shielding coins to yourself</translation>
+    </message>
+    <message>
+        <source>Unshielding coins to yourself</source>
+        <translation>Unshielding coins to yourself</translation>
+    </message>
+    <message>
+        <source>Shielded change, transfer between own shielded addresses</source>
+        <translation>Shielded change, transfer between own shielded addresses</translation>
+    </message>
+    <message>
         <source>Stake delegation spent by</source>
         <translation>Stake delegation spent by</translation>
     </message>
@@ -5239,6 +5407,18 @@ backup will be created.
     <message>
         <source>Converted z%1 to %1</source>
         <translation>Converted z%1 to %1</translation>
+    </message>
+    <message>
+        <source>Received with shielded</source>
+        <translation>Received with shielded</translation>
+    </message>
+    <message>
+        <source>Shielded send to</source>
+        <translation>Shielded send to</translation>
+    </message>
+    <message>
+        <source>Burned JOKEs</source>
+        <translation>Burned JOKEs</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -5352,6 +5532,10 @@ backup will be created.
         <translation>Date</translation>
     </message>
     <message>
+        <source>Memo</source>
+        <translation>Memo</translation>
+    </message>
+    <message>
         <source>TextLabel</source>
         <translation>TextLabel</translation>
     </message>
@@ -5372,12 +5556,28 @@ backup will be created.
         <translation>SEND</translation>
     </message>
     <message>
+        <source>Note From Address</source>
+        <translation>Note From Address</translation>
+    </message>
+    <message>
+        <source>Index</source>
+        <translation>Index</translation>
+    </message>
+    <message>
         <source>ID copied</source>
         <translation>ID copied</translation>
     </message>
     <message>
+        <source>Memo copied</source>
+        <translation>Memo copied</translation>
+    </message>
+    <message>
         <source>Delegating to</source>
         <translation>Delegating to</translation>
+    </message>
+    <message>
+        <source>Shielding to</source>
+        <translation>Shielding to</translation>
     </message>
     <message>
         <source>Unknown</source>
@@ -5390,16 +5590,20 @@ backup will be created.
         <source>Form</source>
         <translation>Form</translation>
     </message>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    <message>
+        <source>-0.000585 JOKE</source>
+        <translation>-0.000585 JOKE</translation>
+    </message>
 </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
         <translation>Send Coins</translation>
-    </message>
-    <message>
-        <source>SwiftX doesn't support sending values that high yet. Transactions are currently limited to %1 %2.</source>
-        <translation>SwiftX doesn't support sending values that high yet. Transactions are currently limited to %1 %2.</translation>
     </message>
     <message>
         <source>Transaction creation failed!
@@ -5486,14 +5690,6 @@ JokeCoin Core Wallet</translation>
 <context>
     <name>jokecoin-core</name>
     <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</source>
-        <translation>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</translation>
-    </message>
-    <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</translation>
     </message>
@@ -5510,20 +5706,8 @@ JokeCoin Core Wallet</translation>
         <translation>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</translation>
     </message>
     <message>
-        <source>Cannot find the Sapling parameters in the following directory:
-%s
-Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</source>
-        <translation>Cannot find the Sapling parameters in the following directory:
-%s
-Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</translation>
-    </message>
-    <message>
         <source>Cannot obtain a lock on data directory %s. JokeCoin Core is probably already running.</source>
         <translation>Cannot obtain a lock on data directory %s. JokeCoin Core is probably already running.</translation>
-    </message>
-    <message>
-        <source>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</source>
-        <translation>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</translation>
     </message>
     <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
@@ -5540,10 +5724,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
         <translation>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</translation>
-    </message>
-    <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -5564,10 +5744,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>Error: Listening for incoming connections failed (listen returned error %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Error: The transaction is larger than the maximum allowed transaction size!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -5600,10 +5776,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>In this mode -genproclimit controls how many blocks are generated immediately.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5666,10 +5838,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Support filtering of blocks and transaction with bloom filters (default: %u)</translation>
     </message>
@@ -5720,10 +5888,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5818,24 +5982,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Done loading</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>Enable the client to act as a masternode (0-1, default: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Error initializing block database</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>Error initializing wallet database environment %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5848,10 +6000,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Error reading from database, shutting down.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>Error writing zerocoinDB to disk</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5868,10 +6016,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>Error: Unsupported argument -tor found, use -onion.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Error: Wallet locked, unable to create transaction!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5922,12 +6066,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Initialization sanity check failed. JokeCoin Core is shutting down.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>Insufficient funds</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Insufficient funds.</translation>
+    </message>
+    <message>
+        <source>Invalid -masternodeaddr port %d, isn't the same as the peer port %d</source>
+        <translation>Invalid -masternodeaddr port %d, isn't the same as the peer port %d</translation>
     </message>
     <message>
         <source>Invalid -onion address or hostname: '%s'</source>
@@ -5938,56 +6082,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>Invalid amount</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Invalid masternodeprivkey. Please see documenation.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Invalid netmask specified in -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>Recalculating JOKE supply...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>Reindexing zerocoin database...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>Reindexing zerocoin failed</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>Selected coins value is less than payment target</translation>
-    </message>
-    <message>
-        <source>Shutdown requested over the txs scan. Exiting.</source>
-        <translation>Shutdown requested over the txs scan. Exiting.</translation>
-    </message>
-    <message>
-        <source>Specify zk params directory (default: %s)</source>
-        <translation>Specify zk params directory (default: %s)</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>SwiftX options:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5998,52 +6098,16 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Execute command when the best block changes and its size is over (%s in cmd is replaced by block hash, %d with the block size)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Failed to find coin set amongst held coins with less than maxNumber of Spends</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
-    </message>
-    <message>
-        <source>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
-        <translation>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</translation>
-    </message>
-    <message>
-        <source>Warning: wallet file corrupt, data salvaged! Original %s saved as %s in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>Warning: wallet file corrupt, data salvaged! Original %s saved as %s in %s; if your balance or transactions are incorrect you should restore from a backup.</translation>
-    </message>
-    <message>
-        <source>%s corrupt, salvage failed</source>
-        <translation>%s corrupt, salvage failed</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
         <translation>&lt;category&gt; can be:</translation>
     </message>
     <message>
-        <source>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</source>
-        <translation>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</translation>
-    </message>
-    <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>Attempt to force blockchain corruption recovery</translation>
-    </message>
-    <message>
-        <source>Attempt to recover private keys from a corrupt wallet file</source>
-        <translation>Attempt to recover private keys from a corrupt wallet file</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>Cannot create public spend input</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -6078,28 +6142,82 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Error: A fatal internal error occurred, see debug.log for details</translation>
     </message>
     <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Error: No valid utxo!</translation>
+        <source>(1 = keep tx meta data e.g. payment request information, 2 = drop tx meta data)</source>
+        <translation>(1 = keep tx meta data e.g. payment request information, 2 = drop tx meta data)</translation>
     </message>
     <message>
-        <source>Failed to parse public spend</source>
-        <translation>Failed to parse public spend</translation>
+        <source>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</source>
+        <translation>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</translation>
     </message>
     <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>Failed to select a zerocoin</translation>
+        <source>Cannot find the Sapling parameters in the following directory:
+%s
+Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</source>
+        <translation>Cannot find the Sapling parameters in the following directory:
+%s
+Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</translation>
     </message>
     <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>Failed to wipe zerocoinDB</translation>
+        <source>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</source>
+        <translation>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</translation>
     </message>
     <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>Failed to write coin serial number into wallet</translation>
+        <source>Disable all JokeCoin specific functionality (Masternodes, Budgeting) (0-1, default: %u)</source>
+        <translation>Disable all JokeCoin specific functionality (Masternodes, Budgeting) (0-1, default: %u)</translation>
+    </message>
+    <message>
+        <source>This file contains all of your private keys in plain text. DO NOT send this file to anyone!</source>
+        <translation>This file contains all of your private keys in plain text. DO NOT send this file to anyone!</translation>
+    </message>
+    <message>
+        <source>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
+        <translation>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</translation>
+    </message>
+    <message>
+        <source>A fatal internal error occurred, see debug.log for details</source>
+        <translation>A fatal internal error occurred, see debug.log for details</translation>
+    </message>
+    <message>
+        <source>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</source>
+        <translation>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</translation>
+    </message>
+    <message>
+        <source>Attempt to recover private keys from a corrupt wallet file</source>
+        <translation>Attempt to recover private keys from a corrupt wallet file</translation>
+    </message>
+    <message>
+        <source>Calculating money supply...</source>
+        <translation>Calculating money supply...</translation>
+    </message>
+    <message>
+        <source>Cannot set -bind or -whitebind together with -listen=0</source>
+        <translation>Cannot set -bind or -whitebind together with -listen=0</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet corrupted</source>
+        <translation>Error loading %s: Wallet corrupted</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet requires newer version of JokeCoin Core</source>
+        <translation>Error loading %s: Wallet requires newer version of JokeCoin Core</translation>
+    </message>
+    <message>
+        <source>Error loading %s
+</source>
+        <translation>Error loading %s
+</translation>
+    </message>
+    <message>
+        <source>Error upgrading chainstate database</source>
+        <translation>Error upgrading chainstate database</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
         <translation>Invalid amount for -%s=&lt;amount&gt;: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid masternodeprivkey. Please see the documentation.</source>
+        <translation>Invalid masternodeprivkey. Please see the documentation.</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
@@ -6182,8 +6300,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Maximum per-connection send buffer, &lt;n&gt;*1000 bytes (default: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>Mint did not make it into blockchain</translation>
+        <source>Mining/Staking options:</source>
+        <translation>Mining/Staking options:</translation>
+    </message>
+    <message>
+        <source>Specify zk params directory (default: %s)</source>
+        <translation>Specify zk params directory (default: %s)</translation>
     </message>
     <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
@@ -6226,16 +6348,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Peers are being disconnected due time differences.</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>Unable to find transaction containing mint %s</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>Unable to find transaction containing mint, txHash: %s</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>Use block spam filter (default: %u)</translation>
+    </message>
+    <message>
+        <source>Wallet debugging/testing options:</source>
+        <translation>Wallet debugging/testing options:</translation>
     </message>
     <message>
         <source>isValid(): Invalid -proxy address or hostname: '%s'</source>
@@ -6322,24 +6440,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Change index out of range</translation>
     </message>
     <message>
-        <source>Error loading %s: Wallet corrupted</source>
-        <translation>Error loading %s: Wallet corrupted</translation>
-    </message>
-    <message>
-        <source>Error loading %s: Wallet requires newer version of JokeCoin Core</source>
-        <translation>Error loading %s: Wallet requires newer version of JokeCoin Core</translation>
-    </message>
-    <message>
-        <source>Error loading %s
-</source>
-        <translation>Error loading %s
-</translation>
-    </message>
-    <message>
-        <source>Error upgrading chainstate database</source>
-        <translation>Error upgrading chainstate database</translation>
-    </message>
-    <message>
         <source>Error: -listen must be true if -masternode is set.</source>
         <translation>Error: -listen must be true if -masternode is set.</translation>
     </message>
@@ -6348,18 +6448,10 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Error: -maxmempool must be at least %d MB</translation>
     </message>
     <message>
-        <source>Error: Invalid port %d for running a masternode.</source>
-        <translation>Error: Invalid port %d for running a masternode.</translation>
-    </message>
-    <message>
         <source>Failed to accept tx in the memory pool (reason: %s)
 </source>
         <translation>Failed to accept tx in the memory pool (reason: %s)
 </translation>
-    </message>
-    <message>
-        <source>Failed to find Zerocoins in wallet database</source>
-        <translation>Failed to find Zerocoins in wallet database</translation>
     </message>
     <message>
         <source>Fee (in %s/kB) to add to transactions you send (default: %s)</source>
@@ -6394,18 +6486,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Limit size of signature cache to &lt;n&gt; MiB (default: %u)</translation>
     </message>
     <message>
-        <source>Masternodes are required to run on port %d for %s-net</source>
-        <translation>Masternodes are required to run on port %d for %s-net</translation>
-    </message>
-    <message>
-        <source>Mining/Staking options:</source>
-        <translation>Mining/Staking options:</translation>
-    </message>
-    <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>Need destination or change address because change is not exact</translation>
-    </message>
-    <message>
         <source>No error</source>
         <translation>No error</translation>
     </message>
@@ -6422,10 +6502,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Print version and exit</translation>
     </message>
     <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>Pubcoin not found in mint tx</translation>
-    </message>
-    <message>
         <source>RPC server options:</source>
         <translation>RPC server options:</translation>
     </message>
@@ -6440,10 +6516,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
         <translation>Rebuild block chain index from current blk000??.dat files</translation>
-    </message>
-    <message>
-        <source>Reindex the %s and z%s money supply statistics</source>
-        <translation>Reindex the %s and z%s money supply statistics</translation>
     </message>
     <message>
         <source>Relay and mine data carrier transactions (default: %u)</source>
@@ -6468,10 +6540,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Run in the background as a daemon and accept commands</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Send transactions as zero-fee transactions if possible (default: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -6518,6 +6586,10 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Shrink debug.log file on client startup (default: 1 when no -debug)</translation>
     </message>
     <message>
+        <source>Shutdown requested over the txs scan. Exiting.</source>
+        <translation>Shutdown requested over the txs scan. Exiting.</translation>
+    </message>
+    <message>
         <source>Signing transaction failed</source>
         <translation>Signing transaction failed</translation>
     </message>
@@ -6548,10 +6620,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Specify your own public address</source>
         <translation>Specify your own public address</translation>
-    </message>
-    <message>
-        <source>Spend Valid</source>
-        <translation>Spend Valid</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
@@ -6586,10 +6654,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Synchronizing sporks...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>Syncing zJOKE wallet...</translation>
-    </message>
-    <message>
         <source>The threshold value cannot be less than %s</source>
         <translation>The threshold value cannot be less than %s</translation>
     </message>
@@ -6618,24 +6682,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Threshold for disconnecting misbehaving peers (default: %u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>Too many spends needed</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Tor control port password (default: empty)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>Tor control port to use if onion listening enabled (default: %s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>Transaction Created</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>Transaction Mint Started</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -6656,10 +6708,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>Transaction too large</source>
         <translation>Transaction too large</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>Trying to spend an already spent serial #, try again.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -6710,24 +6758,12 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Username for JSON-RPC connections</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Value is below the smallest available denomination (= 1) of zJOKE</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Verifying blocks...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>Verifying wallet...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>Wallet %s resides outside data directory %s</translation>
-    </message>
-    <message>
-        <source>Wallet debugging/testing options:</source>
-        <translation>Wallet debugging/testing options:</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -6758,10 +6794,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Warning: Unsupported argument -debugnet ignored, use -debug=net.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>You don't have enough Zerocoins in your wallet</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>You need to rebuild the database using -reindex to change -txindex</translation>
     </message>
@@ -6772,14 +6804,6 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>ZeroMQ notification options:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>Zerocoin minting available only on regtest</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>Zerocoin options:</translation>
     </message>
     <message>
         <source>on startup</source>
@@ -6797,8 +6821,20 @@ Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.<
         <translation>Send</translation>
     </message>
     <message>
-        <source>Send public coins (JOKE)</source>
-        <translation>Send public coins (JOKE)</translation>
+        <source>Transfer coins publicly or privately</source>
+        <translation>Transfer coins publicly or privately</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
+    </message>
+    <message>
+        <source>Select which coins to spend</source>
+        <translation>Select which coins to spend</translation>
     </message>
     <message>
         <source>JokeCoin address or contact label</source>

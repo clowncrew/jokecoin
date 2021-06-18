@@ -76,7 +76,7 @@ class WalletUpgradeTest (JokeCoinTestFramework):
         self.setup_clean_chain = True
         self.num_nodes = 1
 
-    def check_keys(self, addrs, mined_blocks = 0):
+    def check_keys(self, addrs):
         self.log.info("Checking old keys existence in the upgraded wallet..")
         # Now check that all of the pre upgrade addresses are still in the wallet
         for addr in addrs:
@@ -87,7 +87,7 @@ class WalletUpgradeTest (JokeCoinTestFramework):
         self.log.info("All pre-upgrade keys found in the wallet :)")
 
         # Use all of the keys in the pre-HD keypool
-        for _ in range(0, 60 + mined_blocks):
+        for _ in range(0, 60):
             self.nodes[0].getnewaddress()
 
         self.log.info("All pre-upgrade keys should have been marked as used by now, creating new HD keys")
@@ -135,7 +135,7 @@ class WalletUpgradeTest (JokeCoinTestFramework):
         copyPreHDWallet(self.options.tmpdir, False)
         self.start_node(0)
 
-        # Generating a block to not be in IBD
+        # Generating a block to not be in IBD, here we create a new key for the coinbase script
         self.nodes[0].generate(1)
 
         self.log.info("Upgrading wallet..")
@@ -143,7 +143,7 @@ class WalletUpgradeTest (JokeCoinTestFramework):
 
         self.log.info("upgrade completed, checking keys now..")
         # Now check if the upgrade went fine
-        self.check_keys(addrs, 1)
+        self.check_keys(addrs)
 
         self.log.info("Upgrade via RPC completed, all good :)")
 

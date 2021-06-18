@@ -24,8 +24,12 @@
 #include "qt/jokecoin/masternodeswidget.h"
 #include "qt/jokecoin/snackbar.h"
 #include "qt/jokecoin/settings/settingswidget.h"
+#include "qt/jokecoin/settings/settingsfaqwidget.h"
 #include "qt/rpcconsole.h"
 
+namespace interfaces {
+    class Handler;
+}
 
 class ClientModel;
 class NetworkStyle;
@@ -87,7 +91,7 @@ public Q_SLOTS:
     void messageInfo(const QString& message);
     bool execDialog(QDialog *dialog, int xDiv = 3, int yDiv = 5);
     /** Open FAQ dialog **/
-    void openFAQ(int section = 0);
+    void openFAQ(SettingsFaqWidget::Section section = SettingsFaqWidget::Section::INTRO);
 
     /** Show incoming transaction notification for new transactions. */
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address);
@@ -113,13 +117,15 @@ protected:
      */
 
 private:
+    // Handlers
+    std::unique_ptr<interfaces::Handler> m_handler_message_box;
+
     bool enableWallet;
     ClientModel* clientModel = nullptr;
 
     // Actions
     QAction* quitAction = nullptr;
     QAction* toggleHideAction = nullptr;
-
 
     // Frame
     NavMenuWidget *navMenu = nullptr;

@@ -8,14 +8,11 @@
 
 #include "tinyformat.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <errno.h>
 #include <limits>
-
-#include <openssl/bio.h>
-#include <openssl/buffer.h>
-#include <openssl/evp.h>
 
 
 
@@ -191,34 +188,7 @@ std::vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
 std::string DecodeBase64(const std::string& str)
 {
     std::vector<unsigned char> vchRet = DecodeBase64(str.c_str());
-    return (vchRet.size() == 0) ? std::string() : std::string((const char*)&vchRet[0], vchRet.size());
-}
-
-// Base64 encoding with secure memory allocation
-SecureString EncodeBase64Secure(const SecureString& input)
-{
-    // Init openssl BIO with base64 filter and memory output
-    BIO *b64, *mem;
-    b64 = BIO_new(BIO_f_base64());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // No newlines in output
-    mem = BIO_new(BIO_s_mem());
-    BIO_push(b64, mem);
-
-    // Decode the string
-    BIO_write(b64, &input[0], input.size());
-    (void)BIO_flush(b64);
-
-    // Create output variable from buffer mem ptr
-    BUF_MEM* bptr;
-    BIO_get_mem_ptr(b64, &bptr);
-    SecureString output(bptr->data, bptr->length);
-
-    // Cleanse secure data buffer from memory
-    memory_cleanse((void*)bptr->data, bptr->length);
-
-    // Free memory
-    BIO_free_all(b64);
-    return output;
+    return std::string((const char*)vchRet.data(), vchRet.size());
 }
 
 std::string EncodeBase32(const unsigned char* pch, size_t len)
@@ -287,7 +257,7 @@ std::vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
 std::string DecodeBase32(const std::string& str)
 {
     std::vector<unsigned char> vchRet = DecodeBase32(str.c_str());
-    return (vchRet.size() == 0) ? std::string() : std::string((const char*)&vchRet[0], vchRet.size());
+    return std::string((const char*)vchRet.data(), vchRet.size());
 }
 
 static bool ParsePrechecks(const std::string& str)
@@ -460,7 +430,7 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
             /* pass single 0 */
             ++ptr;
         } else if (val[ptr] >= '1' && val[ptr] <= '9') {
-            while (ptr < end && val[ptr] >= '0' && val[ptr] <= '9') {
+            while (ptr < end && IsDigit(val[ptr])) {
                 if (!ProcessMantissaDigit(val[ptr], mantissa, mantissa_tzeros))
                     return false; /* overflow */
                 ++ptr;
@@ -470,9 +440,9 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
     if (ptr < end && val[ptr] == '.')
     {
         ++ptr;
-        if (ptr < end && val[ptr] >= '0' && val[ptr] <= '9')
+        if (ptr < end && IsDigit(val[ptr]))
         {
-            while (ptr < end && val[ptr] >= '0' && val[ptr] <= '9') {
+            while (ptr < end && IsDigit(val[ptr])) {
                 if (!ProcessMantissaDigit(val[ptr], mantissa, mantissa_tzeros))
                     return false; /* overflow */
                 ++ptr;
@@ -489,8 +459,8 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
             exponent_sign = true;
             ++ptr;
         }
-        if (ptr < end && val[ptr] >= '0' && val[ptr] <= '9') {
-            while (ptr < end && val[ptr] >= '0' && val[ptr] <= '9') {
+        if (ptr < end && IsDigit(val[ptr])) {
+            while (ptr < end && IsDigit(val[ptr])) {
                 if (exponent > (UPPER_BOUND / 10LL))
                     return false; /* overflow */
                 exponent = exponent * 10 + val[ptr] - '0';
@@ -530,3 +500,38 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
 
     return true;
 }
+
+void Downcase(std::string& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){return ToLower(c);});
+}
+
+std::string Capitalize(std::string str)
+{
+    if (str.empty()) return str;
+    str[0] = ToUpper(str.front());
+    return str;
+}
+
+// Based on http://www.zedwood.com/article/cpp-is-valid-utf8-string-function
+bool IsValidUTF8(const std::string& str)
+{
+    const unsigned int strLen = str.length();
+    int c,n;
+    for (unsigned i = 0; i < strLen; i++) {
+        c = (unsigned char) str[i];
+        if (0x00 <= c && c <= 0x7f)     n=0;      // 0bbbbbbb (ASCII)
+        else if ((c & 0xE0) == 0xC0)    n=1;      // 110bbbbb
+        else if ( c == 0xED && i < (strLen - 1) && ((unsigned char)str[i+1] & 0xA0) == 0xA0)
+            return false;                         //U+d800 to U+dfff
+        else if ((c & 0xF0) == 0xE0)    n=2;      // 1110bbbb
+        else if ((c & 0xF8) == 0xF0)    n=3;      // 11110bbb
+        else return false;
+        for (int j=0; j < n && i < strLen; j++) { // n bytes matching 10bbbbbb follow ?
+            if ((++i == strLen) || (( (unsigned char)str[i] & 0xC0) != 0x80))
+                return false;
+        }
+    }
+    return true;
+}
+

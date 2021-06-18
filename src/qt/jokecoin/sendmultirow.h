@@ -25,7 +25,7 @@ class SendMultiRow : public PWidget
     Q_OBJECT
 
 public:
-    explicit SendMultiRow(PWidget *parent = nullptr);
+    explicit SendMultiRow(JokeCoinGUI* _window, PWidget *parent = nullptr);
     ~SendMultiRow();
 
     void hideLabels();
@@ -38,6 +38,7 @@ public:
     SendCoinsRecipient getValue();
     QString getAddress();
     CAmount getAmountValue();
+    QString getMemo();
 
     /** Return whether the entry is still empty and unedited */
     bool isClear();
@@ -55,16 +56,20 @@ public:
     int getEditWidth();
     int getMenuBtnWidth();
 
+    // Return true if memo was set and false if it was cleared.
+    bool launchMemoDialog();
+
 public Q_SLOTS:
     void clear();
     void updateDisplayUnit();
+    void onMemoClicked();
 
 Q_SIGNALS:
     void removeEntry(SendMultiRow* entry);
     void onContactsClicked(SendMultiRow* entry);
     void onMenuClicked(SendMultiRow* entry);
     void onValueChanged();
-    void onUriParsed(SendCoinsRecipient rcp);
+    void onUriParsed(const SendCoinsRecipient& rcp);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -79,14 +84,14 @@ private Q_SLOTS:
     //void on_addressBookButton_clicked();
 
 private:
-    Ui::SendMultiRow *ui;
-    QPushButton *iconNumber;
-    QAction *btnContact;
+    Ui::SendMultiRow *ui{nullptr};
+    QPushButton *iconNumber{nullptr};
+    QAction *btnContact{nullptr};
 
-    int displayUnit;
-    int number = 0;
-    bool isExpanded = false;
-    bool onlyStakingAddressAccepted = false;
+    int displayUnit{0};
+    int number{0};
+    bool isExpanded{false};
+    bool onlyStakingAddressAccepted{false};
 
     SendCoinsRecipient recipient;
 

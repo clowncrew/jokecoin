@@ -117,7 +117,7 @@ ColdStakingWidget::ColdStakingWidget(JokeCoinGUI* parent) :
     connect(ui->pushButtonClear, &QPushButton::clicked, this, &ColdStakingWidget::clearAll);
 
     setCssProperty(ui->labelEditTitle, "text-title");
-    sendMultiRow = new SendMultiRow(this);
+    sendMultiRow = new SendMultiRow(window, this);
     sendMultiRow->setOnlyStakingAddressAccepted(true);
     ((QVBoxLayout*)ui->containerSend->layout())->insertWidget(1, sendMultiRow);
     connect(sendMultiRow, &SendMultiRow::onContactsClicked, [this](){ onContactsClicked(false); });
@@ -204,7 +204,6 @@ ColdStakingWidget::ColdStakingWidget(JokeCoinGUI* parent) :
 void ColdStakingWidget::loadWalletModel()
 {
     if (walletModel) {
-        coinControlDialog->setModel(walletModel);
         sendMultiRow->setWalletModel(walletModel);
         txModel = walletModel->getTransactionTableModel();
         csModel = new ColdStakingModel(walletModel, txModel, walletModel->getAddressTableModel(), this);
@@ -225,8 +224,6 @@ void ColdStakingWidget::loadWalletModel()
         ui->containerHistoryLabel->setVisible(false);
         ui->emptyContainer->setVisible(false);
         ui->listView->setVisible(false);
-
-        tryRefreshDelegations();
     }
 
 }
@@ -246,8 +243,14 @@ void ColdStakingWidget::walletSynced(bool sync)
     }
 }
 
+void ColdStakingWidget::showEvent(QShowEvent *event)
+{
+    tryRefreshDelegations();
+}
+
 void ColdStakingWidget::tryRefreshDelegations()
 {
+    if (!isVisible()) return;
     // Check for min update time to not reload the UI so often if the node is syncing.
     int64_t now = GetTime();
     if (lastRefreshTime + LOAD_MIN_TIME_INTERVAL < now) {
@@ -355,7 +358,7 @@ void ColdStakingWidget::onContactsClicked()
         return;
     }
 
-    menuContacts->setWalletModel(walletModel, isContactOwnerSelected ? AddressTableModel::Receive : AddressTableModel::ColdStakingSend);
+    menuContacts->setWalletModel(walletModel, {(isContactOwnerSelected ? AddressTableModel::Receive : AddressTableModel::ColdStakingSend)});
     menuContacts->resizeList(width, height);
     menuContacts->setStyleSheet(styleSheet());
     menuContacts->adjustSize();
@@ -477,7 +480,7 @@ void ColdStakingWidget::onSendClicked()
 
     // Prepare transaction for getting txFee earlier (exlude delegated coins)
     WalletModelTransaction currentTransaction(recipients);
-    WalletModel::SendCoinsReturn prepareStatus = walletModel->prepareTransaction(currentTransaction, coinControlDialog->coinControl, false);
+    WalletModel::SendCoinsReturn prepareStatus = walletModel->prepareTransaction(&currentTransaction, coinControlDialog->coinControl, false);
 
     // process prepareStatus and on error generate message shown to user
     GuiTransactionsUtils::ProcessSendCoinsReturnAndInform(
@@ -496,7 +499,7 @@ void ColdStakingWidget::onSendClicked()
     showHideOp(true);
     TxDetailDialog* dialog = new TxDetailDialog(window);
     dialog->setDisplayUnit(nDisplayUnit);
-    dialog->setData(walletModel, currentTransaction);
+    dialog->setData(walletModel, &currentTransaction);
     dialog->adjustSize();
     openDialogWithOpaqueBackgroundY(dialog, window, 3, 5);
 
@@ -533,6 +536,7 @@ void ColdStakingWidget::onCoinControlClicked()
 {
     if (isInDelegation) {
         if (walletModel->getBalance() > 0) {
+            if (!coinControlDialog->hasModel()) coinControlDialog->setModel(walletModel);
             coinControlDialog->refreshDialog();
             setCoinControlPayAmounts();
             coinControlDialog->exec();
@@ -547,7 +551,7 @@ void ColdStakingWidget::setCoinControlPayAmounts()
 {
     if (!coinControlDialog) return;
     coinControlDialog->clearPayAmounts();
-    coinControlDialog->addPayAmount(sendMultiRow->getAmountValue());
+    coinControlDialog->addPayAmount(sendMultiRow->getAmountValue(), false);
 }
 
 void ColdStakingWidget::onColdStakeClicked()

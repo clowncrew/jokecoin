@@ -1,86 +1,72 @@
 // Copyright (c) 2017-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
 #include "stakeinput.h"
 
 #include "chain.h"
-#include "main.h"
 #include "txdb.h"
-#include "zjoke/deterministicmint.h"
 #include "wallet/wallet.h"
 
-bool CJokeStake::InitFromTxIn(const CTxIn& txin)
+CPivStake* CPivStake::NewPivStake(const CTxIn& txin)
 {
-    if (txin.IsZerocoinSpend())
-        return error("%s: unable to initialize CJokeStake from zerocoin spend", __func__);
+    if (txin.IsZerocoinSpend()) {
+        error("%s: unable to initialize CPivStake from zerocoin spend", __func__);
+        return nullptr;
+    }
 
     // Find the previous transaction in database
     uint256 hashBlock;
-    CTransaction txPrev;
-    if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true))
-        return error("%s : INFO: read txPrev failed, tx id prev: %s", __func__, txin.prevout.hash.GetHex());
-    SetPrevout(txPrev, txin.prevout.n);
+    CTransactionRef txPrev;
+    if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true)) {
+        error("%s : INFO: read txPrev failed, tx id prev: %s", __func__, txin.prevout.hash.GetHex());
+        return nullptr;
+    }
 
+    const CBlockIndex* pindexFrom = nullptr;
     // Find the index of the block of the previous transaction
     if (mapBlockIndex.count(hashBlock)) {
         CBlockIndex* pindex = mapBlockIndex.at(hashBlock);
         if (chainActive.Contains(pindex)) pindexFrom = pindex;
     }
     // Check that the input is in the active chain
-    if (!pindexFrom)
-        return error("%s : Failed to find the block index for stake origin", __func__);
+    if (!pindexFrom) {
+        error("%s : Failed to find the block index for stake origin", __func__);
+        return nullptr;
+    }
 
-    // All good
+    return new CPivStake(txPrev->vout[txin.prevout.n],
+                         txin.prevout,
+                         pindexFrom);
+}
+
+bool CPivStake::GetTxOutFrom(CTxOut& out) const
+{
+    out = outputFrom;
     return true;
 }
 
-bool CJokeStake::SetPrevout(CTransaction txPrev, unsigned int n)
+CTxIn CPivStake::GetTxIn() const
 {
-    this->txFrom = txPrev;
-    this->nPosition = n;
-    return true;
+    return CTxIn(outpointFrom.hash, outpointFrom.n);
 }
 
-bool CJokeStake::GetTxFrom(CTransaction& tx) const
+CAmount CPivStake::GetValue() const
 {
-    if (txFrom.IsNull())
-        return false;
-    tx = txFrom;
-    return true;
+    return outputFrom.nValue;
 }
 
-bool CJokeStake::GetTxOutFrom(CTxOut& out) const
-{
-    if (txFrom.IsNull() || nPosition >= txFrom.vout.size())
-        return false;
-    out = txFrom.vout[nPosition];
-    return true;
-}
-
-bool CJokeStake::CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut)
-{
-    txIn = CTxIn(txFrom.GetHash(), nPosition);
-    return true;
-}
-
-CAmount CJokeStake::GetValue() const
-{
-    return txFrom.vout[nPosition].nValue;
-}
-
-bool CJokeStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal, const bool onlyP2PK)
+bool CPivStake::CreateTxOuts(const CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal) const
 {
     std::vector<valtype> vSolutions;
     txnouttype whichType;
-    CScript scriptPubKeyKernel = txFrom.vout[nPosition].scriptPubKey;
+    CScript scriptPubKeyKernel = outputFrom.scriptPubKey;
     if (!Solver(scriptPubKeyKernel, whichType, vSolutions))
         return error("%s: failed to parse kernel", __func__);
 
     if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH && whichType != TX_COLDSTAKE)
         return error("%s: type=%d (%s) not supported for scriptPubKeyKernel", __func__, whichType, GetTxnOutputType(whichType));
 
-    CScript scriptPubKey;
     CKey key;
     if (whichType == TX_PUBKEYHASH || whichType == TX_COLDSTAKE) {
         // if P2PKH or P2CS check that we have the input private key
@@ -88,17 +74,7 @@ bool CJokeStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmou
             return error("%s: Unable to get staking private key", __func__);
     }
 
-    // Consensus check: P2PKH block signatures were not accepted before v5 update.
-    // This can be removed after v5.0 enforcement
-    if (whichType == TX_PUBKEYHASH && onlyP2PK) {
-        // convert to P2PK inputs
-        scriptPubKey << key.GetPubKey() << OP_CHECKSIG;
-    } else {
-        // keep the same script
-        scriptPubKey = scriptPubKeyKernel;
-    }
-
-    vout.emplace_back(CTxOut(0, scriptPubKey));
+    vout.emplace_back(0, scriptPubKeyKernel);
 
     // Calculate if we need to split the output
     if (pwallet->nStakeSplitThreshold > 0) {
@@ -110,7 +86,7 @@ bool CJokeStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmou
                 nSplit = txSizeMax;
             for (int i = nSplit; i > 1; i--) {
                 LogPrintf("%s: StakeSplit: nTotal = %d; adding output %d of %d\n", __func__, nTotal, (nSplit-i)+2, nSplit);
-                vout.emplace_back(CTxOut(0, scriptPubKey));
+                vout.emplace_back(0, scriptPubKeyKernel);
             }
         }
     }
@@ -118,41 +94,28 @@ bool CJokeStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmou
     return true;
 }
 
-CDataStream CJokeStake::GetUniqueness() const
+CDataStream CPivStake::GetUniqueness() const
 {
     //The unique identifier for a JOKE stake is the outpoint
     CDataStream ss(SER_NETWORK, 0);
-    ss << nPosition << txFrom.GetHash();
+    ss << outpointFrom.n << outpointFrom.hash;
     return ss;
 }
 
 //The block that the UTXO was added to the chain
-CBlockIndex* CJokeStake::GetIndexFrom()
+const CBlockIndex* CPivStake::GetIndexFrom() const
 {
-    if (pindexFrom)
-        return pindexFrom;
-    uint256 hashBlock = UINT256_ZERO;
-    CTransaction tx;
-    if (GetTransaction(txFrom.GetHash(), tx, hashBlock, true)) {
-        // If the index is in the chain, then set it as the "index from"
-        if (mapBlockIndex.count(hashBlock)) {
-            CBlockIndex* pindex = mapBlockIndex.at(hashBlock);
-            if (chainActive.Contains(pindex))
-                pindexFrom = pindex;
-        }
-    } else {
-        LogPrintf("%s : failed to find tx %s\n", __func__, txFrom.GetHash().GetHex());
-    }
-
+    // Sanity check, pindexFrom is set on the constructor.
+    if (!pindexFrom) throw std::runtime_error("CPivStake: uninitialized pindexFrom");
     return pindexFrom;
 }
 
 // Verify stake contextual checks
-bool CJokeStake::ContextCheck(int nHeight, uint32_t nTime)
+bool CPivStake::ContextCheck(int nHeight, uint32_t nTime)
 {
     const Consensus::Params& consensus = Params().GetConsensus();
     // Get Stake input block time/height
-    CBlockIndex* pindexFrom = GetIndexFrom();
+    const CBlockIndex* pindexFrom = GetIndexFrom();
     if (!pindexFrom)
         return error("%s: unable to get previous index for stake input", __func__);
     const int nHeightBlockFrom = pindexFrom->nHeight;

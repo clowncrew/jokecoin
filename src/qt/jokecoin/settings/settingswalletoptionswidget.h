@@ -21,7 +21,9 @@ public:
     ~SettingsWalletOptionsWidget();
 
     void setMapper(QDataWidgetMapper *mapper);
-    void setSpinBoxStakeSplitThreshold(double val);
+
+    void discardWalletOnlyOptions();
+    bool saveWalletOnlyOptions();
 
 Q_SIGNALS:
     void saveSettings();
@@ -32,6 +34,12 @@ public Q_SLOTS:
 
 private:
     Ui::SettingsWalletOptionsWidget *ui;
+
+    void loadWalletModel() override;
+    void reloadWalletOptions();
+
+    void setSpinBoxStakeSplitThreshold(double val);
+    double getSpinBoxStakeSplitThreshold() const;
 };
 
 #endif // SETTINGSWALLETOPTIONSWIDGET_H

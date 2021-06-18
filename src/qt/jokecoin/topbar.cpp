@@ -1,6 +1,6 @@
 // Copyright (c) 2019-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
 #include "qt/jokecoin/topbar.h"
 #include "qt/jokecoin/forms/ui_topbar.h"
@@ -11,14 +11,13 @@
 #include "askpassphrasedialog.h"
 
 #include "bitcoinunits.h"
+#include "qt/jokecoin/balancebubble.h"
 #include "clientmodel.h"
-#include "qt/guiconstants.h"
 #include "qt/guiutil.h"
 #include "optionsmodel.h"
 #include "qt/platformstyle.h"
 #include "walletmodel.h"
 #include "addresstablemodel.h"
-#include "guiinterface.h"
 
 #include "masternode-sync.h"
 #include "wallet/wallet.h"
@@ -26,6 +25,29 @@
 #include <QPixmap>
 
 #define REQUEST_UPGRADE_WALLET 1
+
+class ButtonHoverWatcher : public QObject
+{
+public:
+    explicit ButtonHoverWatcher(QObject* parent = nullptr) :
+            QObject(parent) {}
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        QPushButton* button = qobject_cast<QPushButton*>(watched);
+        if (!button) return false;
+
+        if (event->type() == QEvent::Enter) {
+            button->setIcon(QIcon("://ic-information-hover"));
+            return true;
+        }
+
+        if (event->type() == QEvent::Leave){
+            button->setIcon(QIcon("://ic-information"));
+            return true;
+        }
+        return false;
+    }
+};
 
 TopBar::TopBar(JokeCoinGUI* _mainWindow, QWidget *parent) :
     PWidget(_mainWindow, parent),
@@ -44,17 +66,17 @@ TopBar::TopBar(JokeCoinGUI* _mainWindow, QWidget *parent) :
     ui->containerTop->setProperty("cssClass", "container-top");
 #endif
 
-    std::initializer_list<QWidget*> lblTitles = {ui->labelTitle1, ui->labelTitle3, ui->labelTitle4};
+    std::initializer_list<QWidget*> lblTitles = {ui->labelTitle1, ui->labelTitle3, ui->labelTitle4, ui->labelTrans, ui->labelShield};
     setCssProperty(lblTitles, "text-title-topbar");
     QFont font;
     font.setWeight(QFont::Light);
-    Q_FOREACH (QWidget* w, lblTitles) { w->setFont(font); }
+    for (QWidget* w : lblTitles) { w->setFont(font); }
 
     // Amount information top
     ui->widgetTopAmount->setVisible(false);
-    setCssProperty({ui->labelAmountTopJoke}, "amount-small-topbar");
-    setCssProperty({ui->labelAmountJoke}, "amount-topbar");
-    setCssProperty({ui->labelPendingJoke, ui->labelImmatureJoke}, "amount-small-topbar");
+    setCssProperty({ui->labelAmountTopPiv, ui->labelAmountTopShieldedPiv}, "amount-small-topbar");
+    setCssProperty({ui->labelAmountPiv}, "amount-topbar");
+    setCssProperty({ui->labelPendingPiv, ui->labelImmaturePiv}, "amount-small-topbar");
 
     // Progress Sync
     progressBar = new QProgressBar(ui->layoutSync);
@@ -103,6 +125,9 @@ TopBar::TopBar(JokeCoinGUI* _mainWindow, QWidget *parent) :
 
     setCssProperty(ui->qrContainer, "container-qr");
     setCssProperty(ui->pushButtonQR, "btn-qr");
+    setCssProperty(ui->pushButtonBalanceInfo, "btn-info");
+    ButtonHoverWatcher * watcher = new ButtonHoverWatcher(this);
+    ui->pushButtonBalanceInfo->installEventFilter(watcher);
 
     // QR image
     QPixmap pixmap("://img-qr-test");
@@ -119,6 +144,7 @@ TopBar::TopBar(JokeCoinGUI* _mainWindow, QWidget *parent) :
 
     connect(ui->pushButtonQR, &QPushButton::clicked, this, &TopBar::onBtnReceiveClicked);
     connect(ui->btnQr, &QPushButton::clicked, this, &TopBar::onBtnReceiveClicked);
+    connect(ui->pushButtonBalanceInfo, &QPushButton::clicked, this, &TopBar::onBtnBalanceInfoClicked);
     connect(ui->pushButtonLock, &ExpandableButton::Mouse_Pressed, this, &TopBar::onBtnLockClicked);
     connect(ui->pushButtonTheme, &ExpandableButton::Mouse_Pressed, this, &TopBar::onThemeClicked);
     connect(ui->pushButtonFAQ, &ExpandableButton::Mouse_Pressed, [this](){window->openFAQ();});
@@ -313,9 +339,29 @@ void TopBar::onBtnReceiveClicked()
     }
 }
 
+void TopBar::onBtnBalanceInfoClicked()
+{
+    if (!walletModel) return;
+    if (balanceBubble) {
+        if (balanceBubble->isVisible()) {
+            balanceBubble->hide();
+            return;
+        }
+    } else balanceBubble = new BalanceBubble(this);
+
+    const auto& balances = walletModel->GetWalletBalances();
+    balanceBubble->updateValues(balances.balance - balances.shielded_balance, balances.shielded_balance, nDisplayUnit);
+    QPoint pos = this->pos();
+    pos.setX(pos.x() + (ui->labelTitle1->width()) + 60);
+    pos.setY(pos.y() + 20);
+    balanceBubble->move(pos);
+    balanceBubble->show();
+}
+
 void TopBar::showTop()
 {
     if (ui->bottom_container->isVisible()) {
+        if (balanceBubble && balanceBubble->isVisible()) balanceBubble->hide();
         ui->bottom_container->setVisible(false);
         ui->widgetTopAmount->setVisible(true);
         this->setFixedHeight(75);
@@ -395,12 +441,13 @@ void TopBar::setStakingStatusActive(bool fActive)
 }
 void TopBar::updateStakingStatus()
 {
-    setStakingStatusActive(walletModel &&
-                           !walletModel->isWalletLocked() &&
-                           walletModel->isStakingStatusActive());
+    if (walletModel && !walletModel->isShutdownRequested()) {
+        setStakingStatusActive(!walletModel->isWalletLocked() &&
+                               walletModel->isStakingStatusActive());
 
-    // Taking advantage of this timer to update Tor status if needed.
-    updateTorIcon();
+        // Taking advantage of this timer to update Tor status if needed.
+        updateTorIcon();
+    }
 }
 
 void TopBar::setNumConnections(int count)
@@ -425,28 +472,9 @@ void TopBar::setNumBlocks(int count)
     if (!clientModel)
         return;
 
-    // Acquire current block source
-    enum BlockSource blockSource = clientModel->getBlockSource();
-    std::string text = "";
-    switch (blockSource) {
-        case BLOCK_SOURCE_NETWORK:
-            text = "Synchronizing..";
-            break;
-        case BLOCK_SOURCE_DISK:
-            text = "Importing blocks from disk..";
-            break;
-        case BLOCK_SOURCE_REINDEX:
-            text = "Reindexing blocks on disk..";
-            break;
-        case BLOCK_SOURCE_NONE:
-            // Case: not Importing, not Reindexing and no network connection
-            text = "No block source available..";
-            ui->pushButtonSync->setChecked(false);
-            break;
-    }
-
+    std::string text;
     bool needState = true;
-    if (masternodeSync.IsBlockchainSynced()) {
+    if (masternodeSync.IsBlockchainSyncedReadOnly()) {
         // chain synced
         Q_EMIT walletSynced(true);
         if (masternodeSync.IsSynced()) {
@@ -474,7 +502,7 @@ void TopBar::setNumBlocks(int count)
         Q_EMIT walletSynced(false);
     }
 
-    if (needState) {
+    if (needState && clientModel->isTipCached()) {
         // Represent time from last generated block in human readable text
         QDateTime lastBlockDate = clientModel->getLastBlockDate();
         QDateTime currentDate = QDateTime::currentDateTime();
@@ -512,13 +540,10 @@ void TopBar::setNumBlocks(int count)
     ui->pushButtonSync->setButtonText(tr(text.data()));
 }
 
-void TopBar::showUpgradeDialog()
+void TopBar::showUpgradeDialog(const QString& message)
 {
     QString title = tr("Wallet Upgrade");
-    if (ask(title,
-            tr("Upgrading to HD wallet will improve\nthe wallet's reliability and security.\n\n\n"
-                    "NOTE: after the upgrade, a new\nbackup will be created.\n"))) {
-
+    if (ask(title, message)) {
         std::unique_ptr<WalletModel::UnlockContext> pctx = MakeUnique<WalletModel::UnlockContext>(walletModel->requestUnlock());
         if (!pctx->isValid()) {
             warn(tr("Upgrade Wallet"), tr("Wallet unlock cancelled"));
@@ -535,14 +560,19 @@ void TopBar::loadWalletModel()
 {
     // Upgrade wallet.
     if (walletModel->isHDEnabled()) {
-        ui->pushButtonHDUpgrade->setVisible(false);
+        if (walletModel->isSaplingWalletEnabled()) {
+            // hide upgrade
+            ui->pushButtonHDUpgrade->setVisible(false);
+        } else {
+            // show upgrade to Sapling
+            ui->pushButtonHDUpgrade->setButtonText(tr("Upgrade to Sapling Wallet"));
+            ui->pushButtonHDUpgrade->setNoIconText("SHIELD UPGRADE");
+            connectUpgradeBtnAndDialogTimer(tr("Upgrading to Sapling wallet will enable\nall of the privacy features!\n\n\n"
+                                               "NOTE: after the upgrade, a new\nbackup will be created.\n"));
+        }
     } else {
-        connect(ui->pushButtonHDUpgrade, &ExpandableButton::Mouse_Pressed, this, &TopBar::showUpgradeDialog);
-
-        // Upgrade wallet timer, only once. launched 4 seconds after the wallet started.
-        QTimer::singleShot(4000, [this](){
-            showUpgradeDialog();
-        });
+        connectUpgradeBtnAndDialogTimer(tr("Upgrading to HD wallet will improve\nthe wallet's reliability and security.\n\n\n"
+                                           "NOTE: after the upgrade, a new\nbackup will be created.\n"));
     }
 
     connect(walletModel, &WalletModel::balanceChanged, this, &TopBar::updateBalances);
@@ -557,6 +587,15 @@ void TopBar::loadWalletModel()
     onColdStakingClicked();
 
     isInitializing = false;
+}
+
+void TopBar::connectUpgradeBtnAndDialogTimer(const QString& message)
+{
+    const auto& func = [this, message]() { showUpgradeDialog(message); };
+    connect(ui->pushButtonHDUpgrade, &ExpandableButton::Mouse_Pressed, func);
+
+    // Upgrade wallet timer, only once. launched 4 seconds after the wallet started.
+    QTimer::singleShot(4000, func);
 }
 
 void TopBar::updateTorIcon()
@@ -583,7 +622,7 @@ void TopBar::updateTorIcon()
 void TopBar::refreshStatus()
 {
     // Check lock status
-    if (!this->walletModel)
+    if (!walletModel || !walletModel->hasWallet())
         return;
 
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
@@ -629,15 +668,18 @@ void TopBar::updateBalances(const interfaces::WalletBalances& newBalance)
     ui->labelTitle1->setText(nLockedBalance > 0 ? tr("Available (Locked included)") : tr("Available"));
 
     // JOKE Total
-    QString totalJoke = GUIUtil::formatBalance(newBalance.balance, nDisplayUnit);
+    QString totalPiv = GUIUtil::formatBalance(newBalance.balance, nDisplayUnit);
+    QString totalTransparent = GUIUtil::formatBalance(newBalance.balance - newBalance.shielded_balance);
+    QString totalShielded = GUIUtil::formatBalance(newBalance.shielded_balance);
 
     // JOKE
     // Top
-    ui->labelAmountTopJoke->setText(totalJoke);
+    ui->labelAmountTopPiv->setText(totalTransparent);
+    ui->labelAmountTopShieldedPiv->setText(totalShielded);
     // Expanded
-    ui->labelAmountJoke->setText(totalJoke);
-    ui->labelPendingJoke->setText(GUIUtil::formatBalance(newBalance.unconfirmed_balance, nDisplayUnit));
-    ui->labelImmatureJoke->setText(GUIUtil::formatBalance(newBalance.immature_balance, nDisplayUnit));
+    ui->labelAmountPiv->setText(totalPiv);
+    ui->labelPendingPiv->setText(GUIUtil::formatBalance(newBalance.unconfirmed_balance + newBalance.unconfirmed_shielded_balance, nDisplayUnit));
+    ui->labelImmaturePiv->setText(GUIUtil::formatBalance(newBalance.immature_balance, nDisplayUnit));
 }
 
 void TopBar::resizeEvent(QResizeEvent *event)

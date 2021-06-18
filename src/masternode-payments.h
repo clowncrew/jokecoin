@@ -7,7 +7,6 @@
 #define MASTERNODE_PAYMENTS_H
 
 #include "key.h"
-#include "main.h"
 #include "masternode.h"
 
 
@@ -18,6 +17,7 @@ extern RecursiveMutex cs_mapMasternodePayeeVotes;
 class CMasternodePayments;
 class CMasternodePaymentWinner;
 class CMasternodeBlockPayees;
+class CValidationState;
 
 extern CMasternodePayments masternodePayments;
 
@@ -25,10 +25,16 @@ extern CMasternodePayments masternodePayments;
 #define MNPAYMENTS_SIGNATURES_TOTAL 10
 
 void ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
-bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight);
+bool IsBlockPayeeValid(const CBlock& block, const CBlockIndex* pindexPrev);
 std::string GetRequiredPaymentsString(int nBlockHeight);
-bool IsBlockValueValid(int nHeight, CAmount nExpectedValue, CAmount nMinted);
-void FillBlockPayee(CMutableTransaction& txNew, const CBlockIndex* pindexPrev, bool fProofOfStake);
+bool IsBlockValueValid(int nHeight, CAmount& nExpectedValue, CAmount nMinted, CAmount& nBudgetAmt);
+void FillBlockPayee(CMutableTransaction& txCoinbase, CMutableTransaction& txCoinstake, const CBlockIndex* pindexPrev, bool fProofOfStake);
+
+/**
+ * Check coinbase output value for blocks v10+.
+ * It must pay the masternode for regular blocks and a proposal during superblocks.
+ */
+bool IsCoinbaseValueValid(const CTransactionRef& tx, CAmount nBudgetAmt, CValidationState& _state);
 
 void DumpMasternodePayments();
 
@@ -53,7 +59,7 @@ public:
 
     CMasternodePaymentDB();
     bool Write(const CMasternodePayments& objToSave);
-    ReadResult Read(CMasternodePayments& objToLoad, bool fDryRun = false);
+    ReadResult Read(CMasternodePayments& objToLoad);
 };
 
 class CMasternodePayee
@@ -79,7 +85,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(*(CScriptBase*)(&scriptPubKey));
+        READWRITE(scriptPubKey);
         READWRITE(nVotes);
     }
 };
@@ -117,12 +123,12 @@ public:
         vecPayments.push_back(c);
     }
 
-    bool GetPayee(CScript& payee)
+    bool GetPayee(CScript& payee) const
     {
         LOCK(cs_vecPayments);
 
         int nVotes = -1;
-        for (CMasternodePayee& p : vecPayments) {
+        for (const CMasternodePayee& p : vecPayments) {
             if (p.nVotes > nVotes) {
                 payee = p.scriptPubKey;
                 nVotes = p.nVotes;
@@ -171,10 +177,10 @@ public:
         payee()
     {}
 
-    CMasternodePaymentWinner(CTxIn vinIn) :
+    CMasternodePaymentWinner(const CTxIn& vinIn, int nHeight):
         CSignedMessage(),
         vinMasternode(vinIn),
-        nBlockHeight(0),
+        nBlockHeight(nHeight),
         payee()
     {}
 
@@ -183,7 +189,7 @@ public:
     // override CSignedMessage functions
     uint256 GetSignatureHash() const override { return GetHash(); }
     std::string GetStrMessage() const override;
-    const CTxIn GetVin() const override { return vinMasternode; };
+    CTxIn GetVin() const { return vinMasternode; };
 
     bool IsValid(CNode* pnode, std::string& strError);
     void Relay();
@@ -200,7 +206,7 @@ public:
     {
         READWRITE(vinMasternode);
         READWRITE(nBlockHeight);
-        READWRITE(*(CScriptBase*)(&payee));
+        READWRITE(payee);
         READWRITE(vchSig);
         try
         {
@@ -249,14 +255,20 @@ public:
     }
 
     bool AddWinningMasternode(CMasternodePaymentWinner& winner);
-    bool ProcessBlock(int nBlockHeight);
+    void ProcessBlock(int nBlockHeight);
 
     void Sync(CNode* node, int nCountNeeded);
-    void CleanPaymentList();
+    void CleanPaymentList(int mnCount, int nHeight);
 
-    bool GetBlockPayee(int nBlockHeight, CScript& payee);
-    bool IsTransactionValid(const CTransaction& txNew, int nBlockHeight);
-    bool IsScheduled(CMasternode& mn, int nNotBlockHeight);
+    // get the masternode payment outs for block built on top of pindexPrev
+    bool GetMasternodeTxOuts(const CBlockIndex* pindexPrev, std::vector<CTxOut>& voutMasternodePaymentsRet) const;
+
+    // can be removed after transition to DMN
+    bool GetLegacyMasternodeTxOut(int nHeight, std::vector<CTxOut>& voutMasternodePaymentsRet) const;
+    bool GetBlockPayee(int nBlockHeight, CScript& payee) const;
+
+    bool IsTransactionValid(const CTransaction& txNew, const CBlockIndex* pindexPrev);
+    bool IsScheduled(const CMasternode& mn, int nNotBlockHeight);
 
     bool CanVote(const COutPoint& outMasternode, int nBlockHeight)
     {
@@ -275,7 +287,7 @@ public:
 
     void ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew, const CBlockIndex* pindexPrev, bool fProofOfStake);
+    void FillBlockPayee(CMutableTransaction& txCoinbase, CMutableTransaction& txCoinstake, const CBlockIndex* pindexPrev, bool fProofOfStake) const;
     std::string ToString() const;
 
     ADD_SERIALIZE_METHODS;

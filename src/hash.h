@@ -8,6 +8,7 @@
 #ifndef JokeCoin_HASH_H
 #define JokeCoin_HASH_H
 
+#include "arith_uint256.h"
 #include "crypto/ripemd160.h"
 #include "crypto/sha256.h"
 #include "prevector.h"
@@ -24,7 +25,6 @@
 #include "crypto/sha512.h"
 
 #include <iomanip>
-#include <openssl/sha.h>
 #include <sstream>
 #include <vector>
 
@@ -149,30 +149,6 @@ public:
         return *this;
     }
 };
-
-/** Compute the 256-bit hash of a std::string */
-inline std::string Hash(std::string input)
-{
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, input.c_str(), input.size());
-    SHA256_Final(hash, &sha256);
-    std::stringstream ss;
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-    }
-    return ss.str();
-}
-
-/** Compute the 256-bit hash of a void pointer */
-inline void Hash(void* in, unsigned int len, unsigned char* out)
-{
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, in, len);
-    SHA256_Final(out, &sha256);
-}
 
 /** Compute the 512-bit hash of an object. */
 template <typename T1>
@@ -340,7 +316,7 @@ public:
     }
 
     template<typename T>
-    CHashVerifier<Source>& operator>>(T& obj)
+    CHashVerifier<Source>& operator>>(T&& obj)
     {
         // Unserialize from this stream
         ::Unserialize(*this, obj);
@@ -417,10 +393,10 @@ inline uint256 HashQuark(const T1 pbegin, const T1 pend)
     sph_skein512_context ctx_skein;
     static unsigned char pblank[1];
 
-    uint512 mask = 8;
-    uint512 zero = 0;
+    arith_uint512 mask(8);
+    arith_uint512 zero(0);
 
-    uint512 hash[9];
+    arith_uint512 hash[9];
 
     sph_blake512_init(&ctx_blake);
     // ZBLAKE;

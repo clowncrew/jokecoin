@@ -6,6 +6,7 @@
 #define BITCOIN_POLICYESTIMATOR_H
 
 #include "amount.h"
+#include "feerate.h"
 #include "uint256.h"
 
 #include <map>
@@ -95,7 +96,7 @@ private:
     // Combine the conf counts with tx counts to calculate the confirmation % for each Y,X
     // Combine the total value with the tx counts to calculate the avg feerate per bucket
 
-    double decay;
+    double decay{0.0};
 
     // Mempool counts of outstanding transactions
     // For each bucket X, track the number of transactions in the mempool
@@ -179,7 +180,7 @@ static const double UNLIKELY_PCT = .5;
 static const double SUFFICIENT_FEETXS = 1;
 
 // Minimum and Maximum values for tracking feerates
-static const double MIN_FEERATE = 10;
+static constexpr double MIN_FEERATE = 10;
 static const double MAX_FEERATE = 1e7;
 static const double INF_FEERATE = 1e16;
 static const double INF_PRIORITY = 1e25;

@@ -3,13 +3,15 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "qt/jokecoin/settings/settingsbackupwallet.h"
+
 #include "qt/jokecoin/settings/forms/ui_settingsbackupwallet.h"
-#include <QFile>
-#include <QGraphicsDropShadowEffect>
+
+#include "guiinterface.h"
 #include "guiutil.h"
 #include "qt/jokecoin/qtutils.h"
-#include "guiinterface.h"
-#include "qt/jokecoin/qtutils.h"
+
+#include <QGraphicsDropShadowEffect>
+
 SettingsBackupWallet::SettingsBackupWallet(JokeCoinGUI* _window, QWidget *parent) :
     PWidget(_window, parent),
     ui(new Ui::SettingsBackupWallet)

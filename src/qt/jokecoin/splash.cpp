@@ -6,10 +6,11 @@
 #include "qt/jokecoin/forms/ui_splash.h"
 #include "QFile"
 
+#include "interfaces/handler.h"
 #include "init.h"
 #include "guiinterface.h"
 #include "networkstyle.h"
-#include "util.h"
+#include "util/system.h"
 #include "version.h"
 #include "guiutil.h"
 
@@ -23,8 +24,8 @@
 
 #include <iostream>
 
-Splash::Splash(Qt::WindowFlags f, const NetworkStyle* networkStyle) :
-    QWidget(0, f), ui(new Ui::Splash)
+Splash::Splash(const NetworkStyle* networkStyle) :
+    QWidget(nullptr), ui(new Ui::Splash)
 {
     ui->setupUi(this);
     QString titleText = tr("JokeCoin Core");
@@ -76,27 +77,28 @@ static void ShowProgress(Splash* splash, const std::string& title, int nProgress
 }
 
 #ifdef ENABLE_WALLET
+std::unique_ptr<interfaces::Handler> m_handler_show_progress_wallet;
 static void ConnectWallet(Splash* splash, CWallet* wallet){
-    wallet->ShowProgress.connect(boost::bind(ShowProgress, splash, _1, _2));
+    m_handler_show_progress_wallet = interfaces::MakeHandler(wallet->ShowProgress.connect(std::bind(ShowProgress, splash, std::placeholders::_1, std::placeholders::_2)));
 }
 #endif
 
 void Splash::subscribeToCoreSignals(){
     // Connect signals to client
-    uiInterface.InitMessage.connect(boost::bind(InitMessage, this, _1));
-    uiInterface.ShowProgress.connect(boost::bind(ShowProgress, this, _1, _2));
+    m_handler_init_message = interfaces::MakeHandler(uiInterface.InitMessage.connect(std::bind(InitMessage, this, std::placeholders::_1)));
+    m_handler_show_progress = interfaces::MakeHandler(uiInterface.ShowProgress.connect(std::bind(ShowProgress, this, std::placeholders::_1, std::placeholders::_2)));
 #ifdef ENABLE_WALLET
-    uiInterface.LoadWallet.connect(boost::bind(ConnectWallet, this, _1));
+    m_handler_load_wallet = interfaces::MakeHandler(uiInterface.LoadWallet.connect(std::bind(ConnectWallet, this, std::placeholders::_1)));
 #endif
 }
 
 void Splash::unsubscribeFromCoreSignals(){
     // Disconnect signals from client
-    uiInterface.InitMessage.disconnect(boost::bind(InitMessage, this, _1));
-    uiInterface.ShowProgress.disconnect(boost::bind(ShowProgress, this, _1, _2));
+    m_handler_init_message->disconnect();
+    m_handler_show_progress->disconnect();
 #ifdef ENABLE_WALLET
-    if (pwalletMain)
-        pwalletMain->ShowProgress.disconnect(boost::bind(ShowProgress, this, _1, _2));
+    m_handler_load_wallet->disconnect();
+    if (m_handler_show_progress_wallet) m_handler_show_progress_wallet->disconnect();
 #endif
 }
 

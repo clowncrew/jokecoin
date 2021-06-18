@@ -10,7 +10,7 @@
 #include "fs.h"
 #include "guiutil.h"
 
-#include "util.h"
+#include "util/system.h"
 #include "qt/jokecoin/qtutils.h"
 
 #include <QFileDialog>
@@ -172,7 +172,7 @@ bool Intro::pickDataDirectory()
     QSettings settings;
     /* If data directory provided on command line, no need to look at settings
        or show a picking dialog */
-    if (!GetArg("-datadir", "").empty())
+    if (!gArgs.GetArg("-datadir", "").empty())
         return true;
     /* 1) Default data directory for operating system */
     QString dataDir = getDefaultDataDirectory();
@@ -180,7 +180,7 @@ bool Intro::pickDataDirectory()
     dataDir = settings.value("strDataDir", dataDir).toString();
 
 
-    if (!fs::exists(GUIUtil::qstringToBoostPath(dataDir)) || GetBoolArg("-choosedatadir", DEFAULT_CHOOSE_DATADIR)) {
+    if (!fs::exists(GUIUtil::qstringToBoostPath(dataDir)) || gArgs.GetBoolArg("-choosedatadir", DEFAULT_CHOOSE_DATADIR)) {
         // If current default data directory does not exist, let the user choose one
         Intro intro;
         intro.setDataDirectory(dataDir);
@@ -193,7 +193,7 @@ bool Intro::pickDataDirectory()
             }
             dataDir = intro.getDataDirectory();
             try {
-                TryCreateDirectory(GUIUtil::qstringToBoostPath(dataDir));
+                TryCreateDirectories(GUIUtil::qstringToBoostPath(dataDir));
                 break;
             } catch (const fs::filesystem_error& e) {
                 QMessageBox::critical(0, tr("JokeCoin Core"),
@@ -211,7 +211,7 @@ bool Intro::pickDataDirectory()
      */
 
     if (dataDir != getDefaultDataDirectory())
-        SoftSetArg("-datadir", GUIUtil::qstringToBoostPath(dataDir).string()); // use OS locale for path setting
+        gArgs.SoftSetArg("-datadir", GUIUtil::qstringToBoostPath(dataDir).string()); // use OS locale for path setting
     return true;
 }
 

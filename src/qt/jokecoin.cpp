@@ -25,23 +25,22 @@
 #ifdef ENABLE_WALLET
 #include "paymentserver.h"
 #include "walletmodel.h"
+#include "interfaces/wallet.h"
 #endif
 #include "masternodeconfig.h"
 
 #include "fs.h"
 #include "init.h"
-#include "main.h"
 #include "rpc/server.h"
 #include "guiinterface.h"
-#include "util.h"
+#include "util/system.h"
+#include "warnings.h"
 
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
 
 #include <stdint.h>
-
-#include <boost/thread.hpp>
 
 #include <QApplication>
 #include <QDebug>
@@ -71,6 +70,8 @@ Q_IMPORT_PLUGIN(QGifPlugin);
 // Declare meta types used for QMetaObject::invokeMethod
 Q_DECLARE_METATYPE(bool*)
 Q_DECLARE_METATYPE(CAmount)
+Q_DECLARE_METATYPE(interfaces::WalletBalances);
+Q_DECLARE_METATYPE(uint256)
 
 static void InitMessage(const std::string& message)
 {
@@ -96,7 +97,7 @@ static QString GetLangTerritory(bool forceLangFromSetting = false)
     if (!lang_territory_qsettings.isEmpty())
         lang_territory = lang_territory_qsettings;
     // 3) -lang command line argument
-    lang_territory = QString::fromStdString(GetArg("-lang", lang_territory.toStdString()));
+    lang_territory = QString::fromStdString(gArgs.GetArg("-lang", lang_territory.toStdString()));
     return (forceLangFromSetting) ? lang_territory_qsettings : lang_territory;
 }
 
@@ -170,7 +171,7 @@ Q_SIGNALS:
 
 private:
     /// Flag indicating a restart
-    bool execute_restart;
+    bool execute_restart{false};
 
     /// Pass fatal exception message to UI thread
     void handleRunawayException(const std::exception* e);
@@ -226,16 +227,16 @@ Q_SIGNALS:
     void splashFinished(QWidget* window);
 
 private:
-    QThread* coreThread;
-    OptionsModel* optionsModel;
-    ClientModel* clientModel;
-    JokeCoinGUI* window;
-    QTimer* pollShutdownTimer;
+    QThread* coreThread{nullptr};
+    OptionsModel* optionsModel{nullptr};
+    ClientModel* clientModel{nullptr};
+    JokeCoinGUI* window{nullptr};
+    QTimer* pollShutdownTimer{nullptr};
 #ifdef ENABLE_WALLET
-    PaymentServer* paymentServer;
-    WalletModel* walletModel;
+    PaymentServer* paymentServer{nullptr};
+    WalletModel* walletModel{nullptr};
 #endif
-    int returnValue;
+    int returnValue{0};
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
 
     void startThread();
@@ -250,7 +251,7 @@ BitcoinCore::BitcoinCore() : QObject()
 void BitcoinCore::handleRunawayException(const std::exception* e)
 {
     PrintExceptionContinue(e, "Runaway exception");
-    Q_EMIT runawayException(QString::fromStdString(strMiscWarning));
+    Q_EMIT runawayException(QString::fromStdString(GetWarnings("gui")));
 }
 
 void BitcoinCore::initialize()
@@ -259,7 +260,19 @@ void BitcoinCore::initialize()
 
     try {
         qDebug() << __func__ << ": Running AppInit2 in thread";
-        int rv = AppInit2();
+        if (!AppInitBasicSetup()) {
+            Q_EMIT initializeResult(false);
+            return;
+        }
+        if (!AppInitParameterInteraction()) {
+            Q_EMIT initializeResult(false);
+            return;
+        }
+        if (!AppInitSanityChecks()) {
+            Q_EMIT initializeResult(false);
+            return;
+        }
+        int rv = AppInitMain();
         Q_EMIT initializeResult(rv);
     } catch (const std::exception& e) {
         handleRunawayException(&e);
@@ -363,12 +376,11 @@ void BitcoinApplication::createWindow(const NetworkStyle* networkStyle)
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, &QTimer::timeout, window, &JokeCoinGUI::detectShutdown);
-    pollShutdownTimer->start(200);
 }
 
 void BitcoinApplication::createSplashScreen(const NetworkStyle* networkStyle)
 {
-    Splash* splash = new Splash(0, networkStyle);
+    Splash* splash = new Splash(networkStyle);
     // We don't hold a direct pointer to the splash screen after creation, so use
     // Qt::WA_DeleteOnClose to make sure that the window will be deleted eventually.
     splash->setAttribute(Qt::WA_DeleteOnClose);
@@ -422,7 +434,7 @@ void BitcoinApplication::parameterSetup()
 {
     // Default printtoconsole to false for the GUI. GUI programs should not
     // print to the console unnecessarily.
-    SoftSetBoolArg("-printtoconsole", false);
+    gArgs.SoftSetBoolArg("-printtoconsole", false);
 
     InitLogging();
     InitParameterInteraction();
@@ -440,19 +452,22 @@ void BitcoinApplication::requestShutdown()
     qDebug() << __func__ << ": Requesting shutdown";
     startThread();
     window->hide();
-    window->setClientModel(0);
+    if (walletModel) walletModel->stop();
+    window->setClientModel(nullptr);
     pollShutdownTimer->stop();
 
 #ifdef ENABLE_WALLET
     window->removeAllWallets();
     delete walletModel;
-    walletModel = 0;
+    walletModel = nullptr;
 #endif
     delete clientModel;
-    clientModel = 0;
+    clientModel = nullptr;
 
     // Show a simple window indicating shutdown status
     ShutdownWindow::showShutdownWindow(window);
+
+    StartShutdown();
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
@@ -465,7 +480,6 @@ void BitcoinApplication::initializeResult(int retval)
     returnValue = retval ? 0 : 1;
     if (retval) {
 #ifdef ENABLE_WALLET
-        PaymentServer::LoadRootCAs();
         paymentServer->setOptionsModel(optionsModel);
 #endif
 
@@ -473,19 +487,18 @@ void BitcoinApplication::initializeResult(int retval)
         window->setClientModel(clientModel);
 
 #ifdef ENABLE_WALLET
-        if (pwalletMain) {
-            walletModel = new WalletModel(pwalletMain, optionsModel);
+        // TODO: Expose secondary wallets
+        if (!vpwallets.empty()) {
+            walletModel = new WalletModel(vpwallets[0], optionsModel);
+            walletModel->setClientModel(clientModel);
 
             window->addWallet(JokeCoinGUI::DEFAULT_WALLET, walletModel);
             window->setCurrentWallet(JokeCoinGUI::DEFAULT_WALLET);
-
-            connect(walletModel, &WalletModel::coinsSent,
-                    paymentServer, &PaymentServer::fetchPaymentACK);
         }
 #endif
 
         // If -min option passed, start window minimized.
-        if (GetBoolArg("-min", false)) {
+        if (gArgs.GetBoolArg("-min", false)) {
             window->showMinimized();
         } else {
             window->show();
@@ -502,6 +515,7 @@ void BitcoinApplication::initializeResult(int retval)
         });
         QTimer::singleShot(100, paymentServer, &PaymentServer::uiReady);
 #endif
+        pollShutdownTimer->start(200);
     } else {
         quit(); // Exit main loop
     }
@@ -534,7 +548,7 @@ int main(int argc, char* argv[])
 
     /// 1. Parse command-line options. These take precedence over anything else.
     // Command-line options take precedence:
-    ParseParameters(argc, argv);
+    gArgs.ParseParameters(argc, argv);
 
 // Do not refer to data directory yet, this can be overridden by Intro::pickDataDirectory
 
@@ -557,6 +571,8 @@ int main(int argc, char* argv[])
     //   Need to pass name here as CAmount is a typedef (see http://qt-project.org/doc/qt-5/qmetatype.html#qRegisterMetaType)
     //   IMPORTANT if it is no longer a typedef use the normal variant above
     qRegisterMetaType<CAmount>("CAmount");
+    qRegisterMetaType<CAmount>("interfaces::WalletBalances");
+    qRegisterMetaType<size_t>("size_t");
 
     /// 3. Application identification
     // must be set before OptionsModel is initialized or translations are loaded,
@@ -570,12 +586,12 @@ int main(int argc, char* argv[])
     // Now that QSettings are accessible, initialize translations
     //initTranslations(qtTranslatorBase, qtTranslator, translatorBase, translator);
     app.updateTranslation();
-    uiInterface.Translate.connect(Translate);
+    translationInterface.Translate.connect(Translate);
 
     // Show help message immediately after parsing command-line options (for "-lang") and setting locale,
     // but before showing splash screen.
-    if (mapArgs.count("-?") || mapArgs.count("-help") || mapArgs.count("-version")) {
-        HelpMessageDialog help(NULL, mapArgs.count("-version"));
+    if (gArgs.IsArgSet("-?") || gArgs.IsArgSet("-h") || gArgs.IsArgSet("-help") || gArgs.IsArgSet("-version")) {
+        HelpMessageDialog help(nullptr, gArgs.IsArgSet("-version"));
         help.showOrPrint();
         return 1;
     }
@@ -585,15 +601,15 @@ int main(int argc, char* argv[])
     if (!Intro::pickDataDirectory())
         return 0;
 
-    /// 6. Determine availability of data directory and parse jokecoin.conf
+    /// 6. Determine availability of data and blocks directory and parse jokecoin.conf
     /// - Do not call GetDataDir(true) before this step finishes
     if (!fs::is_directory(GetDataDir(false))) {
         QMessageBox::critical(0, QObject::tr("JokeCoin Core"),
-            QObject::tr("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(mapArgs["-datadir"])));
+            QObject::tr("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(gArgs.GetArg("-datadir", ""))));
         return 1;
     }
     try {
-        ReadConfigFile(mapArgs, mapMultiArgs);
+        gArgs.ReadConfigFile(gArgs.GetArg("-conf", JokeCoin_CONF_FILENAME));
     } catch (const std::exception& e) {
         QMessageBox::critical(0, QObject::tr("JokeCoin Core"),
             QObject::tr("Error: Cannot parse configuration file: %1. Only use key=value syntax.").arg(e.what()));
@@ -607,8 +623,10 @@ int main(int argc, char* argv[])
     // - Needs to be done before createOptionsModel
 
     // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
-    if (!SelectParamsFromCommandLine()) {
-        QMessageBox::critical(0, QObject::tr("JokeCoin Core"), QObject::tr("Error: Invalid combination of -regtest and -testnet."));
+    try {
+        SelectParams(gArgs.GetChainName());
+    } catch(const std::exception& e) {
+        QMessageBox::critical(0, QObject::tr("JokeCoin Core"), QObject::tr("Error: %1").arg(e.what()));
         return 1;
     }
 #ifdef ENABLE_WALLET
@@ -666,7 +684,7 @@ int main(int argc, char* argv[])
     bool ret = true;
 #ifdef ENABLE_WALLET
     // Check if the wallet exists or need to be created
-    std::string strWalletFile = GetArg("-wallet", DEFAULT_WALLET_DAT);
+    std::string strWalletFile = gArgs.GetArg("-wallet", DEFAULT_WALLET_DAT);
     std::string strDataDir = GetDataDir().string();
     // Wallet file must be a plain filename without a directory
     fs::path wallet_file_path(strWalletFile);
@@ -685,24 +703,24 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (GetBoolArg("-splash", true) && !GetBoolArg("-min", false))
+    if (gArgs.GetBoolArg("-splash", true) && !gArgs.GetBoolArg("-min", false))
         app.createSplashScreen(networkStyle.data());
 
     try {
         app.createWindow(networkStyle.data());
         app.requestInitialize();
 #if defined(Q_OS_WIN)
-        WinShutdownMonitor::registerShutdownBlockReason(QObject::tr("JokeCoin Core didn't yet exit safely..."), (HWND)app.getMainWinId());
+        WinShutdownMonitor::registerShutdownBlockReason(QObject::tr("%1 didn't yet exit safely...").arg(QObject::tr(PACKAGE_NAME)), (HWND)app.getMainWinId());
 #endif
         app.exec();
         app.requestShutdown();
         app.exec();
     } catch (const std::exception& e) {
         PrintExceptionContinue(&e, "Runaway exception");
-        app.handleRunawayException(QString::fromStdString(strMiscWarning));
+        app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
     } catch (...) {
         PrintExceptionContinue(NULL, "Runaway exception");
-        app.handleRunawayException(QString::fromStdString(strMiscWarning));
+        app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
     }
     return app.getReturnValue();
 }

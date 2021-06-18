@@ -63,6 +63,8 @@ namespace BCLog {
         MNBUDGET    = (1 << 23),
         MNPING      = (1 << 24),
         LEGACYZC    = (1 << 25),
+        SAPLING     = (1 << 26),
+        SPORKS      = (1 << 27),
         ALL         = ~(uint32_t)0,
     };
 
@@ -96,7 +98,7 @@ namespace BCLog {
         std::atomic<bool> m_reopen_file{false};
 
         /** Send a string to the log output */
-        int LogPrintStr(const std::string &str);
+        void LogPrintStr(const std::string &str);
 
         /** Returns whether logs will be written to any output */
         bool Enabled() const { return m_print_to_console || m_print_to_file; }

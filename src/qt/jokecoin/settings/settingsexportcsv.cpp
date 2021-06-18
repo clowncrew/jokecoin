@@ -140,7 +140,7 @@ void SettingsExportCSV::exportTxes(const QString& filename)
         writer.addColumn(tr("Label"), 0, TransactionTableModel::LabelRole);
         writer.addColumn(tr("Address"), 0, TransactionTableModel::AddressRole);
         writer.addColumn(BitcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit()), 0, TransactionTableModel::FormattedAmountRole);
-        writer.addColumn(tr("ID"), 0, TransactionTableModel::TxIDRole);
+        writer.addColumn(tr("ID"), 0, TransactionTableModel::TxHashRole);
         fExport = writer.write();
     }
 

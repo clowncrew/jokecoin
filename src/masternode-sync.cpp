@@ -4,16 +4,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 // clang-format off
-#include "main.h"
 #include "activemasternode.h"
+#include "budget/budgetmanager.h"
+#include "evo/deterministicmns.h"
 #include "masternode-sync.h"
 #include "masternode-payments.h"
-#include "masternode-budget.h"
 #include "masternode.h"
 #include "masternodeman.h"
 #include "netmessagemaker.h"
 #include "spork.h"
-#include "util.h"
+#include "util/system.h"
 #include "addrman.h"
 // clang-format on
 
@@ -66,11 +66,9 @@ bool CMasternodeSync::IsBlockchainSynced()
 
     int64_t blockTime = 0;
     {
-        TRY_LOCK(cs_main, lockMain);
-        if (!lockMain) return false;
-        CBlockIndex *pindex = chainActive.Tip();
-        if (pindex == nullptr) return false;
-        blockTime = pindex->nTime;
+        TRY_LOCK(g_best_block_mutex, lock);
+        if (!lock) return false;
+        blockTime = g_best_block_time;
     }
 
     if (blockTime + 60 * 60 < lastProcess)
@@ -79,6 +77,11 @@ bool CMasternodeSync::IsBlockchainSynced()
     fBlockchainSynced = true;
 
     return true;
+}
+
+bool CMasternodeSync::IsBlockchainSyncedReadOnly() const
+{
+    return fBlockchainSynced;
 }
 
 void CMasternodeSync::Reset()
@@ -115,7 +118,7 @@ void CMasternodeSync::AddedMasternodeList(const uint256& hash)
         }
     } else {
         lastMasternodeList = GetTime();
-        mapSeenSyncMNB.insert(std::make_pair(hash, 1));
+        mapSeenSyncMNB.emplace(hash, 1);
     }
 }
 
@@ -128,23 +131,23 @@ void CMasternodeSync::AddedMasternodeWinner(const uint256& hash)
         }
     } else {
         lastMasternodeWinner = GetTime();
-        mapSeenSyncMNW.insert(std::make_pair(hash, 1));
+        mapSeenSyncMNW.emplace(hash, 1);
     }
 }
 
 void CMasternodeSync::AddedBudgetItem(const uint256& hash)
 {
-    if (budget.HaveSeenProposal(hash) ||
-            budget.HaveSeenProposalVote(hash) ||
-            budget.HaveSeenFinalizedBudget(hash) ||
-            budget.HaveSeenFinalizedBudgetVote(hash)) {
+    if (g_budgetman.HaveProposal(hash) ||
+            g_budgetman.HaveSeenProposalVote(hash) ||
+            g_budgetman.HaveFinalizedBudget(hash) ||
+            g_budgetman.HaveSeenFinalizedBudgetVote(hash)) {
         if (mapSeenSyncBudget[hash] < MASTERNODE_SYNC_THRESHOLD) {
             lastBudgetItem = GetTime();
             mapSeenSyncBudget[hash]++;
         }
     } else {
         lastBudgetItem = GetTime();
-        mapSeenSyncBudget.insert(std::make_pair(hash, 1));
+        mapSeenSyncBudget.emplace(hash, 1);
     }
 }
 
@@ -158,28 +161,37 @@ bool CMasternodeSync::IsBudgetFinEmpty()
     return sumBudgetItemFin == 0 && countBudgetItemFin > 0;
 }
 
-void CMasternodeSync::GetNextAsset()
+int CMasternodeSync::GetNextAsset(int currentAsset)
 {
-    switch (RequestedMasternodeAssets) {
-    case (MASTERNODE_SYNC_INITIAL):
-    case (MASTERNODE_SYNC_FAILED): // should never be used here actually, use Reset() instead
-        ClearFulfilledRequest();
-        RequestedMasternodeAssets = MASTERNODE_SYNC_SPORKS;
-        break;
-    case (MASTERNODE_SYNC_SPORKS):
-        RequestedMasternodeAssets = MASTERNODE_SYNC_LIST;
-        break;
-    case (MASTERNODE_SYNC_LIST):
-        RequestedMasternodeAssets = MASTERNODE_SYNC_MNW;
-        break;
-    case (MASTERNODE_SYNC_MNW):
-        RequestedMasternodeAssets = MASTERNODE_SYNC_BUDGET;
-        break;
-    case (MASTERNODE_SYNC_BUDGET):
-        LogPrintf("CMasternodeSync::GetNextAsset - Sync has finished\n");
-        RequestedMasternodeAssets = MASTERNODE_SYNC_FINISHED;
-        break;
+    if (currentAsset > MASTERNODE_SYNC_FINISHED) {
+        LogPrintf("%s - invalid asset %d\n", __func__, currentAsset);
+        return MASTERNODE_SYNC_FAILED;
     }
+    switch (currentAsset) {
+    case (MASTERNODE_SYNC_INITIAL):
+    case (MASTERNODE_SYNC_FAILED):
+        return MASTERNODE_SYNC_SPORKS;
+    case (MASTERNODE_SYNC_SPORKS):
+        return deterministicMNManager->LegacyMNObsolete() ? MASTERNODE_SYNC_BUDGET : MASTERNODE_SYNC_LIST;
+    case (MASTERNODE_SYNC_LIST):
+        return deterministicMNManager->LegacyMNObsolete() ? MASTERNODE_SYNC_BUDGET : MASTERNODE_SYNC_MNW;
+    case (MASTERNODE_SYNC_MNW):
+        return MASTERNODE_SYNC_BUDGET;
+    case (MASTERNODE_SYNC_BUDGET):
+    default:
+        return MASTERNODE_SYNC_FINISHED;
+    }
+}
+
+void CMasternodeSync::SwitchToNextAsset()
+{
+    const int nextAsset = GetNextAsset(RequestedMasternodeAssets);
+    if (nextAsset == MASTERNODE_SYNC_FINISHED) {
+        LogPrintf("%s - Sync has finished\n", __func__);
+    } else if (nextAsset == MASTERNODE_SYNC_FAILED) {
+        ClearFulfilledRequest();
+    }
+    RequestedMasternodeAssets = nextAsset;
     RequestedMasternodeAttempt = 0;
     nAssetSyncStarted = GetTime();
 }
@@ -263,7 +275,7 @@ void CMasternodeSync::Process()
         /*
             Resync if we lose all masternodes from sleep/wake or failure to sync originally
         */
-        if (mnodeman.CountEnabled() == 0) {
+        if (mnodeman.CountEnabled() == 0 && !isRegTestNet) {
             Reset();
         } else
             return;
@@ -278,38 +290,34 @@ void CMasternodeSync::Process()
 
     LogPrint(BCLog::MASTERNODE, "CMasternodeSync::Process() - tick %d RequestedMasternodeAssets %d\n", tick, RequestedMasternodeAssets);
 
-    if (RequestedMasternodeAssets == MASTERNODE_SYNC_INITIAL) GetNextAsset();
+    if (RequestedMasternodeAssets == MASTERNODE_SYNC_INITIAL) SwitchToNextAsset();
 
     // sporks synced but blockchain is not, wait until we're almost at a recent block to continue
-    if (!isRegTestNet && !IsBlockchainSynced() &&
+    if (!IsBlockchainSynced() &&
         RequestedMasternodeAssets > MASTERNODE_SYNC_SPORKS) return;
 
+    // Skip after legacy obsolete. !TODO: remove when transition to DMN is complete
+    bool fLegacyMnObsolete = deterministicMNManager->LegacyMNObsolete();
+
     CMasternodeSync* sync = this;
-    g_connman->ForEachNodeContinueIf([sync, isRegTestNet](CNode* pnode) {
-      return sync->SyncWithNode(pnode, isRegTestNet);
+
+    // New sync architecture, regtest only for now.
+    if (isRegTestNet) {
+        g_connman->ForEachNode([sync](CNode* pnode){
+            return sync->SyncRegtest(pnode);
+        });
+        return;
+    }
+
+    // Mainnet sync
+    g_connman->ForEachNodeContinueIf([sync, fLegacyMnObsolete](CNode* pnode){
+        return sync->SyncWithNode(pnode, fLegacyMnObsolete);
     });
 }
 
-bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
+bool CMasternodeSync::SyncWithNode(CNode* pnode, bool fLegacyMnObsolete)
 {
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
-    if (isRegTestNet) {
-        if (RequestedMasternodeAttempt <= 2) {
-            g_connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETSPORKS)); //get current network sporks
-        } else if (RequestedMasternodeAttempt < 4) {
-            mnodeman.DsegUpdate(pnode);
-        } else if (RequestedMasternodeAttempt < 6) {
-            int nMnCount = mnodeman.CountEnabled();
-
-            g_connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETMNWINNERS, nMnCount)); //sync payees
-            uint256 n;
-            g_connman->PushMessage(pnode, msgMaker.Make(NetMsgType::BUDGETVOTESYNC, n)); //sync masternode votes
-        } else {
-            RequestedMasternodeAssets = MASTERNODE_SYNC_FINISHED;
-        }
-        RequestedMasternodeAttempt++;
-        return false;
-    }
 
     //set to synced
     if (RequestedMasternodeAssets == MASTERNODE_SYNC_SPORKS) {
@@ -317,16 +325,21 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
         pnode->FulfilledRequest("getspork");
 
         g_connman->PushMessage(pnode, msgMaker.Make(NetMsgType::GETSPORKS)); //get current network sporks
-        if (RequestedMasternodeAttempt >= 2) GetNextAsset();
+        if (RequestedMasternodeAttempt >= 2) SwitchToNextAsset();
         RequestedMasternodeAttempt++;
         return false;
     }
 
     if (pnode->nVersion >= ActiveProtocol()) {
         if (RequestedMasternodeAssets == MASTERNODE_SYNC_LIST) {
+            if (fLegacyMnObsolete) {
+                SwitchToNextAsset();
+                return false;
+            }
+
             LogPrint(BCLog::MASTERNODE, "CMasternodeSync::Process() - lastMasternodeList %lld (GetTime() - MASTERNODE_SYNC_TIMEOUT) %lld\n", lastMasternodeList, GetTime() - MASTERNODE_SYNC_TIMEOUT);
             if (lastMasternodeList > 0 && lastMasternodeList < GetTime() - MASTERNODE_SYNC_TIMEOUT * 2 && RequestedMasternodeAttempt >= MASTERNODE_SYNC_THRESHOLD) { //hasn't received a new item in the last five seconds, so we'll move to the
-                GetNextAsset();
+                SwitchToNextAsset();
                 return false;
             }
 
@@ -343,7 +356,7 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
                     lastFailure = GetTime();
                     nCountFailures++;
                 } else {
-                    GetNextAsset();
+                    SwitchToNextAsset();
                 }
                 return false;
             }
@@ -356,8 +369,13 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
         }
 
         if (RequestedMasternodeAssets == MASTERNODE_SYNC_MNW) {
+            if (fLegacyMnObsolete) {
+                SwitchToNextAsset();
+                return false;
+            }
+
             if (lastMasternodeWinner > 0 && lastMasternodeWinner < GetTime() - MASTERNODE_SYNC_TIMEOUT * 2 && RequestedMasternodeAttempt >= MASTERNODE_SYNC_THRESHOLD) { //hasn't received a new item in the last five seconds, so we'll move to the
-                GetNextAsset();
+                SwitchToNextAsset();
                 return false;
             }
 
@@ -374,7 +392,7 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
                     lastFailure = GetTime();
                     nCountFailures++;
                 } else {
-                    GetNextAsset();
+                    SwitchToNextAsset();
                 }
                 return false;
             }
@@ -391,7 +409,7 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
             // We'll start rejecting votes if we accidentally get set as synced too soon
             if (lastBudgetItem > 0 && lastBudgetItem < GetTime() - MASTERNODE_SYNC_TIMEOUT * 2 && RequestedMasternodeAttempt >= MASTERNODE_SYNC_THRESHOLD) {
                 // Hasn't received a new item in the last five seconds, so we'll move to the
-                GetNextAsset();
+                SwitchToNextAsset();
 
                 // Try to activate our masternode if possible
                 activeMasternode.ManageStatus();
@@ -402,7 +420,7 @@ bool CMasternodeSync::SyncWithNode(CNode* pnode, bool isRegTestNet)
             if (lastBudgetItem == 0 &&
                 (RequestedMasternodeAttempt >= MASTERNODE_SYNC_THRESHOLD * 3 || GetTime() - nAssetSyncStarted > MASTERNODE_SYNC_TIMEOUT * 5)) {
                 // maybe there is no budgets at all, so just finish syncing
-                GetNextAsset();
+                SwitchToNextAsset();
                 activeMasternode.ManageStatus();
                 return false;
             }

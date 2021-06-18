@@ -181,7 +181,7 @@ void SettingsSignMessageWidgets::onSignMessageButtonSMClicked()
     }
 
     CKey key;
-    if (!pwalletMain->GetKey(*keyID, key)) {
+    if (!walletModel->getKey(*keyID, key)) {
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_SM->setText(tr("Private key for the entered address is not available."));
         return;
@@ -276,7 +276,7 @@ void SettingsSignMessageWidgets::onAddressesClicked()
                 height,
                 this
         );
-        menuContacts->setWalletModel(walletModel, AddressTableModel::Receive);
+        menuContacts->setWalletModel(walletModel, {AddressTableModel::Receive});
         connect(menuContacts, &ContactsDropdown::contactSelected, [this](QString address, QString label){
             setAddress_SM(address);
         });

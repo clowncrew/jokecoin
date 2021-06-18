@@ -46,7 +46,7 @@ public:
 };
 
 class MutableTransactionSignatureCreator : public TransactionSignatureCreator {
-    CTransaction tx;
+    const CTransaction tx;
 
 public:
     MutableTransactionSignatureCreator(const CKeyStore* keystoreIn, const CMutableTransaction* txToIn, unsigned int nInIn, const CAmount& amount, int nHashTypeIn) : TransactionSignatureCreator(keystoreIn, &tx, nInIn, amount, nHashTypeIn), tx(*txToIn) {}
@@ -68,7 +68,7 @@ struct SignatureData {
 };
 
 /** Produce a script signature using a generic signature creator. */
-bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKey, SignatureData& sigdata, bool fColdStake, ScriptError* serror = nullptr);
+bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKey, SignatureData& sigdata, SigVersion sigversion, bool fColdStake, ScriptError* serror = nullptr);
 
 /** Produce a script signature for a transaction. */
 bool SignSignature(const CKeyStore& keystore, const CScript& fromPubKey, CMutableTransaction& txTo, unsigned int nIn, const CAmount& amount, int nHashType, bool fColdStake = false);
@@ -85,6 +85,6 @@ void UpdateTransaction(CMutableTransaction& tx, unsigned int nIn, const Signatur
   * have all private keys. While this function does not need private keys, the passed
   * keystore is used to look up public keys and redeemscripts by hash.
   * Solvability is unrelated to whether we consider this output to be ours. */
-bool IsSolvable(const CKeyStore& store, const CScript& script);
+bool IsSolvable(const CKeyStore& store, const CScript& script, bool fColdStaking);
 
 #endif // BITCOIN_SCRIPT_SIGN_H

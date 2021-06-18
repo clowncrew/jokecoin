@@ -10,16 +10,16 @@
 
 #include "qt/guiutil.h"
 #include "clientmodel.h"
+#include "interfaces/handler.h"
 #include "optionsmodel.h"
 #include "networkstyle.h"
 #include "notificator.h"
 #include "guiinterface.h"
 #include "qt/jokecoin/qtutils.h"
 #include "qt/jokecoin/defaultdialog.h"
-#include "qt/jokecoin/settings/settingsfaqwidget.h"
 
 #include "init.h"
-#include "util.h"
+#include "util/system.h"
 
 #include <QApplication>
 #include <QColor>
@@ -59,12 +59,12 @@ JokeCoinGUI::JokeCoinGUI(const NetworkStyle* networkStyle, QWidget* parent) :
 
 #ifdef ENABLE_WALLET
     /* if compiled with wallet support, -disablewallet can still disable the wallet */
-    enableWallet = !GetBoolArg("-disablewallet", false);
+    enableWallet = !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
 #else
     enableWallet = false;
 #endif // ENABLE_WALLET
 
-    QString windowTitle = QString::fromStdString(GetArg("-windowtitle", ""));
+    QString windowTitle = QString::fromStdString(gArgs.GetArg("-windowtitle", ""));
     if (windowTitle.isEmpty()) {
         windowTitle = tr("JokeCoin Core") + " - ";
         windowTitle += ((enableWallet) ? tr("Wallet") : tr("Node"));
@@ -240,9 +240,9 @@ void JokeCoinGUI::handleRestart(QStringList args)
 }
 
 
-void JokeCoinGUI::setClientModel(ClientModel* clientModel)
+void JokeCoinGUI::setClientModel(ClientModel* _clientModel)
 {
-    this->clientModel = clientModel;
+    this->clientModel = _clientModel;
     if (this->clientModel) {
         // Create system tray menu (or setup the dock menu) that late to prevent users from calling actions,
         // while the client has not yet fully loaded
@@ -255,6 +255,9 @@ void JokeCoinGUI::setClientModel(ClientModel* clientModel)
 
         // Receive and report messages from client model
         connect(clientModel, &ClientModel::message, this, &JokeCoinGUI::message);
+        connect(clientModel, &ClientModel::alertsChanged, [this](const QString& _alertStr) {
+            message(tr("Alert!"), _alertStr, CClientUIInterface::MSG_WARNING);
+        });
         connect(topBar, &TopBar::walletSynced, dashboard, &DashboardWidget::walletSynced);
         connect(topBar, &TopBar::walletSynced, coldStakingWidget, &ColdStakingWidget::walletSynced);
 
@@ -334,6 +337,9 @@ void JokeCoinGUI::changeEvent(QEvent* e)
             if (!(wsevt->oldState() & Qt::WindowMinimized) && isMinimized()) {
                 QTimer::singleShot(0, this, &JokeCoinGUI::hide);
                 e->ignore();
+            } else if ((wsevt->oldState() & Qt::WindowMinimized) && !isMinimized()) {
+                QTimer::singleShot(0, this, &JokeCoinGUI::show);
+                e->ignore();
             }
         }
     }
@@ -346,10 +352,14 @@ void JokeCoinGUI::closeEvent(QCloseEvent* event)
     if (clientModel && clientModel->getOptionsModel()) {
         if (!clientModel->getOptionsModel()->getMinimizeOnClose()) {
             QApplication::quit();
+        } else {
+            QMainWindow::showMinimized();
+            event->ignore();
         }
     }
-#endif
+#else
     QMainWindow::closeEvent(event);
+#endif
 }
 
 
@@ -417,7 +427,7 @@ void JokeCoinGUI::message(const QString& title, const QString& message, unsigned
         // Append title to "JokeCoin - "
         if (!msgType.isEmpty())
             strTitle += " - " + msgType;
-        notificator->notify((Notificator::Class) nNotifyIcon, strTitle, message);
+        notificator->notify(static_cast<Notificator::Class>(nNotifyIcon), strTitle, message);
     }
 }
 
@@ -587,11 +597,11 @@ int JokeCoinGUI::getNavWidth()
     return this->navMenu->width();
 }
 
-void JokeCoinGUI::openFAQ(int section)
+void JokeCoinGUI::openFAQ(SettingsFaqWidget::Section section)
 {
     showHide(true);
     SettingsFaqWidget* dialog = new SettingsFaqWidget(this);
-    if (section > 0) dialog->setSection(section);
+    dialog->setSection(section);
     openDialogWithOpaqueBackgroundFullScreen(dialog, this);
     dialog->deleteLater();
 }
@@ -647,7 +657,7 @@ void JokeCoinGUI::incomingTransaction(const QString& date, int unit, const CAmou
     // Only send notifications when not disabled
     if (!bdisableSystemnotifications) {
         // On new transaction, make an info balloon
-        message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
+        message(amount < 0 ? tr("Sent transaction") : tr("Incoming transaction"),
             tr("Date: %1\n"
                "Amount: %2\n"
                "Type: %3\n"
@@ -657,8 +667,6 @@ void JokeCoinGUI::incomingTransaction(const QString& date, int unit, const CAmou
                 .arg(type)
                 .arg(address),
             CClientUIInterface::MSG_INFORMATION);
-
-        pwalletMain->fMultiSendNotify = false;
     }
 }
 
@@ -687,11 +695,11 @@ static bool ThreadSafeMessageBox(JokeCoinGUI* gui, const std::string& message, c
 void JokeCoinGUI::subscribeToCoreSignals()
 {
     // Connect signals to client
-    uiInterface.ThreadSafeMessageBox.connect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+    m_handler_message_box = interfaces::MakeHandler(uiInterface.ThreadSafeMessageBox.connect(std::bind(ThreadSafeMessageBox, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 }
 
 void JokeCoinGUI::unsubscribeFromCoreSignals()
 {
     // Disconnect signals from client
-    uiInterface.ThreadSafeMessageBox.disconnect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+    m_handler_message_box->disconnect();
 }

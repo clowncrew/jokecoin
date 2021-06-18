@@ -21,7 +21,7 @@
 #include "sync.h"
 #include "wallet/wallet.h"
 #include "askpassphrasedialog.h"
-#include "util.h"
+#include "util/system.h"
 #include "qt/jokecoin/optionbutton.h"
 #include <iostream>
 #include <fstream>
@@ -77,7 +77,7 @@ MasterNodesWidget::MasterNodesWidget(JokeCoinGUI *parent) :
             new MNHolder(isLightTheme()),
             this
     );
-    mnModel = new MNModel(this);
+    mnModel = new MNModel(this, walletModel);
 
     this->setStyleSheet(parent->styleSheet());
 
@@ -126,8 +126,8 @@ MasterNodesWidget::MasterNodesWidget(JokeCoinGUI *parent) :
         onStartAllClicked(REQUEST_START_MISSING);
     });
     connect(ui->listMn, &QListView::clicked, this, &MasterNodesWidget::onMNClicked);
-    connect(ui->btnAbout, &OptionButton::clicked, [this](){window->openFAQ(9);});
-    connect(ui->btnAboutController, &OptionButton::clicked, [this](){window->openFAQ(10);});
+    connect(ui->btnAbout, &OptionButton::clicked, [this](){window->openFAQ(SettingsFaqWidget::Section::MASTERNODE);});
+    connect(ui->btnAboutController, &OptionButton::clicked, [this](){window->openFAQ(SettingsFaqWidget::Section::MNCONTROLLER);});
 }
 
 void MasterNodesWidget::showEvent(QShowEvent *event)
@@ -217,7 +217,7 @@ void MasterNodesWidget::onEditMNClicked()
             }
         } else {
             inform(tr("Cannot start masternode, the collateral transaction has not been confirmed by the network yet.\n"
-                    "Please wait few more minutes (masternode collaterals require %1 confirmations).").arg(MASTERNODE_MIN_CONFIRMATIONS));
+                    "Please wait few more minutes (masternode collaterals require %1 confirmations).").arg(MasternodeCollateralMinConf()));
         }
     }
 }
@@ -244,7 +244,7 @@ void MasterNodesWidget::updateModelAndInform(QString informText)
     inform(informText);
 }
 
-bool MasterNodesWidget::startMN(CMasternodeConfig::CMasternodeEntry mne, std::string& strError)
+bool MasterNodesWidget::startMN(const CMasternodeConfig::CMasternodeEntry& mne, std::string& strError)
 {
     CMasternodeBroadcast mnb;
     if (!CMasternodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), strError, mnb))
@@ -452,7 +452,7 @@ void MasterNodesWidget::onDeleteMNClicked()
             bool convertOK = false;
             unsigned int indexOut = outIndex.toUInt(&convertOK);
             if (convertOK) {
-                COutPoint collateralOut(uint256(txId.toStdString()), indexOut);
+                COutPoint collateralOut(uint256S(txId.toStdString()), indexOut);
                 walletModel->unlockCoin(collateralOut);
             }
 

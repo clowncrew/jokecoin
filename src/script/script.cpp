@@ -8,6 +8,8 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
+#include <atomic>
+
 
 const char* GetOpName(opcodetype opcode)
 {
@@ -146,7 +148,8 @@ const char* GetOpName(opcodetype opcode)
     case OP_ZEROCOINPUBLICSPEND    : return "OP_ZEROCOINPUBLICSPEND";
 
     // cold staking
-    case OP_CHECKCOLDSTAKEVERIFY   : return "OP_CHECKCOLDSTAKEVERIFY";
+    case OP_CHECKCOLDSTAKEVERIFY_LOF   : return "OP_CHECKCOLDSTAKEVERIFY_LOF";
+    case OP_CHECKCOLDSTAKEVERIFY       : return "OP_CHECKCOLDSTAKEVERIFY";
 
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
@@ -172,7 +175,7 @@ unsigned int CScript::GetSigOpCount(bool fAccurate) const
             if (fAccurate && lastOpcode >= OP_1 && lastOpcode <= OP_16)
                 n += DecodeOP_N(lastOpcode);
             else
-                n += 20;
+                n += MAX_PUBKEYS_PER_MULTISIG;
         }
         lastOpcode = opcode;
     }
@@ -203,28 +206,15 @@ unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
     return subscript.GetSigOpCount(true);
 }
 
-bool CScript::IsNormalPaymentScript() const
+bool CScript::IsPayToPublicKeyHash() const
 {
-    if(this->size() != 25) return false;
-
-    std::string str;
-    opcodetype opcode;
-    const_iterator pc = begin();
-    int i = 0;
-    while (pc < end())
-    {
-        GetOp(pc, opcode);
-
-        if(     i == 0 && opcode != OP_DUP) return false;
-        else if(i == 1 && opcode != OP_HASH160) return false;
-        else if(i == 3 && opcode != OP_EQUALVERIFY) return false;
-        else if(i == 4 && opcode != OP_CHECKSIG) return false;
-        else if(i == 5) return false;
-
-        i++;
-    }
-
-    return true;
+    // Extra-fast test for pay-to-pubkey-hash CScripts:
+    return (this->size() == 25 &&
+            (*this)[0] == OP_DUP &&
+            (*this)[1] == OP_HASH160 &&
+            (*this)[2] == 0x14 &&
+            (*this)[23] == OP_EQUALVERIFY &&
+            (*this)[24] == OP_CHECKSIG);
 }
 
 bool CScript::IsPayToScriptHash() const
@@ -236,16 +226,30 @@ bool CScript::IsPayToScriptHash() const
             (*this)[22] == OP_EQUAL);
 }
 
+// contextual flag to guard the new rules for P2CS.
+// can be removed once v6 enforcement is activated.
+std::atomic<bool> g_IsV6Active{false};
+
+// P2CS script: either with or without last output free
 bool CScript::IsPayToColdStaking() const
 {
-    // Extra-fast test for pay-to-cold-staking CScripts:
     return (this->size() == 51 &&
+            (!g_IsV6Active || (*this)[0] == OP_DUP) &&
+            (!g_IsV6Active || (*this)[1] == OP_HASH160) &&
             (*this)[2] == OP_ROT &&
-            (*this)[4] == OP_CHECKCOLDSTAKEVERIFY &&
+            (!g_IsV6Active || (*this)[3] == OP_IF) &&
+            ((*this)[4] == OP_CHECKCOLDSTAKEVERIFY || (*this)[4] == OP_CHECKCOLDSTAKEVERIFY_LOF) &&
             (*this)[5] == 0x14 &&
+            (!g_IsV6Active || (*this)[26] == OP_ELSE) &&
             (*this)[27] == 0x14 &&
+            (!g_IsV6Active || (*this)[48] == OP_ENDIF) &&
             (*this)[49] == OP_EQUALVERIFY &&
             (*this)[50] == OP_CHECKSIG);
+}
+
+bool CScript::IsPayToColdStakingLOF() const
+{
+    return IsPayToColdStaking() && (*this)[4] == OP_CHECKCOLDSTAKEVERIFY_LOF;
 }
 
 bool CScript::StartsWithOpcode(const opcodetype opcode) const

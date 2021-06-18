@@ -5,11 +5,11 @@
 
 #include "wallet/test/wallet_test_fixture.h"
 
-#include "sapling/util.h"
-#include "sapling/address.hpp"
+#include "sapling/sapling_util.h"
+#include "sapling/address.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-#include "util.h"
+#include "util/system.h"
 #include <boost/test/unit_test.hpp>
 
 /**
@@ -60,15 +60,15 @@ BOOST_AUTO_TEST_CASE(StoreAndLoadSaplingZkeys) {
     HDSeed seed1(seed.GetPrivKey());
     auto m = libzcash::SaplingExtendedSpendingKey::Master(seed1);
     auto sk = m.Derive(0);
-    BOOST_CHECK(wallet.AddSaplingZKey(sk, sk.DefaultAddress()));
+    BOOST_CHECK(wallet.AddSaplingZKey(sk));
 
     // verify wallet did add it
-    auto fvk = sk.expsk.full_viewing_key();
-    BOOST_CHECK(wallet.HaveSaplingSpendingKey(fvk));
+    auto extfvk = sk.ToXFVK();
+    BOOST_CHECK(wallet.HaveSaplingSpendingKey(extfvk));
 
     // verify spending key stored correctly
     libzcash::SaplingExtendedSpendingKey keyOut;
-    wallet.GetSaplingSpendingKey(fvk, keyOut);
+    wallet.GetSaplingSpendingKey(extfvk, keyOut);
     BOOST_CHECK(sk == keyOut);
 
     // verify there are two keys
@@ -84,11 +84,18 @@ BOOST_AUTO_TEST_CASE(StoreAndLoadSaplingZkeys) {
     auto dpa = sk.ToXFVK().Address(diversifier).get().second;
 
     // verify wallet only has the default address
-    BOOST_CHECK(wallet.HaveSaplingIncomingViewingKey(sk.DefaultAddress()));
+    libzcash::SaplingPaymentAddress defaultAddr = sk.DefaultAddress();
+    BOOST_CHECK(wallet.HaveSaplingIncomingViewingKey(defaultAddr));
+
+    // Keep trying different diversifiers until we get a different address
+    while (dpa == defaultAddr && diversifier.begin()[0] < 255) {
+        diversifier.begin()[0] += 1;
+        dpa = sk.ToXFVK().Address(diversifier).get().second;
+    }
     BOOST_CHECK(!wallet.HaveSaplingIncomingViewingKey(dpa));
 
     // manually add a diversified address
-    auto ivk = fvk.in_viewing_key();
+    auto ivk = extfvk.fvk.in_viewing_key();
     BOOST_CHECK(wallet.AddSaplingIncomingViewingKeyW(ivk, dpa));
 
     // verify wallet did add it
@@ -109,7 +116,13 @@ BOOST_AUTO_TEST_CASE(StoreAndLoadSaplingZkeys) {
     BOOST_CHECK_EQUAL(wallet.GetSaplingScriptPubKeyMan()->mapSaplingZKeyMetadata[ivk2].nCreateTime, now);
 
     // Load a diversified address for the third key into the wallet
+    libzcash::SaplingPaymentAddress defaultAddr2 = sk2.DefaultAddress();
+    diversifier.begin()[0] = 10;
     auto dpa2 = sk2.ToXFVK().Address(diversifier).get().second;
+    while (dpa2 == defaultAddr2 && diversifier.begin()[0] < 255) {
+        diversifier.begin()[0] += 1;
+        dpa2 = sk2.ToXFVK().Address(diversifier).get().second;
+    }
     BOOST_CHECK(wallet.HaveSaplingIncomingViewingKey(sk2.DefaultAddress()));
     BOOST_CHECK(!wallet.HaveSaplingIncomingViewingKey(dpa2));
     BOOST_CHECK(wallet.LoadSaplingPaymentAddress(dpa2, ivk2));
@@ -152,11 +165,12 @@ BOOST_AUTO_TEST_CASE(WriteCryptedSaplingZkeyDirectToDb) {
 
     // Create a new wallet from the existing wallet path
     bool fFirstRun;
-    CWallet wallet2(pwalletMain->strWalletFile);
+    std::unique_ptr<CWalletDBWrapper> dbw(new CWalletDBWrapper(&bitdb, pwalletMain->GetDBHandle().GetName()));
+    CWallet wallet2(std::move(dbw));
     BOOST_CHECK_EQUAL(DB_LOAD_OK, wallet2.LoadWallet(fFirstRun));
 
     // Confirm it's not the same as the other wallet
-    BOOST_CHECK(pwalletMain != &wallet2);
+    BOOST_CHECK(pwalletMain.get() != &wallet2);
     BOOST_CHECK(wallet2.HasSaplingSPKM());
 
     // wallet should have two keys

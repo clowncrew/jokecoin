@@ -50,8 +50,12 @@ const struct NUInfo NetworkUpgradeInfo[Consensus::MAX_NETWORK_UPGRADES] = {
                 /*.strInfo =*/ "new message sigs - start block v7 - time protocol - zc spend v4",
         },
         {
-                /*.strName =*/ "v5_dummy",
-                /*.strInfo =*/ "Placeholder for future JokeCoin version 5.0 upgrade",
+                /*.strName =*/ "v5_shield",
+                /*.strInfo =*/ "Sapling Shield - start block v8 - start transaction v3",
+        },
+        {
+                /*.strName =*/ "v6_evo",
+                /*.strInfo =*/ "Deterministic Masternodes",
         },
         {
                 /*.strName =*/ "Test_dummy",

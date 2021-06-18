@@ -111,7 +111,7 @@ def keyhash_to_p2pkh(hash, main=False, isCold=False):
     if isCold:
         version = COLD_ADD_VERSION if main else TNET_COLD_ADD_VERSION
     else:
-        version = PK_ADD_VERSION if main else COLD_ADD_VERSION
+        version = PK_ADD_VERSION if main else TNET_PK_ADD_VERSION
     return byte_to_base58(hash, version)
 
 def scripthash_to_p2sh(hash, main = False):

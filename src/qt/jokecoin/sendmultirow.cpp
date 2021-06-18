@@ -9,10 +9,11 @@
 #include "addresstablemodel.h"
 #include "guiutil.h"
 #include "bitcoinunits.h"
+#include "qt/jokecoin/sendmemodialog.h"
 #include "qt/jokecoin/qtutils.h"
 
-SendMultiRow::SendMultiRow(PWidget *parent) :
-    PWidget(parent),
+SendMultiRow::SendMultiRow(JokeCoinGUI* _window, PWidget *parent) :
+    PWidget(_window, parent),
     ui(new Ui::SendMultiRow),
     iconNumber(new QPushButton())
 {
@@ -29,6 +30,9 @@ SendMultiRow::SendMultiRow(PWidget *parent) :
     /* Description */
     setCssProperty(ui->labelSubtitleDescription, "text-title");
     initCssEditLine(ui->lineEditDescription);
+
+    // future: when we get a designer, this should have another icon. A "memo" icon instead of a "+"
+    setCssProperty(ui->btnAddMemo, "btn-secundary-add");
 
     // Button menu
     setCssProperty(ui->btnMenu, "btn-menu");
@@ -56,6 +60,7 @@ SendMultiRow::SendMultiRow(PWidget *parent) :
     connect(ui->lineEditAddress, &QLineEdit::textChanged, [this](){addressChanged(ui->lineEditAddress->text());});
     connect(btnContact, &QAction::triggered, [this](){Q_EMIT onContactsClicked(this);});
     connect(ui->btnMenu, &QPushButton::clicked, [this](){Q_EMIT onMenuClicked(this);});
+    connect(ui->btnAddMemo, &QPushButton::clicked, this, &SendMultiRow::onMemoClicked);
 }
 
 void SendMultiRow::amountChanged(const QString& amount)
@@ -69,6 +74,34 @@ void SendMultiRow::amountChanged(const QString& amount)
         }
     }
     Q_EMIT onValueChanged();
+}
+
+void SendMultiRow::onMemoClicked()
+{
+    launchMemoDialog();
+}
+
+bool SendMultiRow::launchMemoDialog()
+{
+    window->showHide(true);
+    SendMemoDialog* dialog = new SendMemoDialog(window, walletModel);
+    dialog->setMemo(recipient.message);
+    bool ret = false;
+    if (openDialogWithOpaqueBackgroundY(dialog, window, 3, 5)) {
+        recipient.message = dialog->getMemo();
+        ui->btnAddMemo->setText(tr("Update memo"));
+        setCssProperty(ui->btnAddMemo, "btn-secondary-update", true);
+    } else if (dialog->getOperationResult()) {
+        bool isMemoEmpty = recipient.message.isEmpty();
+        // reset..
+        recipient.message.clear();
+        ui->btnAddMemo->setText(tr("Add encrypted memo"));
+        setCssProperty(ui->btnAddMemo, "btn-secundary-add", true);
+        if (!isMemoEmpty) inform(tr("Memo field reset"));
+        ret = false;
+    }
+    dialog->deleteLater();
+    return ret;
 }
 
 /**
@@ -85,7 +118,8 @@ bool SendMultiRow::addressChanged(const QString& str, bool fOnlyValidate)
 {
     if (!str.isEmpty()) {
         QString trimmedStr = str.trimmed();
-        const bool valid = walletModel->validateAddress(trimmedStr, this->onlyStakingAddressAccepted);
+        bool isShielded = false;
+        const bool valid = walletModel->validateAddress(trimmedStr, this->onlyStakingAddressAccepted, isShielded);
         if (!valid) {
             // check URI
             SendCoinsRecipient rcp;
@@ -115,6 +149,10 @@ bool SendMultiRow::addressChanged(const QString& str, bool fOnlyValidate)
         updateStyle(ui->lineEditAddress);
         return valid;
     }
+
+    setCssProperty(ui->lineEditAddress, "edit-primary-multi-book");
+    updateStyle(ui->lineEditAddress);
+
     return false;
 }
 
@@ -155,10 +193,6 @@ bool SendMultiRow::validate()
     // Check input validity
     bool retval = true;
 
-    // Skip checks for payment request
-    if (recipient.paymentRequest.IsInitialized())
-        return retval;
-
     // Check address validity, returns false if it's invalid
     QString address = ui->lineEditAddress->text();
     if (address.isEmpty()){
@@ -186,14 +220,11 @@ bool SendMultiRow::validate()
 
 SendCoinsRecipient SendMultiRow::getValue()
 {
-    // Payment request
-    if (recipient.paymentRequest.IsInitialized())
-        return recipient;
-
-    // Normal payment
     recipient.address = getAddress();
     recipient.label = ui->lineEditDescription->text();
-    recipient.amount = getAmountValue();;
+    recipient.amount = getAmountValue();
+    auto dest = Standard::DecodeDestination(recipient.address.toStdString());
+    recipient.isShieldedAddr = boost::get<libzcash::SaplingPaymentAddress>(&dest);
     return recipient;
 }
 
@@ -205,6 +236,11 @@ QString SendMultiRow::getAddress()
 CAmount SendMultiRow::getAmountValue()
 {
     return getAmountValue(ui->lineEditAmount->text());
+}
+
+QString SendMultiRow::getMemo()
+{
+    return recipient.message;
 }
 
 QRect SendMultiRow::getEditLineRect()
@@ -266,6 +302,7 @@ void SendMultiRow::setFocus()
 void SendMultiRow::setOnlyStakingAddressAccepted(bool onlyStakingAddress)
 {
     this->onlyStakingAddressAccepted = onlyStakingAddress;
+    ui->containerMemo->setVisible(!onlyStakingAddress);
 }
 
 

@@ -64,9 +64,66 @@ const CBlockIndex* CChain::FindFork(const CBlockIndex* pindex) const
     return pindex;
 }
 
+CBlockIndex* CChain::FindEarliestAtLeast(int64_t nTime) const
+{
+    std::vector<CBlockIndex*>::const_iterator lower = std::lower_bound(vChain.begin(), vChain.end(), nTime,
+        [](CBlockIndex* pBlock, const int64_t& time) -> bool { return pBlock->GetBlockTimeMax() < time; });
+    return (lower == vChain.end() ? nullptr : *lower);
+}
+
+/** Turn the lowest '1' bit in the binary representation of a number into a '0'. */
+int static inline InvertLowestOne(int n) { return n & (n - 1); }
+
+/** Compute what height to jump back to with the CBlockIndex::pskip pointer. */
+int static inline GetSkipHeight(int height)
+{
+    if (height < 2)
+        return 0;
+    // Determine which height to jump back to. Any number strictly lower than height is acceptable,
+    // but the following expression seems to perform well in simulations (max 110 steps to go back
+    // up to 2**18 blocks).
+    return (height & 1) ? InvertLowestOne(InvertLowestOne(height - 1)) + 1 : InvertLowestOne(height);
+}
+
+CBlockIndex* CBlockIndex::GetAncestor(int height)
+{
+    if (height > nHeight || height < 0)
+        return NULL;
+
+    CBlockIndex* pindexWalk = this;
+    int heightWalk = nHeight;
+    while (heightWalk > height) {
+        int heightSkip = GetSkipHeight(heightWalk);
+        int heightSkipPrev = GetSkipHeight(heightWalk - 1);
+        if (heightSkip == height ||
+            (heightSkip > height && !(heightSkipPrev < heightSkip - 2 && heightSkipPrev >= height))) {
+            // Only follow pskip if pprev->pskip isn't better than pskip->pprev.
+            pindexWalk = pindexWalk->pskip;
+            heightWalk = heightSkip;
+        } else {
+            assert(pindexWalk->pprev);
+            pindexWalk = pindexWalk->pprev;
+            heightWalk--;
+        }
+    }
+    return pindexWalk;
+}
+
+const CBlockIndex* CBlockIndex::GetAncestor(int height) const
+{
+    return const_cast<CBlockIndex*>(this)->GetAncestor(height);
+}
+
+void CBlockIndex::BuildSkip()
+{
+    if (pprev)
+        pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
+}
+
 CBlockIndex::CBlockIndex(const CBlock& block):
         nVersion{block.nVersion},
         hashMerkleRoot{block.hashMerkleRoot},
+        hashFinalSaplingRoot(block.hashFinalSaplingRoot),
         nTime{block.nTime},
         nBits{block.nBits},
         nNonce{block.nNonce}
@@ -85,9 +142,9 @@ std::string CBlockIndex::ToString() const
         GetBlockHash().ToString());
 }
 
-CDiskBlockPos CBlockIndex::GetBlockPos() const
+FlatFilePos CBlockIndex::GetBlockPos() const
 {
-    CDiskBlockPos ret;
+    FlatFilePos ret;
     if (nStatus & BLOCK_HAVE_DATA) {
         ret.nFile = nFile;
         ret.nPos = nDataPos;
@@ -95,9 +152,9 @@ CDiskBlockPos CBlockIndex::GetBlockPos() const
     return ret;
 }
 
-CDiskBlockPos CBlockIndex::GetUndoPos() const
+FlatFilePos CBlockIndex::GetUndoPos() const
 {
-    CDiskBlockPos ret;
+    FlatFilePos ret;
     if (nStatus & BLOCK_HAVE_UNDO) {
         ret.nFile = nFile;
         ret.nPos = nUndoPos;
@@ -115,6 +172,7 @@ CBlockHeader CBlockIndex::GetBlockHeader() const
     block.nBits = nBits;
     block.nNonce = nNonce;
     if (nVersion > 3 && nVersion < 7) block.nAccumulatorCheckpoint = nAccumulatorCheckpoint;
+    if (nVersion >= 8) block.hashFinalSaplingRoot = hashFinalSaplingRoot;
     return block;
 }
 
@@ -159,9 +217,6 @@ int64_t CBlockIndex::GetMedianTimePast() const
 unsigned int CBlockIndex::GetStakeEntropyBit() const
 {
     unsigned int nEntropyBit = ((GetBlockHash().GetCheapHash()) & 1);
-    if (GetBoolArg("-printstakemodifier", false))
-        LogPrintf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetBlockHash().ToString().c_str(), nEntropyBit);
-
     return nEntropyBit;
 }
 
@@ -239,6 +294,20 @@ uint256 CBlockIndex::GetStakeModifierV2() const
     return nStakeModifier;
 }
 
+void CBlockIndex::SetChainSaplingValue()
+{
+    // Sapling, update chain value
+    if (pprev) {
+        if (pprev->nChainSaplingValue) {
+            nChainSaplingValue = *pprev->nChainSaplingValue + nSaplingValue;
+        } else {
+            nChainSaplingValue = nullopt;
+        }
+    } else {
+        nChainSaplingValue = nSaplingValue;
+    }
+}
+
 //! Check whether this block index entry is valid up to the passed validity level.
 bool CBlockIndex::IsValid(enum BlockStatus nUpTo) const
 {
@@ -262,8 +331,24 @@ bool CBlockIndex::RaiseValidity(enum BlockStatus nUpTo)
     return false;
 }
 
-/*
- * CBlockIndex - Legacy Zerocoin
- */
+/** Find the last common ancestor two blocks have.
+ *  Both pa and pb must be non-NULL. */
+const CBlockIndex* LastCommonAncestor(const CBlockIndex* pa, const CBlockIndex* pb)
+{
+    if (pa->nHeight > pb->nHeight) {
+        pa = pa->GetAncestor(pb->nHeight);
+    } else if (pb->nHeight > pa->nHeight) {
+        pb = pb->GetAncestor(pa->nHeight);
+    }
+
+    while (pa != pb && pa && pb) {
+        pa = pa->pprev;
+        pb = pb->pprev;
+    }
+
+    // Eventually all chain branches meet at the genesis block.
+    assert(pa == pb);
+    return pa;
+}
 
 

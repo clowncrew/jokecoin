@@ -46,7 +46,7 @@
     </message>
     <message>
         <source>Enter a label for the address (e.g. Exchange)</source>
-        <translation>Unesite oznaku za adresu (npr. Burza)</translation>
+        <translation>Unesite oznaku za adresu (npr. Mjenjačnica)</translation>
     </message>
     <message>
         <source>SAVE</source>
@@ -63,7 +63,7 @@
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>Desni klik miša da bi ste uredili adresu ili oznaku</translation>
+        <translation>Pritisnite desni klik miša da biste uredili adresu ili oznaku</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -135,7 +135,7 @@
     </message>
     <message>
         <source>Copy &amp;Label</source>
-        <translation>Kopiraj &amp;oznaku</translation>
+        <translation>Kopiraj &amp;Oznaka</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
@@ -166,7 +166,7 @@
     </message>
     <message>
         <source>Bob Allen</source>
-        <translation>Bob Allen</translation>
+        <translation>Ivan Horvat</translation>
     </message>
     <message>
         <source>DN6i46dytMPVhV1JMGZFuQBh7BZZ6nNLox</source>
@@ -193,7 +193,7 @@
     </message>
     <message>
         <source>(no label)</source>
-        <translation>(bez oznake)</translation>
+        <translation>(nema oznake)</translation>
     </message>
 </context>
 <context>
@@ -229,6 +229,10 @@
     <message>
         <source>Add new contact</source>
         <translation>Dodaj novi kontakt</translation>
+    </message>
+    <message>
+        <source>Generate a new address to receive tokens.</source>
+        <translation>Stvori novu adresu za primanje novčića.</translation>
     </message>
     <message>
         <source>Invalid Contact Address</source>
@@ -307,7 +311,7 @@ Jeste li sigurni?</translation>
     </message>
     <message>
         <source>Encrypt wallet</source>
-        <translation>Šifriranje novčanika</translation>
+        <translation>Kriptiraj novčanik</translation>
     </message>
     <message>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
@@ -341,7 +345,7 @@ za staking</translation>
     </message>
     <message>
         <source>Confirm wallet encryption</source>
-        <translation>Potvrdi šifriranje novčanika</translation>
+        <translation>Potvrdi kriptiranje novčanika</translation>
     </message>
     <message>
         <source>WARNING</source>
@@ -349,7 +353,7 @@ za staking</translation>
     </message>
     <message>
         <source>If you encrypt your wallet and lose your passphrase, you will</source>
-        <translation>Ako napravite enkripciju Vašeg novčanika i izgubite lozinku, tada ćete</translation>
+        <translation>Ako kriptirate vaš novčanik i izgubite lozinku, tada ćete</translation>
     </message>
     <message>
         <source>ENCRYPT</source>
@@ -369,11 +373,15 @@ za staking</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
-        <translation>Novčanik šifriran</translation>
+        <translation>Novčanik kriptiran</translation>
     </message>
     <message>
         <source>WARNING:</source>
         <translation>UPOZORENJE:</translation>
+    </message>
+    <message>
+        <source>The caps lock key is on!</source>
+        <translation>CAPS LOCK tipka je uključena!</translation>
     </message>
     <message>
         <source>Passphrases do not match!</source>
@@ -385,7 +393,7 @@ za staking</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
-        <translation>Šifriranje novčanika neuspjelo</translation>
+        <translation>Kriptiranje novčanika neuspjelo</translation>
     </message>
     <message>
         <source>OK</source>
@@ -421,6 +429,25 @@ za staking</translation>
     </message>
 </context>
 <context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>Obrazac</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparentno</translation>
+    </message>
+    <message>
+        <source>0.00 jokecoin</source>
+        <translation>0.00 jokecoin</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Zaštićeno</translation>
+    </message>
+</context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -451,11 +478,11 @@ za staking</translation>
     </message>
     <message>
         <source>Not Staking</source>
-        <translation>Staking neaktivan</translation>
+        <translation>Neaktivan Staking</translation>
     </message>
     <message>
         <source>Own delegation</source>
-        <translation>Vlastita delegacija</translation>
+        <translation>Vlastito ovlaštenje</translation>
     </message>
 </context>
 <context>
@@ -616,52 +643,20 @@ za staking</translation>
         <translation>Ostatak kopiran</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>najviši</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>viši</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>visok</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>srednje visok</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>srednji</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>srednje niži</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>nizak</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>niži</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>najniži</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 zaključano)</translation>
     </message>
     <message>
-        <source>none</source>
-        <translation>bez</translation>
-    </message>
-    <message>
         <source>yes</source>
         <translation>da</translation>
+    </message>
+    <message>
+        <source>Can vary +/- %1 u%2 per input.</source>
+        <translation>Može varirati +/- %1 u%2 po unosu.</translation>
+    </message>
+    <message>
+        <source>change in %1</source>
+        <translation>promijeni u %1</translation>
     </message>
     <message>
         <source>delegated to %1 for cold staking</source>
@@ -688,28 +683,12 @@ za staking</translation>
         <translation>Može varirati +/- 1 bajt po unosu.</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Vjerojatnije je da će transakcije s većim prioritetom biti uključene u blok.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Ova oznaka postaje crvena, ako je prioritet manji od "srednji".</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Ova oznaka postaje crvena ako neki primatelj prima iznos manji od %1.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
-        <translation>(bez oznake)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>promijeni s %1 (%2)</translation>
+        <translation>(nema oznake)</translation>
     </message>
     <message>
         <source>(change)</source>
-        <translation>(promjena)</translation>
+        <translation>(ostatak)</translation>
     </message>
 </context>
 <context>
@@ -720,7 +699,7 @@ za staking</translation>
     </message>
     <message>
         <source>Owner address (optional, if empty a new address will be created)</source>
-        <translation>Adresa vlasnika (neobavezno, ako ostavite prazno nova adresa će biti napravljena)</translation>
+        <translation>Adresa vlasnika (neobavezno, ako ostavite prazno automatski će se stvoriti nova adresa)</translation>
     </message>
     <message>
         <source>Total Staking:</source>
@@ -736,11 +715,11 @@ za staking</translation>
     </message>
     <message>
         <source>Delegation</source>
-        <translation>Delegacija</translation>
+        <translation>Ovlaštenje</translation>
     </message>
     <message>
         <source>Delegate</source>
-        <translation>Delegiraj</translation>
+        <translation>Ovlasti</translation>
     </message>
     <message>
         <source>Clear All</source>
@@ -748,11 +727,11 @@ za staking</translation>
     </message>
     <message>
         <source>Delegated balance history</source>
-        <translation>Povijest delegiranih iznosa</translation>
+        <translation>Povijest ovlaštavanja novčića</translation>
     </message>
     <message>
         <source>No delegations yet</source>
-        <translation>Nema još delegacija</translation>
+        <translation>Nema još ovlaštenja</translation>
     </message>
     <message>
         <source>Total Staking: %1</source>
@@ -765,7 +744,7 @@ za staking</translation>
     <message>
         <source>You can delegate your JOKEs, letting a hot node (24/7 online node)
 stake on your behalf, while you keep the keys securely offline.</source>
-        <translation>Možete delegirati svoje JOKE-ove, dopuštajući hot node-u (24/7 online node) da stake-a za Vas, dok su Vaši ključevi offline na sigurnom.</translation>
+        <translation>Možete delegirati vaše novčiće, dozvoljavajući drugom novčaniku (koji radi 24/7) staking u vaše ime, dok su vaši novčići spremljeni na sigurnom.</translation>
     </message>
     <message>
         <source>Enter owner address</source>
@@ -800,12 +779,26 @@ stake on your behalf, while you keep the keys securely offline.</source>
         <translation>Upravljanje novčićima</translation>
     </message>
     <message>
+        <source>Select %1 outputs to delegate.</source>
+        <translation>Označi %1 izlaze za delegirati.</translation>
+    </message>
+    <message>
         <source>Create Cold Staking Address</source>
         <translation>Stvori Cold Staking adresu</translation>
     </message>
     <message>
+        <source>Creates an address to receive delegated coins
+and stake them on their owner's behalf.</source>
+        <translation>Stvara adresu za primanje ovlaštenih novčića
+i stake-a ih u korist vlasnika.</translation>
+    </message>
+    <message>
         <source>My Cold Staking Addresses</source>
         <translation>Moje Cold Staking adrese</translation>
+    </message>
+    <message>
+        <source>List your own cold staking addresses.</source>
+        <translation>Prikaži moje vlastite cold staking adrese.</translation>
     </message>
     <message>
         <source>Invalid entry</source>
@@ -813,7 +806,7 @@ stake on your behalf, while you keep the keys securely offline.</source>
     </message>
     <message>
         <source>Invalid entry, minimum delegable amount is </source>
-        <translation>Neispravan unos, minimalni delegirajući iznos je</translation>
+        <translation>Neispravan unos, minimalni iznos za delegiranje je</translation>
     </message>
     <message>
         <source>Owner address invalid</source>
@@ -880,11 +873,11 @@ Potrošnja ovih novčića morat će se obaviti iz novčanika ili uredjaja koji s
     </message>
     <message>
         <source>Blacklist</source>
-        <translation>Crna lista</translation>
+        <translation>Zabrani</translation>
     </message>
     <message>
         <source>Edit Label</source>
-        <translation>Uredi naziv</translation>
+        <translation>Uredi oznaku</translation>
     </message>
     <message>
         <source>Copy owner
@@ -898,7 +891,7 @@ vlasnika</translation>
     </message>
     <message>
         <source>Edit Cold Address Label</source>
-        <translation>Uredi naziv Cold adrese</translation>
+        <translation>Uredi oznaku Cold adrese</translation>
     </message>
     <message>
         <source>Whitelist failed, please check the logs</source>
@@ -910,11 +903,11 @@ vlasnika</translation>
     </message>
     <message>
         <source>Blacklist failed, please check the logs</source>
-        <translation>Dodavanje na popis zabranjenih neuspjelo, molimo provjerite zapisnik</translation>
+        <translation>Dodavanje na listu zabranjenih neuspjelo, molimo provjerite bilješke</translation>
     </message>
     <message>
         <source> blacklisted from staking</source>
-        <translation>na crnoj listi za staking</translation>
+        <translation>zabranjen za staking</translation>
     </message>
     <message>
         <source>Owner address copied</source>
@@ -926,7 +919,7 @@ vlasnika</translation>
     </message>
     <message>
         <source>Address label saved</source>
-        <translation>Naziv adrese spremljen</translation>
+        <translation>Oznaka adrese spremljena</translation>
     </message>
     <message>
         <source>Error storing address label</source>
@@ -959,6 +952,10 @@ vlasnika</translation>
         <translation>Statistika stakinga</translation>
     </message>
     <message>
+        <source>View your account's history</source>
+        <translation>Pogledajte vašu povijest računa</translation>
+    </message>
+    <message>
         <source>How to get JOKE</source>
         <translation>Kako dobiti JOKE</translation>
     </message>
@@ -984,7 +981,7 @@ vlasnika</translation>
     </message>
     <message>
         <source>Amount of JOKE and zJOKE staked.</source>
-        <translation>Iznos JOKE i zJOKE koji se stakea.</translation>
+        <translation>Iznos JOKE i zJOKE koji se stake-a.</translation>
     </message>
     <message>
         <source>Please wait until the wallet is fully synced to see your correct balance</source>
@@ -997,8 +994,8 @@ vlasnika</translation>
     <message>
         <source>You can verify the staking activity in the status bar at the top right of the wallet.
 It will start automatically as soon as the wallet has enough confirmations on any unspent balances, and the wallet has synced.</source>
-        <translation>Staking aktivnost možete provjeriti u traci statusa u gornjem desnom dijelu novčanika.
-Automatski će se pokrenuti čim novčanik dobije dovoljno potvrda o neiskorištenim ostacima i novčanik je sinkroniziran.</translation>
+        <translation>Možete provjeriti aktivnost stakinga u statusnoj traci u gornjem desnom kutu novčanika.
+Staking će se automatski pokrenuti čim novčanik dobije dovoljno potvrda o nepotrošenim sredstvima i kad se novčanik u potpunosti sinkronizira.</translation>
     </message>
     <message>
         <source>You have no staking rewards</source>
@@ -1288,6 +1285,10 @@ Automatski će se pokrenuti čim novčanik dobije dovoljno potvrda o neiskorišt
         <translation>Obrazac</translation>
     </message>
     <message>
+        <source>Collateral tx not found</source>
+        <translation>Transakcija zaloga nije pronađjena</translation>
+    </message>
+    <message>
         <source>Status: %1</source>
         <translation>Status: %1</translation>
     </message>
@@ -1409,6 +1410,10 @@ Automatski će se pokrenuti čim novčanik dobije dovoljno potvrda o neiskorišt
 %1</translation>
     </message>
     <message>
+        <source>walletModel not set</source>
+        <translation>novčanikModel nije postavljen</translation>
+    </message>
+    <message>
         <source>Invalid masternode.conf file</source>
         <translation>Nevažeća masternode.conf datoteka </translation>
     </message>
@@ -1442,8 +1447,8 @@ Automatski će se pokrenuti čim novčanik dobije dovoljno potvrda o neiskorišt
     <message>
         <source>Full nodes that incentivize node operators to perform the core consensus functions
 and vote on the treasury system receiving a periodic reward.</source>
-        <translation>Potpuni node-ovi koji potiču node operatore na izvršavanje glavnih funkcija konsenzusa
-i glasaju o sustavu riznice koji prima periodičnu nagradu.</translation>
+        <translation>Puni čvorovi koji potiču operatore čvorova da izvršavaju osnovne funkcije iz koncenzusa
+i glasaju o sustavu riznice dobivajući zauzvrat periodične nagrade.</translation>
     </message>
     <message>
         <source>Create Masternode Controller</source>
@@ -1522,6 +1527,10 @@ Molimo pričekajte nekoliko minuta (zalog za Masternode zahtjeva %1 potvrda).</t
         <translation>Podaci za Masternode kopirani u međjuspremnik.</translation>
     </message>
     <message>
+        <source>Not enough balance to create a masternode, 10,000 %1 required.</source>
+        <translation>Nemate dovoljno sredstava za stvoriti masternode, potrebno je 10,000 %1.</translation>
+    </message>
+    <message>
         <source>Remote Masternode Data</source>
         <translation>Podaci za udaljeni Masternode</translation>
     </message>
@@ -1530,8 +1539,16 @@ Molimo pričekajte nekoliko minuta (zalog za Masternode zahtjeva %1 potvrda).</t
         <translation>Što je Masternode?</translation>
     </message>
     <message>
+        <source>FAQ explaining what Masternodes are</source>
+        <translation>Najčešća pitanja objašnjavaju što su Masternodeovi</translation>
+    </message>
+    <message>
         <source>What is a Controller?</source>
         <translation>Što je Controller?</translation>
+    </message>
+    <message>
+        <source>FAQ explaining what is a Masternode Controller</source>
+        <translation>Najčešća pitanja objašnjavaju što je Masternode Upravljač</translation>
     </message>
     <message>
         <source>You are just about to export the required data to run a Masternode
@@ -1628,7 +1645,11 @@ Jeste li sigurni?</translation>
         <source>Masternode public key copied</source>
         <translation>Masternode javni ključ je kopiran</translation>
     </message>
-    </context>
+    <message>
+        <source>Collateral tx id copied</source>
+        <translation>ID transakcije zaloga kopiran</translation>
+    </message>
+</context>
 <context>
     <name>MyAddressRow</name>
     <message>
@@ -1645,25 +1666,25 @@ Jeste li sigurni?</translation>
     <message>
         <source>HOME
 </source>
-        <translation>GLAVNO
+        <translation>POČETNA
 </translation>
     </message>
     <message>
         <source>SEND
 </source>
-        <translation>POŠALJI
+        <translation>SLANJE
 </translation>
     </message>
     <message>
         <source>RECEIVE
 </source>
-        <translation>PRIMI
+        <translation>PRIMANJE
 </translation>
     </message>
     <message>
         <source>CONTACTS
 </source>
-        <translation>KONTAKTI
+        <translation>IMENIK
 </translation>
     </message>
     <message>
@@ -1877,7 +1898,7 @@ https://www.transifex.com/jokecoin-project/jokecoin-project-translations</transl
     </message>
     <message>
         <source>Stake split threshold:</source>
-        <translation>Prag razdvajanja Stake-a:</translation>
+        <translation>Prag dijeljenja Stake-a:</translation>
     </message>
     <message>
         <source>Connect to the JokeCoin network through a SOCKS5 proxy.</source>
@@ -2300,12 +2321,24 @@ Adresa: %4
         <translation>Delegator</translation>
     </message>
     <message>
+        <source>Delegable</source>
+        <translation>Moguće ovlastiti</translation>
+    </message>
+    <message>
         <source>Cold Staking</source>
         <translation>Cold Staking</translation>
     </message>
     <message>
         <source>Cold Staking Contact</source>
         <translation>Cold Staking kontakt</translation>
+    </message>
+    <message>
+        <source>Receiving Shielded</source>
+        <translation>Primanje zaštićenog</translation>
+    </message>
+    <message>
+        <source>Contact Shielded</source>
+        <translation>Kontakt zaštićen</translation>
     </message>
     <message>
         <source>Hidden</source>
@@ -2326,6 +2359,14 @@ Adresa: %4
     <message>
         <source>Staking Contacts</source>
         <translation>Staking kontakti</translation>
+    </message>
+    <message>
+        <source>Shielded Recv</source>
+        <translation>Zaštićeno primanje</translation>
+    </message>
+    <message>
+        <source>Shielded Contact</source>
+        <translation>Zaštićeni kontakt</translation>
     </message>
     <message>
         <source>Date desc</source>
@@ -2350,6 +2391,10 @@ Adresa: %4
     <message>
         <source>Sent</source>
         <translation>Poslano</translation>
+    </message>
+    <message>
+        <source>Shield</source>
+        <translation>Štiti</translation>
     </message>
     <message>
         <source>Mined</source>
@@ -2604,7 +2649,7 @@ Adresa: %4
     </message>
     <message>
         <source>Last Send</source>
-        <translation>Zadnje slanje</translation>
+        <translation>Posljednje slanje</translation>
     </message>
     <message>
         <source>Last Receive</source>
@@ -2668,7 +2713,7 @@ Adresa: %4
     </message>
     <message>
         <source>Custom Backups Threshold:</source>
-        <translation>Prag za prilagođene sigurnosne kopije:</translation>
+        <translation>Prag za prilagođjene sigurnosne kopije:</translation>
     </message>
     <message>
         <source>Salvage wallet</source>
@@ -2881,12 +2926,24 @@ Adresa: %4
         <translation>Obrazac</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>Nema adrese</translation>
+        <source>Scan the QR code or copy the address to receive JOKE</source>
+        <translation>Skeniraj QR kod ili kopiraj adresu da bi primio JOKE</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparentno</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Zaštićeno</translation>
+    </message>
+    <message>
+        <source>Accept transparent or shielded JOKE</source>
+        <translation>Prihvati transparentan ili zaštićeni JOKE</translation>
     </message>
     <message>
         <source>Add Label</source>
-        <translation>Dodaj naziv</translation>
+        <translation>Dodaj oznaku</translation>
     </message>
     <message>
         <source>Generate Address</source>
@@ -2913,8 +2970,14 @@ Adresa: %4
         <translation>Kreiraj zahtjev</translation>
     </message>
     <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>Nema dostupne adrese, pokušajte otključati novčanik</translation>
+        <source>Request payment with a fixed amount</source>
+        <translation>Zatraži plaćanje s fiksnim iznosom</translation>
+    </message>
+    <message>
+        <source>No available address
+try unlocking the wallet</source>
+        <translation>Nema raspoloživih adresa
+pokušajte otključati novčanik</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -2922,11 +2985,11 @@ Adresa: %4
     </message>
     <message>
         <source>Edit Label</source>
-        <translation>Uredi naziv</translation>
+        <translation>Uredi oznaku</translation>
     </message>
     <message>
         <source>Edit Address Label</source>
-        <translation>Uredi naziv adrese</translation>
+        <translation>Uredi oznaku adrese</translation>
     </message>
     <message>
         <source>Address label saved</source>
@@ -3011,6 +3074,10 @@ Adresa: %4
         <translation>JOKE</translation>
     </message>
     <message>
+        <source>Instead of sharing only a JokeCoin address, you can create a payment request, bundling up more information</source>
+        <translation>Umjesto da dijelite samo JokeCoin adresu, možete stvoriti zahtjev za plaćanjem, skupljajući više informacija</translation>
+    </message>
+    <message>
         <source>D7VFR83SQbiezrW72hjcWJtcfip5krte2Z </source>
         <translation>D7VFR83SQbiezrW72hjcWJtcfip5krte2Z</translation>
     </message>
@@ -3078,7 +3145,11 @@ Adresa: %4
         <source>Request for </source>
         <translation>Zahtjev za</translation>
     </message>
-    </context>
+    <message>
+        <source>Cold Staking Address Generated</source>
+        <translation>Cold Staking adresa stvorena</translation>
+    </message>
+</context>
 <context>
     <name>SendChangeAddressDialog</name>
     <message>
@@ -3109,7 +3180,11 @@ Adresa: %4
         <source>Invalid address</source>
         <translation>Nevažeća adresa</translation>
     </message>
-    </context>
+    <message>
+        <source>Cannot use cold staking addresses for change</source>
+        <translation>Ne možete koristiti cold staking adrese za ostatak</translation>
+    </message>
+</context>
 <context>
     <name>SendCustomFeeDialog</name>
     <message>
@@ -3127,6 +3202,10 @@ Adresa: %4
     <message>
         <source>0.00 KB</source>
         <translation>0.00 KB</translation>
+    </message>
+    <message>
+        <source>Customize the transaction fee, depending on the fee value your transaction might be included faster in the blockchain</source>
+        <translation>Prilagodite naknade za transakcije, ovisno o visini naknade vaše transakcije bi mogle biti brže odobrene na blockchainu</translation>
     </message>
     <message>
         <source>Custom</source>
@@ -3166,6 +3245,41 @@ Adresa: %4
     </message>
 </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dijaloški okvir</translation>
+    </message>
+    <message>
+        <source>Private message only visible for the recipient(s)</source>
+        <translation>Privatna poruka vidljiva samo primatelju(ima)</translation>
+    </message>
+    <message>
+        <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>SPREMI</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>RESETIRAJ</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>PONIŠTI</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -3182,6 +3296,18 @@ Adresa: %4
     <message>
         <source>Enter label</source>
         <translation>Unesite oznaku</translation>
+    </message>
+    <message>
+        <source>Update memo</source>
+        <translation>Promjeni poruku</translation>
+    </message>
+    <message>
+        <source>Add encrypted memo</source>
+        <translation>Dodaj zaštićenu poruku</translation>
+    </message>
+    <message>
+        <source>Memo field reset</source>
+        <translation>Resetiraj područje poruke</translation>
     </message>
 </context>
 <context>
@@ -3228,11 +3354,7 @@ Do you want to continue?</source>
     </message>
     <message>
         <source>Cannot send, wallet locked</source>
-        <translation>Ne može se poslati, novčanik je zaključan</translation>
-    </message>
-    <message>
-        <source>Cannot create transaction.</source>
-        <translation>Neuspjelo stvaranje transakcije.</translation>
+        <translation>Ne mogu poslati, novčanik je zaključan</translation>
     </message>
     <message>
         <source>WARNING:
@@ -3259,6 +3381,10 @@ Ovi novčići više neće biti cold-stakeani.</translation>
         <translation>Nevažeća adresa u URI-u</translation>
     </message>
     <message>
+        <source>Memo</source>
+        <translation>Pisana poruka</translation>
+    </message>
+    <message>
         <source>Custom Fee %1</source>
         <translation>Prilagođjena naknada %1</translation>
     </message>
@@ -3283,16 +3409,91 @@ Ovi novčići više neće biti cold-stakeani.</translation>
         <translation>Otvori URI</translation>
     </message>
     <message>
+        <source>Parse a payment request</source>
+        <translation>Analiziraj zahtjev za plaćanje</translation>
+    </message>
+    <message>
+        <source>Shield Coins</source>
+        <translation>Zaštiti novčiće</translation>
+    </message>
+    <message>
+        <source>Convert all transparent coins into shielded coins</source>
+        <translation>Pretvori sve transparentne novčiće u zaštićene novčiće</translation>
+    </message>
+    <message>
         <source>Unlocked remaining</source>
         <translation>Preostalo otključano</translation>
+    </message>
+    <message>
+        <source>Cannot send memo to address
+%1
+
+Encrypted memo messages are available only for shielded recipients.
+
+Do you wish to proceed without memo?
+</source>
+        <translation>Nije moguće poslati poruku na adresu
+%1
+
+Zaštićene poruke dostupne su samo za zaštićene adrese primatelja.
+
+Želite li nastaviti bez poruke?
+</translation>
+    </message>
+    <message>
+        <source>Cannot perform shielded operations, v5 upgrade isn't being enforced yet!</source>
+        <translation>Ne mogu se vršiti zaštićene transakcije, v5 nadogradnja još nije aktivirana!</translation>
+    </message>
+    <message>
+        <source>Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)</source>
+        <translation>Sapling Protokol se privremeno održava. Zaštićene transakcije su onemogućene (SPORK 20)</translation>
+    </message>
+    <message>
+        <source>On going process being executed, please wait until it's finished to create a new transaction</source>
+        <translation>U tijeku je postupak izvršavanja, pričekajte dok ne završi da biste stvorili novu transakciju</translation>
+    </message>
+    <message>
+        <source>Preparing transaction</source>
+        <translation>Pripremam transakciju</translation>
     </message>
     <message>
         <source>You don't have any %1 to select.</source>
         <translation>Nemate ni jedan %1 za odabrati.</translation>
     </message>
     <message>
+        <source>You are just about to anonymize all of your balance!
+Available %1
+With fee %2
+
+Meaning that you will be able to perform completely
+anonymous transactions
+
+Do you want to continue?
+</source>
+        <translation>Upravo ćete anonimizirati sve vaše novčiće!
+Raspoloživo %1
+Uz naknadu %2
+
+Što znači da ćete moći raditi potpuno anonimne transakcije
+
+Želite li nastaviti?
+</translation>
+    </message>
+    <message>
+        <source>Error generating address to shield JOKEs</source>
+        <translation>Pogreška pri generiranju adrese za zaštićene JOKE-ove</translation>
+    </message>
+    <message>
+        <source>You don't have any transparent JOKEs to shield.</source>
+        <translation>Nemate nikakvih transparentnih JOKE za zaštititi.</translation>
+    </message>
+    <message>
         <source>No contacts available, you can go to the contacts screen and add some there!</source>
         <translation>Nema dostupnih kontakata, možete otići na zaslon s kontaktima i tamo ih dodati!</translation>
+    </message>
+    <message>
+        <source>Add Memo</source>
+        <translation>Dodaj Poruku</translation>
     </message>
     <message>
         <source>Save contact</source>
@@ -3342,8 +3543,20 @@ Ovi novčići više neće biti cold-stakeani.</translation>
         <translation>Gdje</translation>
     </message>
     <message>
+        <source>Keep your wallet safe by doing regular backups and storing your backup file externally.
+This option creates a wallet.dat file that can be used to recover your whole balance (transactions and addresses) on another device</source>
+        <translation>Čuvajte svoj novčanik redovitim sigurnosnim kopijama i vanjskom pohranom sigurnosne kopije.
+Ova opcija stvara datoteku wallet.dat koja se može koristiti za oporavak cijelog stanja (transakcija i adresa) na drugom uređaju</translation>
+    </message>
+    <message>
         <source>Select folder...</source>
-        <translation>Odaberi folder...</translation>
+        <translation>Odaberi direktorij...</translation>
+    </message>
+    <message>
+        <source>This will decrypt the whole wallet data and encrypt it back with the new passphrase.
+Remember to write it down and store it safely, otherwise you might lose access to your funds</source>
+        <translation>Ovo će dekriptirati cijele podatke novčanika i kriptirati ih nazad s novom lozinkom.
+Ne zaboravite zapisati i sigurno pohraniti lozinku, jer u protivnom možete izgubiti pristup svojim sredstvima</translation>
     </message>
     <message>
         <source>Change Passphrase</source>
@@ -3367,7 +3580,7 @@ Ovi novčići više neće biti cold-stakeani.</translation>
     </message>
     <message>
         <source>Please select a folder to export the backup first.</source>
-        <translation>Molimo prvo odaberite mapu za izvoz sigurnosne kopije.</translation>
+        <translation>Molimo prvo odaberite direktorij za izvoz sigurnosne kopije.</translation>
     </message>
 </context>
 <context>
@@ -3385,6 +3598,12 @@ Ovi novčići više neće biti cold-stakeani.</translation>
         <translation>BIP38 alat</translation>
     </message>
     <message>
+        <source>Encrypt your JokeCoin addresses (key pair actually) using BIP38 encryption.
+Using this mechanism you can share your keys without middle-man risk, only need to store your passphrase safely</source>
+        <translation>Kriptirajte vašu JokeCoin adresu (odnosno par ključeva) koristeći BIP38 enkripciju.
+Korištenjem ovog mehanizma možete dijeliti vaše ključeve bez rizika posredništva, samo trebate sigurno pohraniti lozinku</translation>
+    </message>
+    <message>
         <source>Encrypt</source>
         <translation>Kriptiraj</translation>
     </message>
@@ -3398,7 +3617,7 @@ Ovi novčići više neće biti cold-stakeani.</translation>
     </message>
     <message>
         <source>Enter a encrypted key</source>
-        <translation>Unesite šifrirani ključ</translation>
+        <translation>Unesite kriptirani ključ</translation>
     </message>
     <message>
         <source>Passphrase</source>
@@ -3430,7 +3649,7 @@ Ovi novčići više neće biti cold-stakeani.</translation>
     </message>
     <message>
         <source>Encrypted Key</source>
-        <translation>Šifrirani ključ</translation>
+        <translation>Kriptirani ključ</translation>
     </message>
     <message>
         <source>ENCRYPT</source>
@@ -3645,7 +3864,7 @@ Provjerite jeste li instalirali unaprijed određjeni uređjivač teksta.</transl
     </message>
     <message>
         <source>Select folder...</source>
-        <translation>Odaberi folder...</translation>
+        <translation>Odaberi direktorij...</translation>
     </message>
     <message>
         <source>Export Address Book</source>
@@ -3669,7 +3888,7 @@ Provjerite jeste li instalirali unaprijed određjeni uređjivač teksta.</transl
     </message>
     <message>
         <source>Please select a folder to export the csv file first.</source>
-        <translation>Najprije odaberite mapu gdje biste izvezli CSV datoteku.</translation>
+        <translation>Najprije odaberite direktorij gdje želite izvesti CSV datoteku.</translation>
     </message>
     <message>
         <source>Confirmed</source>
@@ -3755,36 +3974,6 @@ Došlo je do greške prilikom spremanja popisa adresa u %1. Molimo pokušajte po
         <translation>Što je JokeCoin?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-JokeCoin je oblik digitalnog online novca koji koristi blockchain tehnologiju
-koji se lako može slati i primati globalno, trenutno, i gotovo bez naknade.
-JokeCoin uključuje vodeću sigurnost  i privatnost na tržištu
-i takođjer je prva PoS (Proof of Stake) kriptovaluta
-koja je implementirala ZeroCoin (zJOKE) i Zerocoin staking.
-&lt;/p&gt;&lt;p align="justify"&gt;
-JokeCoin koristi algoritam konsenzusa Proof of Stake (PoS),
-omogućujući svim vlasnicima JokeCoin-a sudjelovanje u zarađi blokovih nagrada
-dok osiguravaju mrežu full node novčanicima, kao i
-vodjenje Masternode-ova za stvaranje i glasanje o prijedlozima.
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-</translation>
-    </message>
-    <message>
         <source>2</source>
         <translation>2</translation>
     </message>
@@ -3821,6 +4010,10 @@ da biste vidjeli i mogli potrošiti sredstva na mreži.
         <translation>Kako stakeat JOKE?</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ol style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;"&gt;&lt;li align="justify" style=" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Make sure your wallet is completely synchronized and you are using the latest release. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;You must have a balance of JokeCoin with a minimum of 600 confirmations. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Your wallet must stay online and be unlocked for staking purposes. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Once all those steps are followed staking should be enabled. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;You can see the status of staking in the wallet by mousing over the package icon in the row on the top left of the wallet interface. There package will be lit up and will state &amp;quot;Staking Enabled&amp;quot; to indicate it is staking. Using the command line interface (jokecoin-cli); the command &lt;span style=" font-style:italic;"&gt;getstakingstatus&lt;/span&gt; will confirm that staking is active. &lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ol style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;"&gt;&lt;li align="justify" style=" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Provjerite da je vaš novčanik u potpunosti sinkroniziran i da koristite najnoviju verziju novčanika. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Morate imati iznos JokeCoin novčića s najmanje 600 potvrda na blockchainu. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Novčanik mora biti upaljen i otključan za staking. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Kada se prate svi ti koraci, staking bi trebao biti omogućen. &lt;/li&gt;&lt;li align="justify" style=" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;Status stakinga možete vidjeti prolaskom miša preko staking ikonice u gornjem desnom kutu. Staking ikona (kutija) će svijetliti i prikazivati &amp;quot;Staking omogućen&amp;quot; i naznačiti da se aktivno stake-a. Koristeći sučelje naredbene trake (jokecoin-cli); naredba &lt;span style=" font-style:italic;"&gt;getstakingstatus&lt;/span&gt; će potvrditi da je staking aktivan. &lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <source>4</source>
         <translation>4</translation>
     </message>
@@ -3835,6 +4028,59 @@ da biste vidjeli i mogli potrošiti sredstva na mreži.
     <message>
         <source>Where should I go if I need support?</source>
         <translation>Gdje se trebam javiti ako mi treba pomoć?</translation>
+    </message>
+    <message>
+        <source>
+                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+                           JokeCoin is a form of digital online money using blockchain technology
+                           that can be easily transferred globally, instantly, and with near
+                           zero fees.  JokeCoin incorporates market leading security &amp;
+                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
+                           to implement Sapling(SHIELD), a zk-SNARKs based privacy protocol.
+                           &lt;/p&gt;&lt;p align="justify"&gt;
+                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
+                           allowing all owners of JokeCoin to participate in earning block rewards
+                           while securing the network with full node wallets, as well as to
+                           run Masternodes to create and vote on proposals.
+                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                         </source>
+        <translation>
+
+&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+JokeCoin je oblik digitalnog online novca koji koristi blockchain tehnologiju
+koji se lako može slati i primati globalno, trenutno, i gotovo bez naknade.
+JokeCoin uključuje vodeću sigurnost  i privatnost na tržištu
+i takođjer je prva PoS (Proof of Stake) kriptovaluta
+koja je implementirala Sapling (SHIELD) i anoniman zk-SNARKs baziran protokol.
+&lt;/p&gt;&lt;p align="justify"&gt;
+JokeCoin koristi algoritam konsenzusa Proof of Stake (PoS),
+omogućujući svim vlasnicima JokeCoin-a sudjelovanje u zarađi blokovih nagrada
+dok osiguravaju mrežu full node novčanicima, kao i
+vodjenje Masternode-ova za stvaranje i glasanje o prijedlozima.
+&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+</translation>
+    </message>
+    <message>
+        <source>
+                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+                           We have support channels in most of our official chat groups, for example
+                           &lt;a style='color: #b088ff' href='https://discord.JokeCoin.org'&gt;
+                           #support in our Discord&lt;/a&gt;.
+                           If you prefer to submit a ticket, You can do so at
+                           &lt;a style='color: #b088ff' href='https://JokeCoin.freshdesk.com'&gt;
+                           our Freshdesk support site&lt;/a&gt;.
+                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                         </source>
+        <translation>
+&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
+Imamo korisničku podršku u većini naših službenih chat grupa, na primjer
+&lt;a style='color: #b088ff' href='https://discord.JokeCoin.org'&gt;
+#support na Discordu&lt;/a&gt;.
+Možete i podnijeti zahtjev, a to možete
+&lt;a style='color: #b088ff' href='https://JokeCoin.freshdesk.com'&gt;
+na našoj Freshdesk stranici za podršku&lt;/a&gt;.
+&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+</translation>
     </message>
     <message>
         <source>What is a Masternode?</source>
@@ -3939,12 +4185,28 @@ Zahtjevi:
         <translation>Najčešće postavljena pitanja</translation>
     </message>
     <message>
-        <source>You can read more here</source>
-        <translation>Možete pročitati o više ovdje</translation>
+        <source>Close FAQ</source>
+        <translation>Zatvori FAQ</translation>
     </message>
     <message>
-        <source>Exit</source>
-        <translation>Izlaz</translation>
+        <source>3) How do I stake JOKE?</source>
+        <translation>3) Kako stake-am JOKE?</translation>
+    </message>
+    <message>
+        <source>4) Where I should go if I need support?</source>
+        <translation>4) Gdje trebam ići ako mi treba podrška?</translation>
+    </message>
+    <message>
+        <source>5) What is a Masternode?</source>
+        <translation>5) Što je Masternode?</translation>
+    </message>
+    <message>
+        <source>6) What is a Masternode Controller?</source>
+        <translation>6) Što je Masternode upravljač?</translation>
+    </message>
+    <message>
+        <source>You can read more here</source>
+        <translation>Možete pročitati o više ovdje</translation>
     </message>
 </context>
 <context>
@@ -4057,7 +4319,7 @@ Zahtjevi:
         <source>Out:</source>
         <translation>Iz:</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -4293,7 +4555,7 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     </message>
     <message>
         <source>Sign/Verify Message</source>
-        <translation>Potpiši/verificiraj poruku</translation>
+        <translation>Potpiši/Ovjeri poruku</translation>
     </message>
     <message>
         <source>Sign</source>
@@ -4302,6 +4564,10 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     <message>
         <source>Verify</source>
         <translation>Ovjeri</translation>
+    </message>
+    <message>
+        <source>Write message here...</source>
+        <translation>Napišite poruku ovdje...</translation>
     </message>
     <message>
         <source>Select mode</source>
@@ -4341,7 +4607,7 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     </message>
     <message>
         <source>VERIFY</source>
-        <translation>VERIFICIRAJ</translation>
+        <translation>OVJERI</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
@@ -4435,6 +4701,14 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
         <translation>Prilagodite postavke čvorova mreže</translation>
     </message>
     <message>
+        <source>Connect through SOCKS5 proxy (default proxy)</source>
+        <translation>Spajanje putem proxy SOCKS5 (zadani proxy)</translation>
+    </message>
+    <message>
+        <source>Proxy IP</source>
+        <translation>Proxy IP</translation>
+    </message>
+    <message>
         <source>Port</source>
         <translation>Ulaz</translation>
     </message>
@@ -4478,6 +4752,10 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
         <translation>Nadogradite novčanik na najnoviji format pri pokretanju. (Napomena: ovo NIJE ažuriranje samog novčanika)</translation>
     </message>
     <message>
+        <source>The buttons below will restart the wallet with command-line options to repair this wallet, fix issues with corrupt blockchain files or missing/obsolete transactions</source>
+        <translation>Tipke ispod će ponovno pokrenuti novčanik s mogućnostima naredbene linije da popravi novčanik, riješi probleme s oštećenim datotekama blockchaina ili nedostajalim/zastarjelim transakcijama</translation>
+    </message>
+    <message>
         <source>Salvage wallet</source>
         <translation>Spasi novčanik</translation>
     </message>
@@ -4490,12 +4768,24 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
         <translation>Preskenirajte blockchain datoteku</translation>
     </message>
     <message>
+        <source>Rescan the blockchain for missing wallet transactions</source>
+        <translation>Ponovno skeniraj blockchain zbog transakcija koje nedostaju u novčaniku</translation>
+    </message>
+    <message>
         <source>Recover transactions 1</source>
         <translation>Oporavak transakcija 1</translation>
     </message>
     <message>
+        <source>Recover transactions from blockchain (keep-meta-data, e.g. account owner)</source>
+        <translation>Oporavi transakcije iz blockchaina (zadrži meta-podatke, npr. Vlasnika računa)</translation>
+    </message>
+    <message>
         <source>Recover transactions 2</source>
         <translation>Oporavak transakcija 2</translation>
+    </message>
+    <message>
+        <source>Recover transactions from blockchain (drop meta-data)</source>
+        <translation>Obnova transakcija iz blockchaina (izbaci meta-podatake)</translation>
     </message>
     <message>
         <source>Upgrade wallet format</source>
@@ -4504,6 +4794,18 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     <message>
         <source>Rebuild index</source>
         <translation>Obnovi indeks</translation>
+    </message>
+    <message>
+        <source>Rebuild blockchain index from current blk000???.dat files</source>
+        <translation>Ponovno izgradite blockchain indeks iz trenutnih blk000 ???.dat datoteka</translation>
+    </message>
+    <message>
+        <source>Delete local blockchain</source>
+        <translation>Izbriši lokalni blockchain</translation>
+    </message>
+    <message>
+        <source>Deletes all local blockchain folders so the wallet synchronizes from scratch</source>
+        <translation>Briše sve vaše lokalne blockchain direktorije pa se novčanik sinkronizira ispočetka</translation>
     </message>
     <message>
         <source>This will delete your local blockchain folders and the wallet will synchronize the complete Blockchain from scratch.&lt;br /&gt;&lt;br /&gt;</source>
@@ -4554,7 +4856,7 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     </message>
     <message>
         <source>Sign/Verify Message</source>
-        <translation>Potpiši/verificiraj poruku</translation>
+        <translation>Potpiši/Ovjeri Poruku</translation>
     </message>
     <message>
         <source>BIP38 Tool</source>
@@ -4615,6 +4917,10 @@ Označite jedan ili oba polja za potvrdu da biste poslali staking i/ili masterno
     <message>
         <source>Client will be shutdown, do you want to proceed?</source>
         <translation>Klijent će biti isključen, želite li nastaviti?</translation>
+    </message>
+    <message>
+        <source>Stake Split too low, it shall be either &gt;= %1 or equal to 0 (to disable stake splitting)</source>
+        <translation>Stake dijeljenje prenisko, treba biti ili &gt;= %1 ili jednak 0 (da onemogućite dijeljenje)</translation>
     </message>
     <message>
         <source>Restart required</source>
@@ -4735,6 +5041,14 @@ Jeste li sigurni?
         <translation>Obrazac</translation>
     </message>
     <message>
+        <source>transparent</source>
+        <translation>transparentno</translation>
+    </message>
+    <message>
+        <source>shielded</source>
+        <translation>zaštićeno</translation>
+    </message>
+    <message>
         <source>Available</source>
         <translation>Raspoloživo</translation>
     </message>
@@ -4765,6 +5079,10 @@ Jeste li sigurni?
     <message>
         <source>Staking not active</source>
         <translation>Staking nije aktivan</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n active connection(s)</source>
+        <translation><numerusform>%n aktivna veza</numerusform><numerusform>%n aktivnih veza</numerusform><numerusform>%n aktivnih veza</numerusform></translation>
     </message>
     <message>
         <source>Synchronized - Block: %1</source>
@@ -4843,6 +5161,10 @@ se nova sigurnosna kopija.
         <translation>Staking onemogućen</translation>
     </message>
     <message>
+        <source>Cold Staking Disabled</source>
+        <translation>Cold Staking onemogućen</translation>
+    </message>
+    <message>
         <source> %54 Synchronizing..</source>
         <translation>%54 Sinkoniziram..</translation>
     </message>
@@ -4865,6 +5187,25 @@ se nova sigurnosna kopija.
     <message>
         <source>Wallet Unlocked</source>
         <translation>Novčanik otključan</translation>
+    </message>
+    <message>
+        <source>Upgrade to Sapling Wallet</source>
+        <translation>Nadogradi na Sapling novčanik</translation>
+    </message>
+    <message>
+        <source>Upgrading to Sapling wallet will enable
+all of the privacy features!
+
+
+NOTE: after the upgrade, a new
+backup will be created.
+</source>
+        <translation>Nadogradnjom na Sapling novčanik omogućit će se sve značajke privatnosti!
+
+
+NAPOMENA: Nakon nadogradnje
+stvorit će se nova sigurnosna kopija.
+</translation>
     </message>
     <message>
         <source>Wallet Unencrypted</source>
@@ -4908,7 +5249,7 @@ se nova sigurnosna kopija.
     </message>
     <message>
         <source>Wallet upgraded successfully, but no backup created.</source>
-        <translation>Novčanik je uspješno nadograđen, ali nije izrađena sigurnosna kopija.</translation>
+        <translation>Novčanik je uspješno nadograđjen, ali nije stvorena sigurnosna kopija.</translation>
     </message>
     <message>
         <source>WARNING: remember to make a copy of your wallet file!</source>
@@ -4939,6 +5280,10 @@ se nova sigurnosna kopija.
     <message>
         <source>Address</source>
         <translation>Adresa</translation>
+    </message>
+    <message numerus="yes">
+        <source>Open for %n more block(s)</source>
+        <translation><numerusform>Otvoreno još %n blok</numerusform><numerusform>Otvoreno još %n blokova</numerusform><numerusform>Otvoreno još %n blokova</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -5009,12 +5354,52 @@ se nova sigurnosna kopija.
         <translation>Plaćanje sebi</translation>
     </message>
     <message>
+        <source>Shielding coins to yourself</source>
+        <translation>Štićenje novčića prema sebi</translation>
+    </message>
+    <message>
+        <source>Unshielding coins to yourself</source>
+        <translation>Odštićivanje novčića sebi</translation>
+    </message>
+    <message>
+        <source>Shielded change, transfer between own shielded addresses</source>
+        <translation>Zaštićeni ostatak, prijenos izmedju vlastitih zaštićenih adresa</translation>
+    </message>
+    <message>
         <source>Stake delegation spent by</source>
         <translation>Stake delegacija potrošena od strane</translation>
     </message>
     <message>
         <source>Mined</source>
         <translation>Stvoreno</translation>
+    </message>
+    <message>
+        <source>Converted %1 to z%1</source>
+        <translation>Pretvoreno %1 u z%1</translation>
+    </message>
+    <message>
+        <source>Spent z%1</source>
+        <translation>Potrošeni z%1</translation>
+    </message>
+    <message>
+        <source>Received %1 from z%1</source>
+        <translation>Primljeno %1 iz z%1</translation>
+    </message>
+    <message>
+        <source>Minted Change as z%1 from z%1 Spend</source>
+        <translation>Kovani ostatak kao z%1 iz z%1 Potrošnja</translation>
+    </message>
+    <message>
+        <source>Converted z%1 to %1</source>
+        <translation>Pretvoreno z%1 u %1</translation>
+    </message>
+    <message>
+        <source>Received with shielded</source>
+        <translation>Primljeno sa zaštićenom </translation>
+    </message>
+    <message>
+        <source>Shielded send to</source>
+        <translation>Zaštićeno slanje na</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -5128,6 +5513,10 @@ se nova sigurnosna kopija.
         <translation>Datum</translation>
     </message>
     <message>
+        <source>Memo</source>
+        <translation>Pisana poruka</translation>
+    </message>
+    <message>
         <source>TextLabel</source>
         <translation>TekstOznake</translation>
     </message>
@@ -5148,8 +5537,28 @@ se nova sigurnosna kopija.
         <translation>ŠALJI</translation>
     </message>
     <message>
+        <source>Note From Address</source>
+        <translation>Novčanica s adrese</translation>
+    </message>
+    <message>
+        <source>Index</source>
+        <translation>Indeks</translation>
+    </message>
+    <message>
         <source>ID copied</source>
         <translation>ID kopiran</translation>
+    </message>
+    <message>
+        <source>Memo copied</source>
+        <translation>Poruka kopirana</translation>
+    </message>
+    <message>
+        <source>Delegating to</source>
+        <translation>Delegiram prema</translation>
+    </message>
+    <message>
+        <source>Shielding to</source>
+        <translation>Zaštićujem prema</translation>
     </message>
     <message>
         <source>Unknown</source>
@@ -5161,6 +5570,14 @@ se nova sigurnosna kopija.
     <message>
         <source>Form</source>
         <translation>Obrazac</translation>
+    </message>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    <message>
+        <source>-0.000585 JOKE</source>
+        <translation>-0.000585 JOKE</translation>
     </message>
 </context>
 <context>
@@ -5175,7 +5592,13 @@ se nova sigurnosna kopija.
         <translation>Stvaranje transakcije neuspjelo!
 %1</translation>
     </message>
-    </context>
+    <message>
+        <source>The size of the transaction is too big.
+Select fewer inputs with coin control.</source>
+        <translation>Veličina transakcije je prevelika.
+Odaberite manje ulaza pomoću Upravljanja novčićima.</translation>
+    </message>
+</context>
 <context>
     <name>WelcomeContentWidget</name>
     <message>
@@ -5226,7 +5649,7 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;As our manifesto says: Privacy is a non-negotiable basic human right; it grants users the freedom to share their data whenever and with whomever they want - JokeCoin believes in self sovereignty.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kao što kaže naš manifest: Privatnost je temeljno ljudsko pravo o kojemu se ne pregovara; korisnicima daje slobodu dijeljenja svojih podataka kad god i s kim god žele - JokeCoin vjeruje u suverenitet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kao što naš manifest kaže: Privatnost je osnovno ljudsko pravo o kojemu se ne pregovara; korisnicima daje slobodu dijeljenja svojih podataka kad god i s kim god žele - JokeCoin vjeruje u suverenitet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>The masternode network is JokeCoin's second layer network on top of the blockchain that enables our DAO to provide decentralized governance and a treasury.</source>
@@ -5247,10 +5670,6 @@ JokeCoin temeljni novčanik</translation>
 </context>
 <context>
     <name>jokecoin-core</name>
-    <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = zadržite metapodatke tx, npr. Vlasnika računa i podatke o zahtjevu za plaćanje, 2 = odbaci meta podataka tx)</translation>
-    </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>Dopusti JSON-RPC veze od određenog izvora. Vrijedi za jednu IP (npr. 1.2.3.4), mrežu / mrežnu masku (npr. 1.2.3.4/255.255.255.0) ili mrežu / CIDR (npr. 1.2.3.4/24). Ova se opcija može odrediti više puta</translation>
@@ -5288,10 +5707,6 @@ JokeCoin temeljni novčanik</translation>
         <translation>Izbrišite sve transakcije lisnice i obnavljajte one dijelove blok-lanca kroz -rescan pri pokretanju</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Izbriši sve zerocoin utroške i minteve koji su zabilježeni na blockchain database i reindexiraj ih (0-1, default: %u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Distribuirano pod MIT softverskom licencom, pogledajte priloženu datoteku COPYING ili &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
@@ -5310,10 +5725,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>Pogreška: Slušanje dolaznih veza nije uspjelo (slušajte pogrešku vraćenu pogrešku %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Pogreška: transakcija je veća od maksimalne dozvoljene veličine transakcije!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -5346,10 +5757,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>U ovom načinu rada -genproclimit kontrolira koliko blokova se generiraju odmah.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>Nedovoljno ili nedovoljno potvrđena sredstva, možda ćete morati pričekati nekoliko minuta i pokušati ponovno.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5412,10 +5819,6 @@ JokeCoin temeljni novčanik</translation>
         <translation>Postavite broj niti za generiranje novčića ako je omogućeno (-1 = sve jezgre, zadana vrijednost: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Prikaži potvrde N za uspješno zaključanu transakciju (0-9999, zadano: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Podržite filtriranje blokova i transakciju s filtrima za cvjetanje (zadano: %u)</translation>
     </message>
@@ -5466,10 +5869,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>Popis dopuštenih suradnika ne može biti zabranjen DoS i njihova se transakcija uvijek prenosi, čak i ako su već u spremištu,  na primjer. za pristupnika</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Morate odrediti masternodeprivkey u konfiguraciji. Za pomoć pogledajte dokumentaciju.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5542,7 +5941,7 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>Delete blockchain folders and resync from scratch</source>
-        <translation>Brisanje blockchain mape i RESYNC od nule</translation>
+        <translation>Izbriši blockchain direktorije i ponovno sinkroniziraj ispočetka</translation>
     </message>
     <message>
         <source>Disable OS notifications for incoming transactions (default: %u)</source>
@@ -5565,24 +5964,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Završeno učitavanje</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Omogući objavu hasha transakcije (zaključano putem usluge SwiftX) u &lt;address&gt;</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Omogući objavljivanje neobrađjene transakcije (zaključano putem usluge SwiftX) u &lt;address&gt;</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>Omogućite klijentu da djeluje kao masternode (0-1, zadano: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Pogreška prilikom inicijalizacije baze podataka blokova</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>Pogreška pri pokretanju okruženja baze podataka novčanika %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5595,10 +5982,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Pogreška pri čitanju iz baze podataka, zatvaranje.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>Greška u zapisivanju zerocoinDB na disk</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5615,10 +5998,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>Pogreška: neodržani argument - tor pronađen, koristite -onion.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Pogreška: Novčanik zaključan, ne može stvoriti transakciju!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5669,10 +6048,6 @@ JokeCoin temeljni novčanik</translation>
         <translation>Provjera ispravnosti inicijalizacije nije uspjela. JokeCoin Core se zatvara.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>Nedovoljna sredstva</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Nedovoljna sredstva.</translation>
     </message>
@@ -5685,48 +6060,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Nevažeći iznos za -paytxfee =&lt;amount&gt;: '%s' (mora biti barem %s)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>Neispravan iznos</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Nevažeći masternodeprivkey. Molimo pogledajte dokumentaciju.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Nevažeća mrežna maska specificirana u kategoriji -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>Preračunavanje JOKE-a u optjecaju...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>Reindeksiranje zerocoin databaze...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>Reindeksiranje zerocoin neuspjelo</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>Odabrana vrijednost novčića je manja od količine za plačanje</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>SwiftX opcije:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>Ovo je priprema za testiranje prije puštanja - upotrebljavajte na vlastiti rizik - nemojte ga koristiti za staking ili trgovinske aplikacije!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>Onemogući sve specifične funkcije JokeCoin (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, zadano: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Omogućite SwiftX, prikažite potvrde za zaključane transakcije (bool, zadano: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5737,20 +6076,8 @@ JokeCoin temeljni novčanik</translation>
         <translation>Izvrši naredbu kada se najbolji blok promjeni i kada njegova veličina premaši (%s u cmd je zamijenjen s blok hashom, %d s veličinom bloka)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Nije pronađen set novčića koji se drže s manje od maksimuma potrošnje</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>U rijetkim slučajevima, potrošnja s 7 kovanica premašuje našu maksimalnu dopuštenu veličinu transakcije, pokušajte ponovo pokušati potrošiti 6 ili manje kovanica</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Navedite put prilagođenog sigurnosnog kopiranja da biste dodali kopiju sigurnosne kopije lisnice. Ako je postavljeno kao dir, svaka sigurnosna kopija generira vremensku datoteku. Ako je postavljen kao datoteka, prepisat će na tu datoteku svaku kopiju.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftX zahtijeva ulaze s najmanje 6 potvrda, možda ćete morati pričekati nekoliko minuta i pokušati ponovo.</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5759,10 +6086,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>Pokušaj prisiljavanja blokiranja korupcije na oporavak</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>Ne mogu se stvoriti unosi javne potrošnje</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -5797,28 +6120,82 @@ JokeCoin temeljni novčanik</translation>
         <translation>Pogreška: Došlo je do kobne interne pogreške, pogledajte detalje o debug.logu</translation>
     </message>
     <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Pogreška: Nema valjanog utxo!</translation>
+        <source>(1 = keep tx meta data e.g. payment request information, 2 = drop tx meta data)</source>
+        <translation>(1 = zadrži meta podatke transakcije, npr. podatke o zahtjevu za plaćanje, 2 = odbaci meta podatke transakcija)</translation>
     </message>
     <message>
-        <source>Failed to parse public spend</source>
-        <translation>Failed to parse public spend</translation>
+        <source>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</source>
+        <translation>Prihvatite veze izvana (zadano: %u ako nema -proxy ili -connect/-noconnect)</translation>
     </message>
     <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>Odabir Zerocoina nije uspjelo</translation>
+        <source>Cannot find the Sapling parameters in the following directory:
+%s
+Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</source>
+        <translation>Ne mogu pronaći Sapling parametre u sljedećem direktoriju:
+%s
+Pokrenite 'sapling-fetch-params' ili '.util/fetch-params.sh' te ponovno pokrenite novčanik.</translation>
     </message>
     <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>Neuspjelo brisanje zerocoinDB</translation>
+        <source>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</source>
+        <translation>Nije moguće nadograditi na novčanik Sapling (već ima Sapling podršku). Verzija: %d</translation>
     </message>
     <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>Nije uspio zapisi serijskog broja novčića u novčanik</translation>
+        <source>Disable all JokeCoin specific functionality (Masternodes, Budgeting) (0-1, default: %u)</source>
+        <translation>Onemogućite sve JokeCoin specifične funkcionalnosti (Masternode, proračun) (0-1, zadano: %u)</translation>
+    </message>
+    <message>
+        <source>This file contains all of your private keys in plain text. DO NOT send this file to anyone!</source>
+        <translation>Ova datoteka sadrži sve vaše privatne ključeve u čistom tekstu. NEMOJTE slati ovu datoteku nikome!</translation>
+    </message>
+    <message>
+        <source>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
+        <translation>Upozorenje: pogreška u čitanju %s! Svi se ključevi pravilno čitaju, ali podaci o transakcijama ili unosi u imenik možda nedostaju ili su netočni.</translation>
+    </message>
+    <message>
+        <source>A fatal internal error occurred, see debug.log for details</source>
+        <translation>Dogodila se fatalna interna pogreška, pogledajte debug.log datoteku za detalje</translation>
+    </message>
+    <message>
+        <source>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</source>
+        <translation>Dopusti DNS traženje za -addnode, -seednode i -connect (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Attempt to recover private keys from a corrupt wallet file</source>
+        <translation>Pokušaj oporavka privatnih ključeva iz oštećene datoteke novčanika</translation>
+    </message>
+    <message>
+        <source>Calculating money supply...</source>
+        <translation>Računam broj novčića u optjecaju...</translation>
+    </message>
+    <message>
+        <source>Cannot set -bind or -whitebind together with -listen=0</source>
+        <translation>Ne može se postaviti -bind ili -whitebind zajedno s -listen=0</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet corrupted</source>
+        <translation>Greška pri učitavanju %s: Novčanik oštećen</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet requires newer version of JokeCoin Core</source>
+        <translation>Pogreška pri učitavanju %s: Novčanik zahtijeva noviju verziju JokeCoin Core</translation>
+    </message>
+    <message>
+        <source>Error loading %s
+</source>
+        <translation>Greška pri učitavanju %s
+</translation>
+    </message>
+    <message>
+        <source>Error upgrading chainstate database</source>
+        <translation>Greška pri nadogradnji chainstate baze podataka</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
         <translation>Nevažeći iznos za -%s=&lt;amount&gt;: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid masternodeprivkey. Please see the documentation.</source>
+        <translation>Nevažeći masternodeprivkey. Molimo pogledajte dokumentaciju.</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
@@ -5842,7 +6219,7 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>Loading banlist...</source>
-        <translation>Učitavanje liste zabranjenih...</translation>
+        <translation>Učitavanje zabranjene liste...</translation>
     </message>
     <message>
         <source>Loading block index...</source>
@@ -5862,7 +6239,7 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>Loading sporks...</source>
-        <translation>Učitavanje sporkova...</translation>
+        <translation>Učitavanje sigurnosnih ključeva...</translation>
     </message>
     <message>
         <source>Loading wallet...</source>
@@ -5901,8 +6278,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Maksimalni pošiljatelj za slanje po vezama, &lt;n&gt;* 1000 bajta (zadano: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>Novčić nije ušao u blockchain</translation>
+        <source>Mining/Staking options:</source>
+        <translation>Mogućnosti stakinga:</translation>
+    </message>
+    <message>
+        <source>Specify zk params directory (default: %s)</source>
+        <translation>Specificiraj zk params direktorij (zadano: %s)</translation>
     </message>
     <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
@@ -5945,16 +6326,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Druga računala se isključuju zbog vremenskih razlika.</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>Nije moguće pronaći transakciju koja sadrži novčić %s</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>Nije moguće pronaći transakciju koja sadrži novčić, txHash: %s</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>Koristi filter za block spam (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Wallet debugging/testing options:</source>
+        <translation>Mogućnosti otklanjanja pogrešaka/testiranja novčanika:</translation>
     </message>
     <message>
         <source>isValid(): Invalid -proxy address or hostname: '%s'</source>
@@ -5965,42 +6342,134 @@ JokeCoin temeljni novčanik</translation>
         <translation>Priprema za resinkronizaciju...</translation>
     </message>
     <message>
+        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
+        <translation>Povežite se samo s navedenim čvorovima; -noconnect ili -connect=0 za onemogućavanje automatskih veza</translation>
+    </message>
+    <message>
+        <source>Do not accept transactions if any ancestor would have &lt;n&gt; or more in-mempool descendants (default: %u)</source>
+        <translation>Ne prihvaćajte transakcije ako bi bilo koji predak imao &lt;n&gt; ili više poticaja u mempoolu (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Do not accept transactions if any ancestor would have more than &lt;n&gt; kilobytes of in-mempool descendants (default: %u).</source>
+        <translation>Ne prihvaćajte transakcije ako bi bilo koji predak imao više od &lt;n&gt; kilobajta od potomaka u mempoolu (zadano: %u).</translation>
+    </message>
+    <message>
+        <source>Do not accept transactions if number of in-mempool ancestors is &lt;n&gt; or more (default: %u)</source>
+        <translation>Ne prihvaćajte transakcije ako je broj predaka u mempoolu &lt;n&gt; ili više (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Do not accept transactions whose size with all in-mempool ancestors exceeds &lt;n&gt; kilobytes (default: %u)</source>
+        <translation>Ne prihvaćajte transakcije čija veličina sa svim in-mempool precima premašuje &lt;n&gt; kilobajta (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Do not keep transactions in the mempool longer than &lt;n&gt; hours (default: %u)</source>
+        <translation>Ne drži transakcije u spremištu memorije dulje od &lt;n&gt; sati (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/Kb) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
+        <translation>Naknade (u %s/Kb) manje od ove smatraju se nultom naknadom za prenošenje, rudarenje i stvaranje transakcija (zadano: %s)</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Naknade (u %s/Kb) manje od ovoga će se smatrati kao da nema naknade za stvaranje transakcije (default: %s)</translation>
+    </message>
+    <message>
+        <source>Minimum positive amount (in JOKE) allowed by GUI and RPC for the stake split threshold (default: %s)</source>
+        <translation>Najmanji dozvoljeni iznos (u JOKE) kroz GUI RPC za prag dijeljenja stake-a (default: %s)</translation>
+    </message>
+    <message>
         <source>Please check that your computer's date and time are correct! If your clock is wrong JokeCoin Core will not work properly.</source>
         <translation>Provjerite jesu li datum i vrijeme vašeg računala točni! Ako je vaš sat pogrešan, JokeCoin Core neće raditi ispravno.</translation>
+    </message>
+    <message>
+        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
+        <translation>Upit za vršnjačke adrese putem DNS pretraživanja, ako nema dovoljno adresa (zadano: 1 osim ako -connect/-noconnect)</translation>
     </message>
     <message>
         <source>Specify location of debug log file: this can be an absolute path or a path relative to the data directory (default: %s)</source>
         <translation>Navedite lokaciju datoteke dnevnika za uklanjanje pogrešaka: to može biti apsolutna putanja ili putanja u odnosu na direktorij podataka (zadano: %s)</translation>
     </message>
     <message>
+        <source>WARNING: The transaction has been signed and recorded, so the wallet will try to re-send it. Use 'abandontransaction' to cancel it. (txid: %s)</source>
+        <translation>UPOZORENJE: Transakcija je potpisana i zabilježena, pa će je novčanik pokušati ponovno poslati. Upotrijebite 'abandontransaction' naredbu da biste je otkazali. (txid: %s)</translation>
+    </message>
+    <message>
+        <source>(must be %d for %s-net)</source>
+        <translation>(mora biti %d za %s-net)</translation>
+    </message>
+    <message>
         <source>Active Masternode not initialized.</source>
         <translation>Aktivan Masternode nije inicijaliziran.</translation>
+    </message>
+    <message>
+        <source>Allows deprecated RPC method(s) to be used</source>
+        <translation>Omogućava upotrebu zastarjelih RPC metoda</translation>
+    </message>
+    <message>
+        <source>Can't generate a change-address key. Please call keypoolrefill first.</source>
+        <translation>Nije moguće generirati ključ adrese za ostatak. Prvo pozovite keypoolrefill.</translation>
     </message>
     <message>
         <source>Cannot resolve -%s address: '%s'</source>
         <translation>Ne mogu riješiti -%s adresu: '%s'</translation>
     </message>
     <message>
-        <source>Error loading %s
+        <source>Change index out of range</source>
+        <translation>Promijenite indeks izvan raspona</translation>
+    </message>
+    <message>
+        <source>Error: -listen must be true if -masternode is set.</source>
+        <translation>Greška: -listen mora biti istinit ako je -masternode postavljen.</translation>
+    </message>
+    <message>
+        <source>Error: -maxmempool must be at least %d MB</source>
+        <translation>Greška: -maxmempool mora biti najmanje %d MB</translation>
+    </message>
+    <message>
+        <source>Failed to accept tx in the memory pool (reason: %s)
 </source>
-        <translation>Greška pri učitavanju %s
+        <translation>Neuspjelo prihvaćanje transakcije u spremište memorije (razlog: %s)
 </translation>
     </message>
     <message>
-        <source>Error upgrading chainstate database</source>
-        <translation>Greška pri nadogradnji chainstate baze podataka</translation>
+        <source>Fee (in %s/kB) to add to transactions you send (default: %s)</source>
+        <translation>Naknada (u %s/kB) za dodavanje transakcijama koje šaljete (zadano: %s)</translation>
     </message>
     <message>
-        <source>Mining/Staking options:</source>
-        <translation>Rudarenje/Staking mogućnosti:</translation>
+        <source>Invalid -masternodeaddr address: %s</source>
+        <translation>Nevažeća -masternodeaddr adresa: %s</translation>
     </message>
     <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>Potrebno odredište ili promjenu adrese jer promjena nije točna</translation>
+        <source>Invalid -masternodeaddr port %d, only %d is supported on %s-net.</source>
+        <translation>Nevažeći -masternodeaddr ulaz %d, samo %d je podržan na %s-net.</translation>
+    </message>
+    <message>
+        <source>Invalid port %d detected in masternode.conf</source>
+        <translation>Otkriven je nevažeći port %d u masternode.conf</translation>
+    </message>
+    <message>
+        <source>Invalid status error.</source>
+        <translation>Greška zbog nevažećeg statusa.</translation>
+    </message>
+    <message>
+        <source>Keep the transaction memory pool below &lt;n&gt; megabytes (default: %u)</source>
+        <translation>Drži spremište memorije transakcija ispod &lt;n&gt; megabajta (zadano: %u)</translation>
+    </message>
+    <message>
+        <source>Keypool ran out, please call keypoolrefill first, or unlock the wallet.</source>
+        <translation>Keypool je ponestao, prvo pozovite keypoolrefill, ili otključajte novčanik.</translation>
+    </message>
+    <message>
+        <source>Limit size of signature cache to &lt;n&gt; MiB (default: %u)</source>
+        <translation>Ograniči veličinu predmemorije potpisa na &lt;n&gt; MiB (zadano: %u)</translation>
     </message>
     <message>
         <source>No error</source>
         <translation>Nema grešaka</translation>
+    </message>
+    <message>
+        <source>Number of automatic wallet backups (default: %d)</source>
+        <translation>Broj automatskih sigurnosnih kopija novčanika (zadano: %d)</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
@@ -6009,10 +6478,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Print version and exit</source>
         <translation>Ispiši verziju i izađji</translation>
-    </message>
-    <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>Pubcoin nije pronadjen u transakciji stvaranja</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -6053,10 +6518,6 @@ JokeCoin temeljni novčanik</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Radi u pozadini kao daemon i prihvatite naredbe</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Ako je moguće, pošaljite transakcije kao transakcije s nultom naknadom (zadano: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -6103,6 +6564,10 @@ JokeCoin temeljni novčanik</translation>
         <translation>Smanji datoteku debug.log na pokretanju klijenta (zadano: 1 kada nema -debug)</translation>
     </message>
     <message>
+        <source>Shutdown requested over the txs scan. Exiting.</source>
+        <translation>Zatraženo je isključivanje tijekom skeniranja transakcija. Izlazim.</translation>
+    </message>
+    <message>
         <source>Signing transaction failed</source>
         <translation>Potpisivanje transakcije nije uspjelo</translation>
     </message>
@@ -6135,10 +6600,6 @@ JokeCoin temeljni novčanik</translation>
         <translation>Navedite svoju javnu adresu</translation>
     </message>
     <message>
-        <source>Spend Valid</source>
-        <translation>Potrošnja valjana</translation>
-    </message>
-    <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>Provedite nepotvrđene promjene prilikom slanja transakcija (zadano: %u)</translation>
     </message>
@@ -6168,11 +6629,11 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
-        <translation>Sinkronizacija sporkova...</translation>
+        <translation>Sinkronizacija sigurnosnih ključeva...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>Sinkronizacija zJOKE novčanika...</translation>
+        <source>The threshold value cannot be less than %s</source>
+        <translation>Vrijednost praga ne može biti manja od %s</translation>
     </message>
     <message>
         <source>This help message</source>
@@ -6187,6 +6648,10 @@ JokeCoin temeljni novčanik</translation>
         <translation>To je namijenjeno alatima za test regresije i razvoju aplikacija.</translation>
     </message>
     <message>
+        <source>This is not a masternode. 'local' option disabled.</source>
+        <translation>Ovo nije masternode. 'lokalna' opcija isključena.</translation>
+    </message>
+    <message>
         <source>This is not a masternode.</source>
         <translation>Ovo nije masternode.</translation>
     </message>
@@ -6195,24 +6660,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Prag za odspajanje loših korisnika (zadano: %u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>Potrebno je previše potrošnji</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Lozinka za kontrolni port Tor (zadano: prazno)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>Tor kontrolni priključak koji će se koristiti ako je uključeno slušanje portova (zadano: %s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>Stvorena transakcija</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>Transakcija stvaranja započeta</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -6235,10 +6688,6 @@ JokeCoin temeljni novčanik</translation>
         <translation>Transakcija prevelika</translation>
     </message>
     <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>Pokušavate potrošiti već potrošeni serijski broj #, pokušajte ponovo.</translation>
-    </message>
-    <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
         <translation>Nije moguće vezati se na %s na ovom računalu (vezanje vraćene pogreške %s)</translation>
     </message>
@@ -6248,7 +6697,7 @@ JokeCoin temeljni novčanik</translation>
     </message>
     <message>
         <source>Unable to sign spork message, wrong key?</source>
-        <translation>Nije moguće potpisati spork poruku, pogrešan ključ?</translation>
+        <translation>Nije moguće potpisati sigurnosnu poruku, pogrešan ključ?</translation>
     </message>
     <message>
         <source>Unable to start HTTP server. See debug log for details.</source>
@@ -6267,6 +6716,10 @@ JokeCoin temeljni novčanik</translation>
         <translation>Nadogradnja novčanika u najnoviji format</translation>
     </message>
     <message>
+        <source>Upgrading coins database...</source>
+        <translation>Nadograđjujem novčanu bazu podataka...</translation>
+    </message>
+    <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Koristite UPnP za mapiranje priključka za slušanje (zadano: %u)</translation>
     </message>
@@ -6283,20 +6736,12 @@ JokeCoin temeljni novčanik</translation>
         <translation>Korisničko ime za JSON-RPC veze</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Vrijednost je niža od najmanje dostupne denominacije (= 1) zJOKE-a</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Provjera blokova...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>Provjera novčanika...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>Novčanik %s nalazi se izvan direktorija podataka %s</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -6327,28 +6772,16 @@ JokeCoin temeljni novčanik</translation>
         <translation>Upozorenje: nepodržani argument -debugnet ignoriran, upotrijebite -debug=net.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>Nemate dovoljno Zerocoina u novčaniku</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>orate obnoviti bazu podataka koristeći -index za promjenu -txindexa</translation>
     </message>
     <message>
         <source>Zapping all transactions from wallet...</source>
-        <translation>Zapping svih transakcija iz novčanika ...</translation>
+        <translation>Zatvaranje svih transakcija iz novčanika...</translation>
     </message>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>Mogućnosti ZeroMQ obavijesti:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>Stvaranje Zerocoina dostupno je samo na regtestu</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>Zerocoin mogućnosti:</translation>
     </message>
     <message>
         <source>on startup</source>
@@ -6366,8 +6799,20 @@ JokeCoin temeljni novčanik</translation>
         <translation>Pošalji</translation>
     </message>
     <message>
-        <source>Send public coins (JOKE)</source>
-        <translation>Pošalji javne novčiće (JOKE)</translation>
+        <source>Transfer coins publicly or privately</source>
+        <translation>Pošalji novčiće javno ili privatno</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparentno</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Zaštićeno</translation>
+    </message>
+    <message>
+        <source>Select which coins to spend</source>
+        <translation>Odaberi koje novčiće ćeš trošiti</translation>
     </message>
     <message>
         <source>JokeCoin address or contact label</source>

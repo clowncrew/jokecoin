@@ -429,6 +429,13 @@ per lo staking</translation>
     </message>
 </context>
 <context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>Modulo</translation>
+    </message>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -624,48 +631,8 @@ per lo staking</translation>
         <translation>Cambio Copiato</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>massima</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>molto alta</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>alta</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>medio-alta</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>media</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>medio-bassa</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>basso</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>bassa</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>minima</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 bloccati)</translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation>nessuno</translation>
     </message>
     <message>
         <source>yes</source>
@@ -700,24 +667,8 @@ per lo staking</translation>
         <translation>Può variare di +/- 1 byte per input.</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Transazioni con priorità maggiore verranno aggiunte con maggiore probabilità in un blocco.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Questa etichetta diventa rossa se la priorità è inferiore a "media".</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Questa etichetta diventa rossa se uno dei destinatari riceve un importo inferiore a %1.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(nessuna etichetta)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>resto da %1 (%2)</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -2937,10 +2888,6 @@ Indirizzo: %4
         <translation>Modulo</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>Nessun indirizzo</translation>
-    </message>
-    <message>
         <source>Scan the QR code or copy the address to receive JOKE</source>
         <translation>Scansiona il codice QR o copia l'indirizzo per ricevere JOKE</translation>
     </message>
@@ -2975,10 +2922,6 @@ Indirizzo: %4
     <message>
         <source>Request payment with a fixed amount</source>
         <translation>Richiedi pagamento con importo fissato</translation>
-    </message>
-    <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>Nessun indirizzo disponibile, prova a sbloccare il portafoglio</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -3246,6 +3189,25 @@ Indirizzo: %4
     </message>
 </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Finestra di dialogo</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>SALVA</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>RESET</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>CANCELLA</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -3263,7 +3225,7 @@ Indirizzo: %4
         <source>Enter label</source>
         <translation>Inserisci etichetta</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SendWidget</name>
     <message>
@@ -3309,10 +3271,6 @@ Vuoi continuare?</translation>
     <message>
         <source>Cannot send, wallet locked</source>
         <translation>Impossibile inviare, portafoglio bloccato</translation>
-    </message>
-    <message>
-        <source>Cannot create transaction.</source>
-        <translation>Impossibile creare la transazione.</translation>
     </message>
     <message>
         <source>WARNING:
@@ -3857,36 +3815,6 @@ Si è verificato un errore nel tentativo di salvare l'elenco degli indirizzi in 
         <translation>Che cos'è JokeCoin?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-JokeCoin è una forma di denaro online digitale che utilizza la tecnologia blockchain
-che può essere facilmente trasferito a livello globale, istantaneamente e con quasi
-zero costi. JokeCoin incorpora le tecniche di sicurezza e privacy più avanzate del mercato
-ed è anche la prima criptovaluta PoS (Proof of Stake)
-ad implementare lo staking di ZeroCoin (zJOKE) e Zerocoin.
-&lt;/p&gt;&lt;p align="justify"&gt;
-JokeCoin utilizza un algoritmo del sistema di consenso Proof of Stake (PoS),
-consentendo a tutti i proprietari di JokeCoin di partecipare alle ricompense dei blocchi
-proteggendo la rete con portafogli full node, oltre a
-eseguire Masternode per creare e votare proposte.
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </translation>
-    </message>
-    <message>
         <source>2</source>
         <translation>2</translation>
     </message>
@@ -4086,10 +4014,6 @@ regolarmente. Questi servizi includono:
         <source>You can read more here</source>
         <translation>Puoi leggere di più qui</translation>
     </message>
-    <message>
-        <source>Exit</source>
-        <translation>Esci</translation>
-    </message>
 </context>
 <context>
     <name>SettingsInformationWidget</name>
@@ -4201,7 +4125,7 @@ regolarmente. Questi servizi includono:
         <source>Out:</source>
         <translation>Out:</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -5358,16 +5282,16 @@ sarà creato un nuovo un backup.
         <source>Form</source>
         <translation>Modulo</translation>
     </message>
-</context>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
         <translation>Invia Valuta</translation>
-    </message>
-    <message>
-        <source>SwiftX doesn't support sending values that high yet. Transactions are currently limited to %1 %2.</source>
-        <translation>SwiftX non supporta ancora l'invio di valori così elevati. Le transazioni sono attualmente limitate a %1 %2.</translation>
     </message>
     <message>
         <source>Transaction creation failed!
@@ -5454,10 +5378,6 @@ Portafoglio JokeCoin Core.</translation>
 <context>
     <name>jokecoin-core</name>
     <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = conserva i metadati tx, ad esempio il proprietario dell'account e le informazioni sulla richiesta di pagamento, 2 = elimina i metadati tx)</translation>
-    </message>
-    <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>Consenti connessioni JSON-RPC dall'origine specificata. Valido per &lt;ip&gt; sono un singolo IP (ad es. 1.2.3.4), una rete / maschera di rete (ad es. 1.2.3.4/255.255.255.0) o una rete / CIDR (ad es. 1.2.3.4/24). Questa opzione può essere specificata più volte</translation>
     </message>
@@ -5494,10 +5414,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Elimina tutte le transazioni del portafoglio e recupera solo quelle parti della blockchain tramite -rescan all'avvio</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Elimina tutte le spese e forgiature zerocoin che sono state registrate nella blockchain e le reindicizza (0-1, impostazione predefinita: %u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Distribuito sotto la licenza del software MIT, consultare il file di accompagnamento COPYING o &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
@@ -5516,10 +5432,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>Errore: ascolto delle connessioni in entrata non riuscito (ascolto ha restituito errore %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Errore: la transazione è superiore alla dimensione massima consentita della transazione!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -5552,10 +5464,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>In questa modalità -genproclimit controlla quanti blocchi vengono generati immediatamente.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>Fondi confermati insufficienti o insufficienti, potrebbe essere necessario attendere qualche minuto e riprovare.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5618,10 +5526,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Imposta il numero di processi per la generazione di coin se abilitato (-1 = tutti i core, impostazione predefinita: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Mostra N conferme per una transazione bloccata correttamente (0-9999, impostazione predefinita: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Supporta il filtraggio di blocchi e transazioni con filtri bloom (impostazione predefinita: %u)</translation>
     </message>
@@ -5672,10 +5576,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>I peer autorizzati non possono essere esenti da DoS e le loro transazioni vengono sempre inoltrate, anche se sono già nel mempool, utile ad es. per un gateway</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>È necessario specificare una chiave masternodepriv nella configurazione. Consultare la documentazione per assistenza.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5770,24 +5670,12 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Caricamento completato</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Abilita la pubblicazione dell'hash transazione (bloccata tramite SwiftX) in &lt;address&gt;</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Abilita la pubblicazione transazione grezza (bloccata tramite SwiftX) in &lt;address&gt;</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>Abilita il client a fungere da Masternode (0-1, impostazione predefinita: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Errore durante l'inizializzazione del database dei blocchi</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>Errore durante l'inizializzazione dell'ambiente del database del portafoglio %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5800,10 +5688,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Errore durante la lettura dal database, arresto.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>Errore durante la scrittura di zerocoinDB sul disco</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5820,10 +5704,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>Errore: argomento non supportato -tor trovato, utilizzare -onion.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Errore: portafoglio bloccato, impossibile creare la transazione!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5874,10 +5754,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Verifica dell'integrità dell'inizializzazione non riuscita. JokeCoin Core si sta spegnendo.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>Fondi insufficienti</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Fondi insufficienti.</translation>
     </message>
@@ -5890,48 +5766,12 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (deve essere almeno %s)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>Importo non valido</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Invalid masternodeprivkey. Si prega di consultare la documentazione.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Invalid netmask specificata in -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>Ricalcolo della supply JOKE...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>Reindicizzazione del database zerocoin...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>Errore nella reindicizzazione del database zerocoin</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>Il valore delle coin selezionate è inferiore all'obiettivo di pagamento</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>Opzioni SwiftX:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>Questa è una build di test pre-release - utilizzare a proprio rischio - non utilizzare per staking o applicazioni commerciali!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>Disabilita tutte le funzionalità specifiche di JokeCoin (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Abilita SwiftX, mostra le conferme per le transazioni bloccate (valore bool, predefinito: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5942,20 +5782,8 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Esegui comando quando il blocco migliore cambia e la sua dimensione è finita (%s in cmd è sostituito dall'hash del blocco, %d con la dimensione del blocco)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Impossibile trovare il set di coin tra le coin detenute con meno di maxNumber of Spends</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>In rari casi, una spesa con 7 coin supera la dimensione massima consentita della transazione, riprovare a utilizzare 6 o meno coin</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Specifica il percorso di backup personalizzato per aggiungere una copia di qualsiasi backup del portafoglio. Se impostato come dir, ogni backup genera un file con data e ora. Se impostato come file, riscriverà su quel file ogni backup.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftX richiede input con almeno 6 conferme, potrebbe essere necessario attendere qualche minuto e riprovare.</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5964,10 +5792,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>Tentativo di forzare il ripristino della blockchain corrotta</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>Impossibile creare input di spesa pubblica</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -6000,26 +5824,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Error: A fatal internal error occurred, see debug.log for details</source>
         <translation>Errore: si è verificato un errore interno irreversibile, vedere debug.log per i dettagli</translation>
-    </message>
-    <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Errore: Nessun utxo valido!</translation>
-    </message>
-    <message>
-        <source>Failed to parse public spend</source>
-        <translation>Analisi della spesa pubblica non riuscita</translation>
-    </message>
-    <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>Impossibile selezionare uno zerocoin</translation>
-    </message>
-    <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>Impossibile cancellare zerocoinDB</translation>
-    </message>
-    <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>Impossibile scrivere il numero seriale della coin nel portafoglio</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -6106,10 +5910,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Buffer di spedizione massimo per connessione, &lt;n&gt;*1000 bytes (default: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>La forgiatura non è riuscita nella blockchain</translation>
-    </message>
-    <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
         <translation>È necessario specificare una porta con -whitebind: '%s'</translation>
     </message>
@@ -6148,14 +5948,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Peers are being disconnected due time differences.</source>
         <translation>I peers vengono scollegati a causa delle differenze di orario.</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>Impossibile trovare la transazione contenente forgiatura %s</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>Impossibile trovare la transazione contenente forgiatura, txHash %s</translation>
     </message>
     <message>
         <source>Use block spam filter (default: %u)</source>
@@ -6254,10 +6046,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Errore: -maxmempool deve essere almeno %d MB</translation>
     </message>
     <message>
-        <source>Error: Invalid port %d for running a masternode.</source>
-        <translation>Errore: Porta non valida %d per l'esecuzione di un masternode.</translation>
-    </message>
-    <message>
         <source>Failed to accept tx in the memory pool (reason: %s)
 </source>
         <translation>Impossibile accettare tx nel memory pool (reason: %s)
@@ -6296,14 +6084,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Limita la dimensione della cache delle firma a &lt;n&gt; MiB (default: %u)</translation>
     </message>
     <message>
-        <source>Masternodes are required to run on port %d for %s-net</source>
-        <translation>I masternode devono funzionare sulla porta %d per %s-net</translation>
-    </message>
-    <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>Hai bisogno di una destinazione o cambia indirizzo perché il cambio non è esatto</translation>
-    </message>
-    <message>
         <source>No error</source>
         <translation>Nessun errore</translation>
     </message>
@@ -6314,10 +6094,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Print version and exit</source>
         <translation>Stampa versione e esci</translation>
-    </message>
-    <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>Pubcoin not trovato nella tx di forgiatura</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -6334,10 +6110,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
         <translation>Ricostruisce l'indice della blockchain dai file blk000??.dat corrente.</translation>
-    </message>
-    <message>
-        <source>Reindex the %s and z%s money supply statistics</source>
-        <translation>Reinindicizzare le statistiche sulla massa monetaria %s e z%s</translation>
     </message>
     <message>
         <source>Relay and mine data carrier transactions (default: %u)</source>
@@ -6362,10 +6134,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Esegui in background come demone e accetta comandi</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Invia transazioni come transazioni a costo zero, se possibile (default: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -6444,10 +6212,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Specifica il tuo indirizzo pubblico</translation>
     </message>
     <message>
-        <source>Spend Valid</source>
-        <translation>Spesa Valida</translation>
-    </message>
-    <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>Spendi modifiche non confermate quando invii transazioni (default: %u)</translation>
     </message>
@@ -6480,10 +6244,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Sincronizzazione sporks...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>Sincronizzazione del portafoglio zJOKE...</translation>
-    </message>
-    <message>
         <source>The threshold value cannot be less than %s</source>
         <translation>Il valore di soglia non può essere inferiore a %s</translation>
     </message>
@@ -6512,24 +6272,12 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Soglia per disconnettere peer che si comportano in modo inappropriato (default: %u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>Troppe spese necessarie</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Password della porta di controllo Tor (impostazione predefinita: vuota)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>Porta di controllo Tor da utilizzare se l'ascolto onion è abilitato (default: %s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>Transazione creata</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>Transazione di forgiatura iniziata</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -6550,10 +6298,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Transaction too large</source>
         <translation>Transazione troppo grande</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>Tentativo di spendere un numero seriale già esaurito, riprovare.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -6600,20 +6344,12 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Nome utente per connessioni JSON-RPC</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Il valore è inferiore alla denominazione più piccola disponibile (=1) di zJOKE</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Verifica dei blocchi...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>Verifica del portafoglio...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>Il portafoglio %s risiede al di fuori della directory di dati %s</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -6644,10 +6380,6 @@ Portafoglio JokeCoin Core.</translation>
         <translation>Avvertenza: argomento non supportato -debugnet ignorato, utilizzare -debug=net.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>Non hai abbastanza Zerocoin nel tuo portafoglio</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>È necessario ricostruire il database utilizzando -reindex per modificare -txindex</translation>
     </message>
@@ -6658,14 +6390,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>Opzioni di notifica ZeroMQ:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>Coniatura di Zerocoin disponibile solo su regtest</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>Opzioni Zerocoin:</translation>
     </message>
     <message>
         <source>on startup</source>
@@ -6681,10 +6405,6 @@ Portafoglio JokeCoin Core.</translation>
     <message>
         <source>Send</source>
         <translation>Invia</translation>
-    </message>
-    <message>
-        <source>Send public coins (JOKE)</source>
-        <translation>Inviare monete pubbliche (JOKE)</translation>
     </message>
     <message>
         <source>JokeCoin address or contact label</source>

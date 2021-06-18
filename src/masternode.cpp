@@ -7,56 +7,62 @@
 
 #include "addrman.h"
 #include "init.h"
-#include "masternode-payments.h"
 #include "masternode-sync.h"
 #include "masternodeman.h"
 #include "netbase.h"
 #include "sync.h"
-#include "util.h"
+#include "util/system.h"
 #include "wallet/wallet.h"
+
+#define MASTERNODE_MIN_CONFIRMATIONS_REGTEST 1
+#define MASTERNODE_MIN_MNP_SECONDS_REGTEST 90
+#define MASTERNODE_MIN_MNB_SECONDS_REGTEST 25
+#define MASTERNODE_PING_SECONDS_REGTEST 25
+#define MASTERNODE_EXPIRATION_SECONDS_REGTEST 12 * 60
+#define MASTERNODE_REMOVAL_SECONDS_REGTEST 13 * 60
+
+#define MASTERNODE_MIN_CONFIRMATIONS 15
+#define MASTERNODE_MIN_MNP_SECONDS (10 * 60)
+#define MASTERNODE_MIN_MNB_SECONDS (5 * 60)
+#define MASTERNODE_PING_SECONDS (5 * 60)
+#define MASTERNODE_EXPIRATION_SECONDS (120 * 60)
+#define MASTERNODE_REMOVAL_SECONDS (130 * 60)
+#define MASTERNODE_CHECK_SECONDS 5
 
 // keep track of the scanning errors I've seen
 std::map<uint256, int> mapSeenMasternodeScanningErrors;
-// cache block hashes as we calculate them
-std::map<int64_t, uint256> mapCacheBlockHashes;
 
-//Get the last hash that matches the modulus given. Processed in reverse order
-bool GetBlockHash(uint256& hash, int nBlockHeight)
+
+int MasternodeMinPingSeconds()
 {
-    const CBlockIndex* tipIndex = GetChainTip();
-    if (!tipIndex || !tipIndex->nHeight) return false;
-
-    if (nBlockHeight == 0)
-        nBlockHeight = tipIndex->nHeight;
-
-    if (mapCacheBlockHashes.count(nBlockHeight)) {
-        hash = mapCacheBlockHashes[nBlockHeight];
-        return true;
-    }
-
-    int nBlocksAgo = 0;
-    if (nBlockHeight > 0) nBlocksAgo = (tipIndex->nHeight + 1) - nBlockHeight;
-    if (nBlocksAgo < 0) return false;
-
-    const CBlockIndex* BlockReading = tipIndex;
-    int n = 0;
-    for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
-        if (n >= nBlocksAgo) {
-            hash = BlockReading->GetBlockHash();
-            mapCacheBlockHashes[nBlockHeight] = hash;
-            return true;
-        }
-        n++;
-
-        if (BlockReading->pprev == NULL) {
-            assert(BlockReading);
-            break;
-        }
-        BlockReading = BlockReading->pprev;
-    }
-
-    return false;
+    return Params().IsRegTestNet() ? MASTERNODE_MIN_MNP_SECONDS_REGTEST : MASTERNODE_MIN_MNP_SECONDS;
 }
+
+int MasternodeBroadcastSeconds()
+{
+    return Params().IsRegTestNet() ? MASTERNODE_MIN_MNB_SECONDS_REGTEST : MASTERNODE_MIN_MNB_SECONDS;
+}
+
+int MasternodeCollateralMinConf()
+{
+    return Params().IsRegTestNet() ? MASTERNODE_MIN_CONFIRMATIONS_REGTEST : MASTERNODE_MIN_CONFIRMATIONS;
+}
+
+int MasternodePingSeconds()
+{
+    return Params().IsRegTestNet() ? MASTERNODE_PING_SECONDS_REGTEST : MASTERNODE_PING_SECONDS;
+}
+
+int MasternodeExpirationSeconds()
+{
+    return Params().IsRegTestNet() ? MASTERNODE_EXPIRATION_SECONDS_REGTEST : MASTERNODE_EXPIRATION_SECONDS;
+}
+
+int MasternodeRemovalSeconds()
+{
+    return Params().IsRegTestNet() ? MASTERNODE_REMOVAL_SECONDS_REGTEST : MASTERNODE_REMOVAL_SECONDS;
+}
+
 
 CMasternode::CMasternode() :
         CSignedMessage()
@@ -66,16 +72,12 @@ CMasternode::CMasternode() :
     addr = CService();
     pubKeyCollateralAddress = CPubKey();
     pubKeyMasternode = CPubKey();
-    activeState = MASTERNODE_ENABLED;
-    sigTime = GetAdjustedTime();
+    sigTime = 0;
     lastPing = CMasternodePing();
-    unitTest = false;
-    allowFreeTx = true;
     protocolVersion = PROTOCOL_VERSION;
-    nLastDsq = 0;
     nScanningErrorCount = 0;
     nLastScanningErrorBlockHeight = 0;
-    lastTimeChecked = 0;
+    mnPayeeScript.clear();
 }
 
 CMasternode::CMasternode(const CMasternode& other) :
@@ -86,16 +88,28 @@ CMasternode::CMasternode(const CMasternode& other) :
     addr = other.addr;
     pubKeyCollateralAddress = other.pubKeyCollateralAddress;
     pubKeyMasternode = other.pubKeyMasternode;
-    activeState = other.activeState;
     sigTime = other.sigTime;
     lastPing = other.lastPing;
-    unitTest = other.unitTest;
-    allowFreeTx = other.allowFreeTx;
     protocolVersion = other.protocolVersion;
-    nLastDsq = other.nLastDsq;
     nScanningErrorCount = other.nScanningErrorCount;
     nLastScanningErrorBlockHeight = other.nLastScanningErrorBlockHeight;
-    lastTimeChecked = 0;
+    mnPayeeScript = other.mnPayeeScript;
+}
+
+CMasternode::CMasternode(const CDeterministicMNCPtr& dmn, int64_t registeredTime, const uint256& registeredHash) :
+        CSignedMessage()
+{
+    LOCK(cs);
+    vin = CTxIn(dmn->collateralOutpoint);
+    addr = dmn->pdmnState->addr;
+    pubKeyCollateralAddress = CPubKey();
+    pubKeyMasternode = CPubKey();
+    sigTime = registeredTime;
+    lastPing = CMasternodePing(vin, registeredHash, registeredTime);
+    protocolVersion = PROTOCOL_VERSION;
+    nScanningErrorCount = 0;
+    nLastScanningErrorBlockHeight = 0;
+    mnPayeeScript = dmn->pdmnState->scriptPayout;
 }
 
 uint256 CMasternode::GetSignatureHash() const
@@ -126,17 +140,17 @@ std::string CMasternode::GetStrMessage() const
 bool CMasternode::UpdateFromNewBroadcast(CMasternodeBroadcast& mnb)
 {
     if (mnb.sigTime > sigTime) {
+        // TODO: lock cs. Need to be careful as mnb.lastPing.CheckAndUpdate locks cs_main internally.
         pubKeyMasternode = mnb.pubKeyMasternode;
         pubKeyCollateralAddress = mnb.pubKeyCollateralAddress;
         sigTime = mnb.sigTime;
         vchSig = mnb.vchSig;
         protocolVersion = mnb.protocolVersion;
         addr = mnb.addr;
-        lastTimeChecked = 0;
         int nDoS = 0;
         if (mnb.lastPing.IsNull() || (!mnb.lastPing.IsNull() && mnb.lastPing.CheckAndUpdate(nDoS, false))) {
             lastPing = mnb.lastPing;
-            mnodeman.mapSeenMasternodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
+            mnodeman.mapSeenMasternodePing.emplace(lastPing.GetHash(), lastPing);
         }
         return true;
     }
@@ -148,149 +162,40 @@ bool CMasternode::UpdateFromNewBroadcast(CMasternodeBroadcast& mnb)
 // the proof of work for that block. The further away they are the better, the furthest will win the election
 // and get paid this block
 //
-uint256 CMasternode::CalculateScore(int mod, int64_t nBlockHeight)
+arith_uint256 CMasternode::CalculateScore(const uint256& hash) const
 {
-    {
-        LOCK(cs_main);
-        if (!chainActive.Tip()) return UINT256_ZERO;
-    }
-
-    uint256 hash;
-    uint256 aux = vin.prevout.hash + vin.prevout.n;
-
-    if (!GetBlockHash(hash, nBlockHeight)) {
-        LogPrint(BCLog::MASTERNODE,"CalculateScore ERROR - nHeight %d - Returned 0\n", nBlockHeight);
-        return UINT256_ZERO;
-    }
-
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     ss << hash;
-    uint256 hash2 = ss.GetHash();
+    const arith_uint256& hash2 = UintToArith256(ss.GetHash());
 
     CHashWriter ss2(SER_GETHASH, PROTOCOL_VERSION);
     ss2 << hash;
+    const arith_uint256& aux = UintToArith256(vin.prevout.hash) + vin.prevout.n;
     ss2 << aux;
-    uint256 hash3 = ss2.GetHash();
+    const arith_uint256& hash3 = UintToArith256(ss2.GetHash());
 
-    uint256 r = (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
-
-    return r;
+    return (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
 }
 
-void CMasternode::Check(bool forceCheck)
+CMasternode::state CMasternode::GetActiveState() const
 {
-    if (ShutdownRequested()) return;
-
-    // todo: add LOCK(cs) but be careful with the AcceptableInputs() below that requires cs_main.
-
-    if (!forceCheck && (GetTime() - lastTimeChecked < MASTERNODE_CHECK_SECONDS)) return;
-    lastTimeChecked = GetTime();
-
-
-    //once spent, stop doing the checks
-    if (activeState == MASTERNODE_VIN_SPENT) return;
-
-
-    if (!IsPingedWithin(MASTERNODE_REMOVAL_SECONDS)) {
-        activeState = MASTERNODE_REMOVE;
-        return;
+    LOCK(cs);
+    if (fCollateralSpent) {
+        return MASTERNODE_VIN_SPENT;
     }
-
-    if (!IsPingedWithin(MASTERNODE_EXPIRATION_SECONDS)) {
-        activeState = MASTERNODE_EXPIRED;
-        return;
+    if (!IsPingedWithin(MasternodeRemovalSeconds())) {
+        return MASTERNODE_REMOVE;
     }
-
-    if(lastPing.sigTime - sigTime < MASTERNODE_MIN_MNP_SECONDS){
-        activeState = MASTERNODE_PRE_ENABLED;
-        return;
+    if (!IsPingedWithin(MasternodeExpirationSeconds())) {
+        return MASTERNODE_EXPIRED;
     }
-
-    if (!unitTest) {
-        CValidationState state;
-        CMutableTransaction tx = CMutableTransaction();
-        CScript dummyScript;
-        dummyScript << ToByteVector(pubKeyCollateralAddress) << OP_CHECKSIG;
-        CTxOut vout = CTxOut(9999.99 * COIN, dummyScript);
-        tx.vin.push_back(vin);
-        tx.vout.push_back(vout);
-        {
-            TRY_LOCK(cs_main, lockMain);
-            if (!lockMain) return;
-
-            if (!AcceptableInputs(mempool, state, CTransaction(tx), false, NULL)) {
-                activeState = MASTERNODE_VIN_SPENT;
-                return;
-            }
-        }
+    if(lastPing.sigTime - sigTime < MasternodeMinPingSeconds()){
+        return MASTERNODE_PRE_ENABLED;
     }
-
-    activeState = MASTERNODE_ENABLED; // OK
+    return MASTERNODE_ENABLED;
 }
 
-int64_t CMasternode::SecondsSincePayment()
-{
-    CScript pubkeyScript;
-    pubkeyScript = GetScriptForDestination(pubKeyCollateralAddress.GetID());
-
-    int64_t sec = (GetAdjustedTime() - GetLastPaid());
-    int64_t month = 60 * 60 * 24 * 30;
-    if (sec < month) return sec; //if it's less than 30 days, give seconds
-
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << vin;
-    ss << sigTime;
-    uint256 hash = ss.GetHash();
-
-    // return some deterministic value for unknown/unpaid but force it to be more than 30 days old
-    return month + hash.GetCompact(false);
-}
-
-int64_t CMasternode::GetLastPaid()
-{
-    const CBlockIndex* BlockReading = GetChainTip();
-    if (BlockReading == nullptr) return false;
-
-    CScript mnpayee;
-    mnpayee = GetScriptForDestination(pubKeyCollateralAddress.GetID());
-
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << vin;
-    ss << sigTime;
-    uint256 hash = ss.GetHash();
-
-    // use a deterministic offset to break a tie -- 2.5 minutes
-    int64_t nOffset = hash.GetCompact(false) % 150;
-
-    int nMnCount = mnodeman.CountEnabled() * 1.25;
-    int n = 0;
-    for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
-        if (n >= nMnCount) {
-            return 0;
-        }
-        n++;
-
-        if (masternodePayments.mapMasternodeBlocks.count(BlockReading->nHeight)) {
-            /*
-                Search for this payee, with at least 2 votes. This will aid in consensus allowing the network
-                to converge on the same payees quickly, then keep the same schedule.
-            */
-            if (masternodePayments.mapMasternodeBlocks[BlockReading->nHeight].HasPayeeWithVotes(mnpayee, 2)) {
-                return BlockReading->nTime + nOffset;
-            }
-        }
-
-        if (BlockReading->pprev == NULL) {
-            assert(BlockReading);
-            break;
-        }
-        BlockReading = BlockReading->pprev;
-    }
-
-    return 0;
-}
-
-bool CMasternode::IsValidNetAddr()
+bool CMasternode::IsValidNetAddr() const
 {
     // TODO: regtest is fine with any addresses for now,
     // should probably be a bit smarter if one day we start to implement tests for this
@@ -303,11 +208,13 @@ bool CMasternode::IsInputAssociatedWithPubkey() const
     CScript payee;
     payee = GetScriptForDestination(pubKeyCollateralAddress.GetID());
 
-    CTransaction txVin;
+    CTransactionRef txVin;
     uint256 hash;
     if(GetTransaction(vin.prevout.hash, txVin, hash, true)) {
-        for (CTxOut out : txVin.vout) {
-            if (out.nValue == 10000 * COIN && out.scriptPubKey == payee) return true;
+        for (const CTxOut& out : txVin->vout) {
+            if (out.nValue == Params().GetConsensus().nMNCollateralAmt &&
+                out.scriptPubKey == payee)
+                return true;
         }
     }
 
@@ -318,7 +225,7 @@ CMasternodeBroadcast::CMasternodeBroadcast() :
         CMasternode()
 { }
 
-CMasternodeBroadcast::CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyMasternodeNew, int protocolVersionIn) :
+CMasternodeBroadcast::CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyMasternodeNew, int protocolVersionIn, const CMasternodePing& _lastPing) :
         CMasternode()
 {
     vin = newVin;
@@ -326,13 +233,21 @@ CMasternodeBroadcast::CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubK
     pubKeyCollateralAddress = pubKeyCollateralAddressNew;
     pubKeyMasternode = pubKeyMasternodeNew;
     protocolVersion = protocolVersionIn;
+    lastPing = _lastPing;
+    sigTime = lastPing.sigTime;
 }
 
 CMasternodeBroadcast::CMasternodeBroadcast(const CMasternode& mn) :
         CMasternode(mn)
 { }
 
-bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMasternode, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CMasternodeBroadcast& mnbRet, bool fOffline)
+bool CMasternodeBroadcast::Create(const std::string& strService,
+                                  const std::string& strKeyMasternode,
+                                  const std::string& strTxHash,
+                                  const std::string& strOutputIndex,
+                                  std::string& strErrorRet,
+                                  CMasternodeBroadcast& mnbRet,
+                                  bool fOffline)
 {
     CTxIn txin;
     CPubKey pubKeyCollateralAddressNew;
@@ -354,13 +269,14 @@ bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMast
     }
 
     std::string strError;
-    if (!pwalletMain->GetMasternodeVinAndKeys(txin, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex, strError)) {
+    // Use wallet-0 here. Legacy mnb creation can be removed after transition to DMN
+    if (vpwallets.empty() || !vpwallets[0]->GetMasternodeVinAndKeys(txin, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex, strError)) {
         strErrorRet = strError; // GetMasternodeVinAndKeys logs this error. Only returned for GUI error notification.
         LogPrint(BCLog::MASTERNODE,"CMasternodeBroadcast::Create -- %s\n", strprintf("Could not allocate txin %s:%s for masternode %s", strTxHash, strOutputIndex, strService));
         return false;
     }
 
-    int nPort;
+    int nPort = 0;
     int nDefaultPort = Params().GetDefaultPort();
     std::string strHost;
     SplitHostPort(strService, nPort, strHost);
@@ -374,7 +290,14 @@ bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMast
     return Create(txin, _service, keyCollateralAddressNew, pubKeyCollateralAddressNew, keyMasternodeNew, pubKeyMasternodeNew, strErrorRet, mnbRet);
 }
 
-bool CMasternodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyMasternodeNew, CPubKey pubKeyMasternodeNew, std::string& strErrorRet, CMasternodeBroadcast& mnbRet)
+bool CMasternodeBroadcast::Create(const CTxIn& txin,
+                                  const CService& service,
+                                  const CKey& keyCollateralAddressNew,
+                                  const CPubKey& pubKeyCollateralAddressNew,
+                                  const CKey& keyMasternodeNew,
+                                  const CPubKey& pubKeyMasternodeNew,
+                                  std::string& strErrorRet,
+                                  CMasternodeBroadcast& mnbRet)
 {
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
@@ -383,15 +306,17 @@ bool CMasternodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollater
              EncodeDestination(pubKeyCollateralAddressNew.GetID()),
         pubKeyMasternodeNew.GetID().ToString());
 
-    CMasternodePing mnp(txin);
-    if (!mnp.Sign(keyMasternodeNew, pubKeyMasternodeNew)) {
+    // Get block hash to ping (TODO: move outside of this function)
+    const uint256& nBlockHashToPing = mnodeman.GetBlockHashToPing();
+    CMasternodePing mnp(txin, nBlockHashToPing, GetAdjustedTime());
+    if (!mnp.Sign(keyMasternodeNew, pubKeyMasternodeNew.GetID())) {
         strErrorRet = strprintf("Failed to sign ping, masternode=%s", txin.prevout.hash.ToString());
         LogPrint(BCLog::MASTERNODE,"CMasternodeBroadcast::Create -- %s\n", strErrorRet);
         mnbRet = CMasternodeBroadcast();
         return false;
     }
 
-    mnbRet = CMasternodeBroadcast(service, txin, pubKeyCollateralAddressNew, pubKeyMasternodeNew, PROTOCOL_VERSION);
+    mnbRet = CMasternodeBroadcast(service, txin, pubKeyCollateralAddressNew, pubKeyMasternodeNew, PROTOCOL_VERSION, mnp);
 
     if (!mnbRet.IsValidNetAddr()) {
         strErrorRet = strprintf("Invalid IP address %s, masternode=%s", mnbRet.addr.ToStringIP (), txin.prevout.hash.ToString());
@@ -400,7 +325,6 @@ bool CMasternodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollater
         return false;
     }
 
-    mnbRet.lastPing = mnp;
     if (!mnbRet.Sign(keyCollateralAddressNew, pubKeyCollateralAddressNew)) {
         strErrorRet = strprintf("Failed to sign broadcast, masternode=%s", txin.prevout.hash.ToString());
         LogPrint(BCLog::MASTERNODE,"CMasternodeBroadcast::Create -- %s\n", strErrorRet);
@@ -460,10 +384,10 @@ bool CMasternodeBroadcast::CheckDefaultPort(CService service, std::string& strEr
 {
     int nDefaultPort = Params().GetDefaultPort();
 
-    if (service.GetPort() != nDefaultPort) {
+    if (service.GetPort() != nDefaultPort && !Params().IsRegTestNet()) {
         strErrorRet = strprintf("Invalid port %u for masternode %s, only %d is supported on %s-net.",
             service.GetPort(), service.ToString(), nDefaultPort, Params().NetworkIDString());
-        LogPrint(BCLog::MASTERNODE, "%s - %s\n", strContext, strErrorRet);
+        LogPrintf("%s - %s\n", strContext, strErrorRet);
         return false;
     }
 
@@ -478,10 +402,6 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
         nDos = 1;
         return false;
     }
-
-    // incorrect ping or its sigTime
-    if(lastPing.IsNull() || !lastPing.CheckAndUpdate(nDos, false, true))
-    return false;
 
     if (protocolVersion < ActiveProtocol()) {
         LogPrint(BCLog::MASTERNODE,"mnb - ignoring outdated Masternode %s protocol version %d\n", vin.prevout.hash.ToString(), protocolVersion);
@@ -519,13 +439,18 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
         return error("%s : Got bad Masternode address signature", __func__);
     }
 
-    if (Params().NetworkID() == CBaseChainParams::MAIN) {
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if (addr.GetPort() != 30504) return false;
     } else if (addr.GetPort() == 30504)
         return false;
 
+    // incorrect ping or its sigTime
+    if(lastPing.IsNull() || !lastPing.CheckAndUpdate(nDos, false, true)) {
+        return false;
+    }
+
     //search existing Masternode list, this is where we update existing Masternodes with new mnb broadcasts
-    CMasternode* pmn = mnodeman.Find(vin);
+    CMasternode* pmn = mnodeman.Find(vin.prevout);
 
     // no such masternode, nothing to update
     if (pmn == NULL) return true;
@@ -543,11 +468,10 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
 
     // mn.pubkey = pubkey, IsVinAssociatedWithPubkey is validated once below,
     //   after that they just need to match
-    if (pmn->pubKeyCollateralAddress == pubKeyCollateralAddress && !pmn->IsBroadcastedWithin(MASTERNODE_MIN_MNB_SECONDS)) {
+    if (pmn->pubKeyCollateralAddress == pubKeyCollateralAddress && !pmn->IsBroadcastedWithin(MasternodeBroadcastSeconds())) {
         //take the newest entry
         LogPrint(BCLog::MASTERNODE,"mnb - Got updated entry for %s\n", vin.prevout.hash.ToString());
         if (pmn->UpdateFromNewBroadcast((*this))) {
-            pmn->Check();
             if (pmn->IsEnabled()) Relay();
         }
         masternodeSync.AddedMasternodeList(GetHash());
@@ -556,59 +480,43 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
     return true;
 }
 
-bool CMasternodeBroadcast::CheckInputsAndAdd(int& nDoS)
+bool CMasternodeBroadcast::CheckInputsAndAdd(int nChainHeight, int& nDoS)
 {
     // we are a masternode with the same vin (i.e. already activated) and this mnb is ours (matches our Masternode privkey)
     // so nothing to do here for us
     if (fMasterNode && activeMasternode.vin != nullopt &&
-            vin.prevout == activeMasternode.vin->prevout && pubKeyMasternode == activeMasternode.pubKeyMasternode)
+            vin.prevout == activeMasternode.vin->prevout &&
+            pubKeyMasternode == activeMasternode.pubKeyMasternode &&
+            activeMasternode.GetStatus() == ACTIVE_MASTERNODE_STARTED) {
         return true;
+    }
 
     // incorrect ping or its sigTime
-    if(lastPing.IsNull() || !lastPing.CheckAndUpdate(nDoS, false, true)) return false;
+    if(lastPing.IsNull() || !lastPing.CheckAndUpdate(nDoS, false, true)) {
+        return false;
+    }
 
     // search existing Masternode list
-    CMasternode* pmn = mnodeman.Find(vin);
-
+    CMasternode* pmn = mnodeman.Find(vin.prevout);
     if (pmn != NULL) {
         // nothing to do here if we already know about this masternode and it's enabled
         if (pmn->IsEnabled()) return true;
         // if it's not enabled, remove old MN first and continue
         else
-            mnodeman.Remove(pmn->vin);
+            mnodeman.Remove(pmn->vin.prevout);
     }
 
-    CValidationState state;
-    CMutableTransaction tx = CMutableTransaction();
-    CScript dummyScript;
-    dummyScript << ToByteVector(pubKeyCollateralAddress) << OP_CHECKSIG;
-    CTxOut vout = CTxOut(9999.99 * COIN, dummyScript);
-    tx.vin.push_back(vin);
-    tx.vout.push_back(vout);
-
-    int nChainHeight = 0;
-    {
-        TRY_LOCK(cs_main, lockMain);
-        if (!lockMain) {
-            // not mnb fault, let it to be checked again later
-            mnodeman.mapSeenMasternodeBroadcast.erase(GetHash());
-            masternodeSync.mapSeenSyncMNB.erase(GetHash());
-            return false;
-        }
-
-        if (!AcceptableInputs(mempool, state, CTransaction(tx), false, NULL)) {
-            //set nDos
-            state.IsInvalid(nDoS);
-            return false;
-        }
-
-        nChainHeight = chainActive.Height();
+    const Coin& collateralUtxo = pcoinsTip->AccessCoin(vin.prevout);
+    if (collateralUtxo.IsSpent()) {
+        LogPrint(BCLog::MASTERNODE,"mnb - vin %s spent\n", vin.prevout.ToString());
+        return false;
     }
 
     LogPrint(BCLog::MASTERNODE, "mnb - Accepted Masternode entry\n");
-
-    if (pcoinsTip->GetCoinDepthAtHeight(vin.prevout, nChainHeight) < MASTERNODE_MIN_CONFIRMATIONS) {
-        LogPrint(BCLog::MASTERNODE,"mnb - Input must have at least %d confirmations\n", MASTERNODE_MIN_CONFIRMATIONS);
+    const int utxoHeight = collateralUtxo.nHeight;
+    int collateralUtxoDepth = nChainHeight - utxoHeight + 1;
+    if (collateralUtxoDepth < MasternodeCollateralMinConf()) {
+        LogPrint(BCLog::MASTERNODE,"mnb - Input must have at least %d confirmations\n", MasternodeCollateralMinConf());
         // maybe we miss few blocks, let this mnb to be checked again later
         mnodeman.mapSeenMasternodeBroadcast.erase(GetHash());
         masternodeSync.mapSeenSyncMNB.erase(GetHash());
@@ -617,18 +525,11 @@ bool CMasternodeBroadcast::CheckInputsAndAdd(int& nDoS)
 
     // verify that sig time is legit in past
     // should be at least not earlier than block when 1000 JOKE tx got MASTERNODE_MIN_CONFIRMATIONS
-    uint256 hashBlock = UINT256_ZERO;
-    CTransaction tx2;
-    GetTransaction(vin.prevout.hash, tx2, hashBlock, true);
-    BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
-    if (mi != mapBlockIndex.end() && (*mi).second) {
-        CBlockIndex* pMNIndex = (*mi).second;                                                        // block for 1000 JokeCoin tx -> 1 confirmation
-        CBlockIndex* pConfIndex = chainActive[pMNIndex->nHeight + MASTERNODE_MIN_CONFIRMATIONS - 1]; // block where tx got MASTERNODE_MIN_CONFIRMATIONS
-        if (pConfIndex->GetBlockTime() > sigTime) {
-            LogPrint(BCLog::MASTERNODE,"mnb - Bad sigTime %d for Masternode %s (%i conf block is at %d)\n",
-                sigTime, vin.prevout.hash.ToString(), MASTERNODE_MIN_CONFIRMATIONS, pConfIndex->GetBlockTime());
-            return false;
-        }
+    CBlockIndex* pConfIndex = WITH_LOCK(cs_main, return chainActive[utxoHeight + MasternodeCollateralMinConf() - 1]); // block where tx got MASTERNODE_MIN_CONFIRMATIONS
+    if (pConfIndex->GetBlockTime() > sigTime) {
+        LogPrint(BCLog::MASTERNODE,"mnb - Bad sigTime %d for Masternode %s (%i conf block is at %d)\n",
+            sigTime, vin.prevout.hash.ToString(), MasternodeCollateralMinConf(), pConfIndex->GetBlockTime());
+        return false;
     }
 
     LogPrint(BCLog::MASTERNODE,"mnb - Got NEW Masternode entry - %s - %lli \n", vin.prevout.hash.ToString(), sigTime);
@@ -665,22 +566,15 @@ CMasternodePing::CMasternodePing() :
         CSignedMessage(),
         vin(),
         blockHash(),
-        sigTime(GetAdjustedTime())
+        sigTime(0)
 { }
 
-CMasternodePing::CMasternodePing(CTxIn& newVin) :
+CMasternodePing::CMasternodePing(const CTxIn& newVin, const uint256& nBlockHash, uint64_t _sigTime) :
         CSignedMessage(),
         vin(newVin),
-        sigTime(GetAdjustedTime())
-{
-    int nHeight;
-    {
-        LOCK(cs_main);
-        nHeight = chainActive.Height();
-        if (nHeight > 12)
-            blockHash = chainActive[nHeight - 12]->GetBlockHash();
-    }
-}
+        blockHash(nBlockHash),
+        sigTime(_sigTime)
+{ }
 
 uint256 CMasternodePing::GetHash() const
 {
@@ -696,24 +590,33 @@ std::string CMasternodePing::GetStrMessage() const
     return vin.ToString() + blockHash.ToString() + std::to_string(sigTime);
 }
 
-bool CMasternodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fCheckSigTimeOnly)
+bool CMasternodePing::CheckAndUpdate(int& nDos, bool fRequireAvailable, bool fCheckSigTimeOnly)
 {
     if (sigTime > GetAdjustedTime() + 60 * 60) {
         LogPrint(BCLog::MNPING,"%s: Signature rejected, too far into the future %s\n", __func__, vin.prevout.hash.ToString());
-        nDos = 1;
+        nDos = 30;
         return false;
     }
 
     if (sigTime <= GetAdjustedTime() - 60 * 60) {
         LogPrint(BCLog::MNPING,"%s: Signature rejected, too far into the past %s - %d %d \n", __func__, vin.prevout.hash.ToString(), sigTime, GetAdjustedTime());
-        nDos = 1;
+        nDos = 30;
+        return false;
+    }
+
+    // Check if the ping block hash exists and it's within 24 blocks from the tip
+    if (!mnodeman.IsWithinDepth(blockHash, 2 * MNPING_DEPTH)) {
+        LogPrint(BCLog::MNPING,"%s: Masternode %s block hash %s is too old or has an invalid block hash\n",
+                                        __func__, vin.prevout.hash.ToString(), blockHash.ToString());
+        // don't ban peers relaying stale data before the active protocol enforcement
+        nDos = (ActiveProtocol() < MIN_PEER_CACHEDVERSION ? 0 : 33);
         return false;
     }
 
     // see if we have this Masternode
-    CMasternode* pmn = mnodeman.Find(vin);
+    CMasternode* pmn = mnodeman.Find(vin.prevout);
     const bool isMasternodeFound = (pmn != nullptr);
-    const bool isSignatureValid = (isMasternodeFound && CheckSignature(pmn->pubKeyMasternode));
+    const bool isSignatureValid = (isMasternodeFound && CheckSignature(pmn->pubKeyMasternode.GetID()));
 
     if(fCheckSigTimeOnly) {
         if (isMasternodeFound && !isSignatureValid) {
@@ -726,45 +629,34 @@ bool CMasternodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fChec
     LogPrint(BCLog::MNPING, "%s: New Ping - %s - %s - %lli\n", __func__, GetHash().ToString(), blockHash.ToString(), sigTime);
 
     if (isMasternodeFound && pmn->protocolVersion >= ActiveProtocol()) {
-        if (fRequireEnabled && !pmn->IsEnabled()) return false;
+
+        // Update ping only if the masternode is in available state (pre-enabled or enabled)
+        if (fRequireAvailable && !pmn->IsAvailableState()) {
+            nDos = 20;
+            return false;
+        }
 
         // update only if there is no known ping for this masternode or
         // last ping was more then MASTERNODE_MIN_MNP_SECONDS-60 ago comparing to this one
-        if (!pmn->IsPingedWithin(MASTERNODE_MIN_MNP_SECONDS - 60, sigTime)) {
+        if (!pmn->IsPingedWithin(MasternodeMinPingSeconds() - 60, sigTime)) {
             if (!isSignatureValid) {
                 nDos = 33;
                 return false;
             }
 
-            // Check if the ping block hash exists in disk
-            BlockMap::iterator mi = mapBlockIndex.find(blockHash);
-            if (mi == mapBlockIndex.end() || !(*mi).second) {
-                LogPrint(BCLog::MNPING,"%s: ping block not in disk. Masternode %s block hash %s\n", __func__, vin.prevout.hash.ToString(), blockHash.ToString());
-                return false;
-            }
+            // ping have passed the basic checks, can be updated now
+            mnodeman.mapSeenMasternodePing.emplace(GetHash(), *this);
 
-            // Verify ping block hash in main chain and in the [ tip > x > tip - 24 ] range.
-            {
-                LOCK(cs_main);
-                if (!chainActive.Contains((*mi).second) || (chainActive.Height() - (*mi).second->nHeight > 24)) {
-                    LogPrint(BCLog::MNPING,"%s: Masternode %s block hash %s is too old or has an invalid block hash\n",
-                            __func__, vin.prevout.hash.ToString(), blockHash.ToString());
-                    // Do nothing here (no Masternode update, no mnping relay)
-                    // Let this node to be visible but fail to accept mnping
-                    return false;
-                }
-            }
-
-            pmn->lastPing = *this;
+            // SetLastPing locks masternode cs. Be careful with the lock ordering.
+            pmn->SetLastPing(*this);
 
             //mnodeman.mapSeenMasternodeBroadcast.lastPing is probably outdated, so we'll update it
             CMasternodeBroadcast mnb(*pmn);
-            uint256 hash = mnb.GetHash();
+            const uint256& hash = mnb.GetHash();
             if (mnodeman.mapSeenMasternodeBroadcast.count(hash)) {
                 mnodeman.mapSeenMasternodeBroadcast[hash].lastPing = *this;
             }
 
-            pmn->Check(true);
             if (!pmn->IsEnabled()) return false;
 
             LogPrint(BCLog::MNPING, "%s: Masternode ping accepted, vin: %s\n", __func__, vin.prevout.hash.ToString());
@@ -785,4 +677,12 @@ void CMasternodePing::Relay()
 {
     CInv inv(MSG_MASTERNODE_PING, GetHash());
     g_connman->RelayInv(inv);
+}
+
+MasternodeRef MakeMasternodeRefForDMN(const CDeterministicMNCPtr& dmn)
+{
+    // create legacy masternode for DMN
+    int refHeight = std::max(dmn->pdmnState->nRegisteredHeight, dmn->pdmnState->nPoSeRevivedHeight);
+    const CBlockIndex* pindex = WITH_LOCK(cs_main, return mapBlockIndex.at(chainActive[refHeight]->GetBlockHash()); );
+    return std::make_shared<CMasternode>(CMasternode(dmn, pindex->GetBlockTime(), pindex->GetBlockHash()));
 }

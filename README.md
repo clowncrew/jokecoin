@@ -1,59 +1,55 @@
 JokeCoin Core integration/staging repository
 =====================================
 
-[![Build Status](https://travis-ci.org/JokeCoin-Project/JokeCoin.svg?branch=master)](https://travis-ci.org/JokeCoin-Project/JokeCoin) [![GitHub version](https://badge.fury.io/gh/JokeCoin-Project%2FJokeCoin.svg)](https://badge.fury.io/gh/JokeCoin-Project%2FJokeCoin)
+[![master Actions Status](https://github.com/JokeCoin-Project/JokeCoin/workflows/CI%20Actions%20for%20JokeCoin/badge.svg)](https://github.com/JokeCoin-Project/JokeCoin/actions)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/JokeCoin-Project/jokecoin?color=%235c4b7d&cacheSeconds=3600)](https://github.com/JokeCoin-Project/JokeCoin/releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date/JokeCoin-Project/jokecoin?color=%235c4b7d&cacheSeconds=3600)](https://github.com/JokeCoin-Project/JokeCoin/releases)
 
-JokeCoin is an open source cryptocurrency focused on fast, private transactions using the Zerocoin protocol, with low transaction fees & environmental footprint.  It utilizes the first ever anonymous proof of stake protocol, called zPoS, combined with regular PoS and masternodes for securing its network. zPoS incentivizes using the privacy features available in JokeCoin by granting a higher block reward for zPoS over regular PoS and masternodes. In practice, JokeCoin has between 4 to 10 times higher use of its privacy features in comparison to other coins that combine public and private transactions. This is thanks to innovations like zPoS and integrating the Zerocoin protocol into light/mobile wallets, allowing for a complete and lightweight privacy protocol that can be used on the go. This also includes security improvements like [deterministic generation of zJOKE for easy backups.](https://www.reddit.com/r/jokecoin/comments/8gbjf7/how_to_use_deterministic_zerocoin_generation/)
-The goal of JokeCoin is to achieve a decentralized, sustainable cryptocurrency with near instant full-time private transactions, fair governance and community intelligence.
-- Anonymized transactions & consensus using the [_Zerocoin Protocol_](http://www.jokecoin.org/zjoke) and [zPoS](https://jokecoin.org/zpos/).
-- light/mobile wallet privacy using the [Zerocoin Light Node Protocol](https://jokecoin.org/wp-content/uploads/2018/11/Zerocoin_Light_Node_Protocol.pdf)
-- Fast transactions featuring guaranteed zero confirmation transactions, we call it _SwiftX_.
-- Decentralized blockchain voting utilizing Masternode technology to form a DAO. The blockchain will distribute monthly treasury funds based on successful proposals submitted by the community and voted on by the DAO.
+## What is JokeCoin?
 
-More information at [jokecoin.org](http://www.jokecoin.org) Visit our ANN thread at [BitcoinTalk](http://www.bitcointalk.org/index.php?topic=1262920). Join the community at [JokeCoin Discord](https://discordapp.com/invite/jzqVsJd).
+JokeCoin is an open source community-driven cryptocurrency, focused on five main aspects:
 
-### Coin Specs
-<table>
-<tr><td>Algo</td><td>Quark</td></tr>
-<tr><td>Block Time</td><td>60 Seconds</td></tr>
-<tr><td>Difficulty Retargeting</td><td>Every Block</td></tr>
-<tr><td>Max Coin Supply (PoW Phase)</td><td>43,199,500 JOKE</td></tr>
-<tr><td>Max Coin Supply (PoS Phase)</td><td>Infinite</td></tr>
-<tr><td>Premine</td><td>60,000 JOKE*</td></tr>
-</table>
+(1) User Data Protection: Through the use of SHIELD, a zk-SNARKs based privacy protocol.
 
-*60,000 JOKE Premine was burned in block [279917](http://www.presstab.pw/phpexplorer/JokeCoin/block.php?blockhash=206d9cfe859798a0b0898ab00d7300be94de0f5469bb446cecb41c3e173a57e0)
+(2) Low environmental footprint and network participation equality: Through the use of a highly developed Proof of Stake protocol.
 
-### Reward Distribution
+(3) Decentralized Governance System: A DAO built on top of the tier two Masternodes network, enabling a monthly community treasury, proposals submission and decentralized voting.
 
-<table>
-<th colspan=4>Genesis Block</th>
-<tr><th>Block Height</th><th>Reward Amount</th><th>Notes</th></tr>
-<tr><td>1</td><td>60,000 JOKE</td><td>Initial Pre-mine, burnt in block <a href="http://www.presstab.pw/phpexplorer/JokeCoin/block.php?blockhash=206d9cfe859798a0b0898ab00d7300be94de0f5469bb446cecb41c3e173a57e0">279917</a></td></tr>
-</table>
+(4) Fast Transactions: Through the use of fast block times and the tier two network, JokeCoin is committed to continue researching new and better instant transactions mechanisms.
 
-### PoW Rewards Breakdown
+(5) Ease of Use: JokeCoin is determined to offer the best possible graphical interface for a core node/wallet. A full featured graphical product for new and advanced users.
 
-<table>
-<th>Block Height</th><th>Masternodes</th><th>Miner</th><th>Budget</th>
-<tr><td>2-43200</td><td>20% (50 JOKE)</td><td>80% (200 JOKE)</td><td>N/A</td></tr>
-<tr><td>43201-151200</td><td>20% (50 JOKE)</td><td>70% (200 JOKE)</td><td>10% (25 JOKE)</td></tr>
-<tr><td>151201-259200</td><td>45% (22.5 JOKE)</td><td>45% (22.5 JOKE)</td><td>10% (5 JOKE)</td></tr>
-</table>
+A lot more information and specs at [JokeCoin.org](https://www.jokecoin.org/). Join the community at [JokeCoin Discord](https://discordapp.com/invite/jzqVsJd).
 
-### PoS Rewards Breakdown
+## License
+JokeCoin Core is released under the terms of the MIT license. See [COPYING](https://github.com/JokeCoin-Project/JokeCoin/blob/master/COPYING) for more information or see https://opensource.org/licenses/MIT.
 
-<table>
-<th>Phase</th><th>Block Height</th><th>Reward</th><th>Masternodes & Stakers</th><th>Budget</th>
-<tr><td>Phase 0</td><td>259201-302399</td><td>50 JOKE</td><td>90% (45 JOKE)</td><td>10% (5 JOKE)</td></tr>
-<tr><td>Phase 1</td><td>302400-345599</td><td>45 JOKE</td><td>90% (40.5 JOKE)</td><td>10% (4.5 JOKE)</td></tr>
-<tr><td>Phase 2</td><td>345600-388799</td><td>40 JOKE</td><td>90% (36 JOKE)</td><td>10% (4 JOKE)</td></tr>
-<tr><td>Phase 3</td><td>388800-431999</td><td>35 JOKE</td><td>90% (31.5 JOKE)</td><td>10% (3.5 JOKE)</td></tr>
-<tr><td>Phase 4</td><td>432000-475199</td><td>30 JOKE</td><td>90% (27 JOKE)</td><td>10% (3 JOKE)</td></tr>
-<tr><td>Phase 5</td><td>475200-518399</td><td>25 JOKE</td><td>90% (22.5 JOKE)</td><td>10% (2.5 JOKE)</td></tr>
-<tr><td>Phase 6</td><td>518400-561599</td><td>20 JOKE</td><td>90% (18 JOKE)</td><td>10% (2 JOKE)</td></tr>
-<tr><td>Phase 7</td><td>561600-604799</td><td>15 JOKE</td><td>90% (13.5 JOKE)</td><td>10% (1.5 JOKE)</td></tr>
-<tr><td>Phase 8</td><td>604800-647999</td><td>10 JOKE</td><td>90% (9 JOKE)</td><td>10% (1 JOKE)</td></tr>
-<tr><td>Phase 9</td><td>648000-1154203</td><td>5 JOKE</td><td>90% (4.5 JOKE)</td><td>10% (0.5 JOKE)</td></tr>
-<tr><td>Phase X</td><td>1154203-∞</td><td>6 JOKE</td><td>84% (5 JOKE/zJOKE)</td><td>16% (1 JOKE)</td></tr>
-</table>
+## Development Process
+
+The master branch is regularly built (see doc/build-*.md for instructions) and tested, but it is not guaranteed to be completely stable. [Tags](https://github.com/JokeCoin-Project/JokeCoin/tags) are created regularly from release branches to indicate new official, stable release versions of JokeCoin Core.
+
+The contribution workflow is described in [CONTRIBUTING.md](https://github.com/JokeCoin-Project/JokeCoin/blob/master/CONTRIBUTING.md) and useful hints for developers can be found in [doc/developer-notes.md](https://github.com/JokeCoin-Project/JokeCoin/blob/master/doc/developer-notes.md).
+
+## Testing
+
+Testing and code review is the bottleneck for development; we get more pull requests than we can review and test on short notice. Please be patient and help out by testing other people's pull requests, and remember this is a security-critical project where any mistake might cost people a lot of money.
+
+## Automated Testing
+
+Developers are strongly encouraged to write [unit tests](https://github.com/JokeCoin-Project/JokeCoin/blob/master/src/test/README.md) for new code, and to submit new unit tests for old code. Unit tests can be compiled and run (assuming they weren't disabled in configure) with: make check. Further details on running and extending unit tests can be found in [/src/test/README.md](https://github.com/JokeCoin-Project/JokeCoin/blob/master/src/test/README.md).
+
+There are also regression and integration tests, written in Python. These tests can be run (if the test dependencies are installed) with: test/functional/test_runner.py`
+
+The CI (Continuous Integration) systems make sure that every pull request is built for Windows, Linux, and macOS, and that unit/sanity tests are run automatically.
+
+## Manual Quality Assurance (QA) Testing
+
+Changes should be tested by somebody other than the developer who wrote the code. This is especially important for large or high-risk changes. It is useful to add a test plan to the pull request description if testing the changes is not straightforward.
+
+## Translations
+
+Changes to translations as well as new translations can be submitted to JokeCoin Core's Transifex page.
+
+Translations are periodically pulled from Transifex and merged into the git repository. See the [translation process](https://github.com/JokeCoin-Project/JokeCoin/blob/master/doc/translation_process.md) for details on how this works.
+
+Important: We do not accept translation changes as GitHub pull requests because the next pull from Transifex would automatically overwrite them again.

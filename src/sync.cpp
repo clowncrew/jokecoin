@@ -5,14 +5,15 @@
 
 #include "sync.h"
 
-#include <memory>
-#include <set>
-
-#include "util.h"
+#include "logging.h"
 #include "utilstrencodings.h"
 #include "util/threadnames.h"
 
 #include <stdio.h>
+
+#include <map>
+#include <memory>
+#include <set>
 
 #ifdef DEBUG_LOCKCONTENTION
 #if !defined(HAVE_THREAD_LOCAL)
@@ -124,7 +125,7 @@ static void push_lock(void* c, const CLockLocation& locklocation)
     LockData& lockdata = GetLockData();
     std::lock_guard<std::mutex> lock(lockdata.dd_mutex);
 
-    g_lockstack.push_back(std::make_pair(c, locklocation));
+    g_lockstack.emplace_back(c, locklocation);
 
     for (const std::pair<void*, CLockLocation>& i : g_lockstack) {
         if (i.first == c)

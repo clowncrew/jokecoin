@@ -7,34 +7,34 @@
 // Unit tests for denial-of-service detection/prevention code
 //
 
+#include "test/test_jokecoin.h"
 
-
+#include "arith_uint256.h"
 #include "keystore.h"
-#include "main.h"
+#include "net_processing.h"
 #include "net.h"
+#include "pubkey.h"
 #include "pow.h"
 #include "script/sign.h"
 #include "serialize.h"
-#include "util.h"
-
-#include "test/test_jokecoin.h"
+#include "util/system.h"
+#include "validation.h"
 
 #include <stdint.h>
 
-#include <boost/assign/list_of.hpp> // for 'map_list_of()'
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
-// Tests this internal-to-main.cpp method:
-extern bool AddOrphanTx(const CTransaction& tx, NodeId peer);
+// Tests this internal-to-validation.cpp method:
+extern bool AddOrphanTx(const CTransactionRef& tx, NodeId peer);
 extern void EraseOrphansFor(NodeId peer);
 extern unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans);
 struct COrphanTx {
-    CTransaction tx;
+    CTransactionRef tx;
     NodeId fromPeer;
+    int64_t nTimeExpire;
 };
-extern std::map<uint256, COrphanTx> mapOrphanTransactions;
-extern std::map<uint256, std::set<uint256> > mapOrphanTransactionsByPrev;
+extern RecursiveMutex g_cs_orphans;
+extern std::map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(g_cs_orphans);
 
 CService ip(uint32_t i)
 {
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(DoS_banscore)
     std::atomic<bool> interruptDummy(false);
 
     connman->ClearBanned();
-    mapArgs["-banscore"] = "111"; // because 11 is my favorite number
+    gArgs.ForceSetArg("-banscore", "111"); // because 11 is my favorite number
     CAddress addr1(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode1(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr1, 3, 1, "", true);
     dummyNode1.SetSendVersion(PROTOCOL_VERSION);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(DoS_banscore)
     misbehave(dummyNode1.GetId(), 1);
     SendMessages(&dummyNode1, *connman, interruptDummy);
     BOOST_CHECK(connman->IsBanned(addr1));
-    mapArgs.erase("-banscore");
+    gArgs.ForceSetArg("-banscore", std::to_string(DEFAULT_BANSCORE_THRESHOLD));
 }
 
 BOOST_AUTO_TEST_CASE(DoS_bantime)
@@ -133,19 +133,36 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
     BOOST_CHECK(!connman->IsBanned(addr));
 }
 
-CTransaction RandomOrphan()
+CTransactionRef RandomOrphan()
 {
     std::map<uint256, COrphanTx>::iterator it;
+    LOCK2(cs_main, g_cs_orphans);
     it = mapOrphanTransactions.lower_bound(InsecureRand256());
     if (it == mapOrphanTransactions.end())
         it = mapOrphanTransactions.begin();
     return it->second.tx;
 }
 
+static void MakeNewKeyWithFastRandomContext(CKey& key)
+{
+    std::vector<unsigned char> keydata;
+    keydata = insecure_rand_ctx.randbytes(32);
+    key.Set(keydata.data(), keydata.data() + keydata.size(), /*fCompressedIn*/ true);
+    assert(key.IsValid());
+}
+
 BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
 {
+    // This test had non-deterministic coverage due to
+    // randomly selected seeds.
+    // This seed is chosen so that all branches of the function
+    // ecdsa_signature_parse_der_lax are executed during this test.
+    // Specifically branches that run only when an ECDSA
+    // signature's R and S values have leading zeros.
+    insecure_rand_ctx = FastRandomContext(ArithToUint256(arith_uint256(33)));
+
     CKey key;
-    key.MakeNewKey(true);
+    MakeNewKeyWithFastRandomContext(key);
     CBasicKeyStore keystore;
     keystore.AddKey(key);
 
@@ -161,50 +178,51 @@ BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
         tx.vout[0].nValue = 1*CENT;
         tx.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
 
-        AddOrphanTx(tx, i);
+        AddOrphanTx(MakeTransactionRef(tx), i);
     }
 
     // ... and 50 that depend on other orphans:
     for (int i = 0; i < 50; i++)
     {
-        CTransaction txPrev = RandomOrphan();
+        CTransactionRef txPrev = RandomOrphan();
 
         CMutableTransaction tx;
         tx.vin.resize(1);
         tx.vin[0].prevout.n = 0;
-        tx.vin[0].prevout.hash = txPrev.GetHash();
+        tx.vin[0].prevout.hash = txPrev->GetHash();
         tx.vout.resize(1);
         tx.vout[0].nValue = 1*CENT;
         tx.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
-        SignSignature(keystore, txPrev, tx, 0, SIGHASH_ALL);
+        SignSignature(keystore, *txPrev, tx, 0, SIGHASH_ALL);
 
-        AddOrphanTx(tx, i);
+        AddOrphanTx(MakeTransactionRef(tx), i);
     }
 
     // This really-big orphan should be ignored:
     for (int i = 0; i < 10; i++)
     {
-        CTransaction txPrev = RandomOrphan();
+        CTransactionRef txPrev = RandomOrphan();
 
         CMutableTransaction tx;
         tx.vout.resize(1);
         tx.vout[0].nValue = 1*CENT;
         tx.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
-        tx.vin.resize(500);
+        tx.vin.resize(2777);
         for (unsigned int j = 0; j < tx.vin.size(); j++)
         {
             tx.vin[j].prevout.n = j;
-            tx.vin[j].prevout.hash = txPrev.GetHash();
+            tx.vin[j].prevout.hash = txPrev->GetHash();
         }
-        SignSignature(keystore, txPrev, tx, 0, SIGHASH_ALL);
+        SignSignature(keystore, *txPrev, tx, 0, SIGHASH_ALL);
         // Re-use same signature for other inputs
         // (they don't have to be valid for this test)
         for (unsigned int j = 1; j < tx.vin.size(); j++)
             tx.vin[j].scriptSig = tx.vin[0].scriptSig;
 
-        BOOST_CHECK(!AddOrphanTx(tx, i));
+        BOOST_CHECK(!AddOrphanTx(MakeTransactionRef(tx), i));
     }
 
+    LOCK2(cs_main, g_cs_orphans);
     // Test EraseOrphansFor:
     for (NodeId i = 0; i < 3; i++)
     {
@@ -220,7 +238,6 @@ BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
     BOOST_CHECK(mapOrphanTransactions.size() <= 10);
     LimitOrphanTxSize(0);
     BOOST_CHECK(mapOrphanTransactions.empty());
-    BOOST_CHECK(mapOrphanTransactionsByPrev.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

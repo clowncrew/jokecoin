@@ -7,7 +7,7 @@
 #include "base58.h"
 #include "chainparams.h"
 #include "tinyformat.h"
-#include "util.h"
+#include "util/system.h"
 #include "utilstrencodings.h"
 
 bool CHDChain::SetNull()

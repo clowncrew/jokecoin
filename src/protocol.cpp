@@ -7,7 +7,7 @@
 
 #include "protocol.h"
 
-#include "util.h"
+#include "util/system.h"
 #include "utilstrencodings.h"
 
 #ifndef WIN32
@@ -38,8 +38,6 @@ const char* FILTERADD = "filteradd";
 const char* FILTERCLEAR = "filterclear";
 const char* REJECT = "reject";
 const char* SENDHEADERS = "sendheaders";
-const char* IX = "ix";
-const char* IXLOCKVOTE = "txlvote";
 const char* SPORK = "spork";
 const char* GETSPORKS = "getsporks";
 const char* MNBROADCAST = "mnb";
@@ -60,19 +58,19 @@ static const char* ppszTypeName[] = {
     NetMsgType::TX,
     NetMsgType::BLOCK,
     "filtered block", // Should never occur
-    NetMsgType::IX,
-    NetMsgType::IXLOCKVOTE,
+    "ix",   // deprecated
+    "txlvote", // deprecated
     NetMsgType::SPORK,
-    NetMsgType::GETSPORKS,
+    NetMsgType::MNWINNER,
+    "mnodescanerr",
+    NetMsgType::BUDGETVOTE,
+    NetMsgType::BUDGETPROPOSAL,
+    NetMsgType::FINALBUDGET,
+    NetMsgType::FINALBUDGETVOTE,
+    "mnq",
     NetMsgType::MNBROADCAST,
     NetMsgType::MNPING,
-    NetMsgType::MNWINNER,
-    NetMsgType::GETMNWINNERS,
-    NetMsgType::GETMNLIST,
-    NetMsgType::BUDGETPROPOSAL,
-    NetMsgType::BUDGETVOTE,
-    NetMsgType::FINALBUDGET,
-    NetMsgType::FINALBUDGETVOTE
+    "dstx"  // deprecated
 };
 
 /** All known message types. Keep this in the same order as the list of
@@ -101,20 +99,24 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
     NetMsgType::SENDHEADERS,
-    NetMsgType::IX,
-    NetMsgType::IXLOCKVOTE,
+    "filtered block", // Should never occur
+    "ix",   // deprecated
+    "txlvote", // deprecated
     NetMsgType::SPORK,
-    NetMsgType::GETSPORKS,
-    NetMsgType::MNBROADCAST,
-    NetMsgType::MNPING,
     NetMsgType::MNWINNER,
-    NetMsgType::GETMNWINNERS,
-    NetMsgType::GETMNLIST,
-    NetMsgType::BUDGETPROPOSAL,
+    "mnodescanerr",
     NetMsgType::BUDGETVOTE,
-    NetMsgType::BUDGETVOTESYNC,
+    NetMsgType::BUDGETPROPOSAL,
     NetMsgType::FINALBUDGET,
     NetMsgType::FINALBUDGETVOTE,
+    "mnq",
+    NetMsgType::MNBROADCAST,
+    NetMsgType::MNPING,
+    "dstx",  // deprecated
+    NetMsgType::GETMNWINNERS,
+    NetMsgType::GETMNLIST,
+    NetMsgType::BUDGETVOTESYNC,
+    NetMsgType::GETSPORKS,
     NetMsgType::SYNCSTATUSCOUNT
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes + ARRAYLEN(allNetMessageTypes));
@@ -130,8 +132,13 @@ CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn)
 CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn, const char* pszCommand, unsigned int nMessageSizeIn)
 {
     memcpy(pchMessageStart, pchMessageStartIn, MESSAGE_START_SIZE);
-    memset(pchCommand, 0, sizeof(pchCommand));
-    strncpy(pchCommand, pszCommand, COMMAND_SIZE);
+
+    // Copy the command name, zero-padding to COMMAND_SIZE bytes
+    size_t i = 0;
+    for (; i < COMMAND_SIZE && pszCommand[i] != 0; ++i) pchCommand[i] = pszCommand[i];
+    assert(pszCommand[i] == 0); // Assert that the command name passed in is not longer than COMMAND_SIZE
+    for (; i < COMMAND_SIZE; ++i) pchCommand[i] = 0;
+
     nMessageSize = nMessageSizeIn;
     memset(pchChecksum, 0, CHECKSUM_SIZE);
 }
@@ -197,20 +204,6 @@ CInv::CInv(int typeIn, const uint256& hashIn)
     hash = hashIn;
 }
 
-CInv::CInv(const std::string& strType, const uint256& hashIn)
-{
-    unsigned int i;
-    for (i = 1; i < ARRAYLEN(ppszTypeName); i++) {
-        if (strType == ppszTypeName[i]) {
-            type = i;
-            break;
-        }
-    }
-    if (i == ARRAYLEN(ppszTypeName))
-        LogPrint(BCLog::NET, "CInv::CInv(string, uint256) : unknown type '%s'", strType);
-    hash = hashIn;
-}
-
 bool operator<(const CInv& a, const CInv& b)
 {
     return (a.type < b.type || (a.type == b.type && a.hash < b.hash));
@@ -222,7 +215,7 @@ bool CInv::IsKnownType() const
 }
 
 bool CInv::IsMasterNodeType() const{
-     return (type >= 6);
+     return type > 2;
 }
 
 const char* CInv::GetCommand() const

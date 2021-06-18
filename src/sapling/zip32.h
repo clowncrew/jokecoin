@@ -5,12 +5,12 @@
 #ifndef JokeCoin_ZIP32_H
 #define JokeCoin_ZIP32_H
 
-#include "serialize.h"
-#include "allocators.h"
-#include "blob_uint256.h"
-#include "key.h"
 #include "uint256.h"
-#include "sapling/address.hpp"
+#include "key.h"
+#include "sapling/address.h"
+#include "serialize.h"
+#include "support/allocators/zeroafterfree.h"
+#include "uint256.h"
 
 #include <boost/optional.hpp>
 
@@ -41,6 +41,9 @@ public:
         return !(a == b);
     }
 };
+
+// This is not part of ZIP 32, but is here because it's linked to the seed (for now).
+uint256 ovkForShieldingFromTaddr(HDSeed& seed);
 
 namespace libzcash {
 
@@ -131,11 +134,15 @@ struct SaplingExtendedSpendingKey {
     }
 };
 
-typedef boost::variant<InvalidEncoding, SproutSpendingKey, SaplingExtendedSpendingKey> SpendingKey;
+typedef boost::variant<InvalidEncoding, SaplingExtendedSpendingKey> SpendingKey;
+typedef boost::variant<InvalidEncoding, SaplingExtendedFullViewingKey> ViewingKey;
 
 }
 
 /** Check whether a SpendingKey is not an InvalidEncoding. */
 bool IsValidSpendingKey(const libzcash::SpendingKey& zkey);
+
+/** Check whether a ViewingKey is not an InvalidEncoding. */
+bool IsValidViewingKey(const libzcash::ViewingKey& vk);
 
 #endif // JokeCoin_ZIP32_H

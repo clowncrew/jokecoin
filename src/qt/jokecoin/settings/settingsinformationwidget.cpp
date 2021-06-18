@@ -1,6 +1,6 @@
 // Copyright (c) 2019-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
 #include "qt/jokecoin/settings/settingsinformationwidget.h"
 #include "qt/jokecoin/settings/forms/ui_settingsinformationwidget.h"
@@ -8,11 +8,13 @@
 #include "clientmodel.h"
 #include "chainparams.h"
 #include "db.h"
-#include "util.h"
+#include "util/system.h"
 #include "guiutil.h"
 #include "qt/jokecoin/qtutils.h"
 
 #include <QDir>
+
+#define REQUEST_UPDATE_COUNTS 0
 
 SettingsInformationWidget::SettingsInformationWidget(JokeCoinGUI* _window,QWidget *parent) :
     PWidget(_window,parent),
@@ -89,7 +91,7 @@ SettingsInformationWidget::SettingsInformationWidget(JokeCoinGUI* _window,QWidge
 #ifdef ENABLE_WALLET
     // Wallet data -- remove it with if it's needed
     ui->labelInfoBerkeley->setText(DbEnv::version(0, 0, 0));
-    ui->labelInfoDataDir->setText(QString::fromStdString(GetDataDir().string() + QDir::separator().toLatin1() + GetArg("-wallet", DEFAULT_WALLET_DAT)));
+    ui->labelInfoDataDir->setText(QString::fromStdString(GetDataDir().string() + QDir::separator().toLatin1() + gArgs.GetArg("-wallet", DEFAULT_WALLET_DAT)));
 #else
     ui->labelInfoBerkeley->setText(tr("No information"));
 #endif
@@ -139,6 +141,7 @@ void SettingsInformationWidget::setNumConnections(int count)
 
 void SettingsInformationWidget::setNumBlocks(int count)
 {
+    if (!isVisible()) return;
     ui->labelInfoBlockNumber->setText(QString::number(count));
     if (clientModel) {
         ui->labelInfoBlockTime->setText(clientModel->getLastBlockDate().toString());
@@ -165,6 +168,8 @@ void SettingsInformationWidget::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
     if (clientModel) {
         clientModel->startMasternodesTimer();
+        // Initial masternodes count value, running in a worker thread to not lock mnmanager mutex in the main thread.
+        execute(REQUEST_UPDATE_COUNTS);
     }
 }
 
@@ -172,6 +177,23 @@ void SettingsInformationWidget::hideEvent(QHideEvent *event) {
     QWidget::hideEvent(event);
     if (clientModel) {
         clientModel->stopMasternodesTimer();
+    }
+}
+
+void SettingsInformationWidget::run(int type)
+{
+    if (type == REQUEST_UPDATE_COUNTS) {
+        QMetaObject::invokeMethod(this, "setMasternodeCount",
+                                  Qt::QueuedConnection, Q_ARG(QString, clientModel->getMasternodesCount()));
+        QMetaObject::invokeMethod(this, "setNumBlocks",
+                                  Qt::QueuedConnection, Q_ARG(int, clientModel->getLastBlockProcessedHeight()));
+    }
+}
+
+void SettingsInformationWidget::onError(QString error, int type)
+{
+    if (type == REQUEST_UPDATE_COUNTS) {
+        setMasternodeCount(tr("No available data"));
     }
 }
 

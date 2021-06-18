@@ -11,10 +11,6 @@
 #include <QAbstractListModel>
 #include <QSettings>
 
-QT_BEGIN_NAMESPACE
-class QNetworkProxy;
-QT_END_NAMESPACE
-
 /** Interface from Qt to configuration data structure for JokeCoin client.
    To Qt, the options are presented as a list with the different options
    laid out vertically.
@@ -55,10 +51,7 @@ public:
         AnonymizeJokeCoinAmount, //int
         ShowMasternodesTab,  // bool
         Listen,              // bool
-        StakeSplitThreshold,    // CAmount (LongLong)
         ShowColdStakingScreen,  // bool
-        fUseCustomFee,          // bool
-        nCustomFee,             // CAmount (LongLong)
         OptionIDRowCount,
     };
 
@@ -71,13 +64,6 @@ public:
     void refreshDataView();
     /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
     void setDisplayUnit(const QVariant& value);
-    /* Update StakeSplitThreshold's value in wallet */
-    void setStakeSplitThreshold(const CAmount value);
-    double getSSTMinimum() const;
-    bool isSSTValid();
-    /* Update Custom Fee value in wallet */
-    void setUseCustomFee(bool fUse);
-    void setCustomFeeValue(const CAmount& value);
 
     /* Explicit getters */
     bool isHideCharts() { return fHideCharts; }
@@ -85,7 +71,6 @@ public:
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
     QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
-    bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
     const QString& getLang() { return language; }
@@ -93,8 +78,6 @@ public:
     /* Restart flag helper */
     void setRestartRequired(bool fRequired);
     bool isRestartRequired();
-    void setSSTChanged(bool fChanged);
-    bool isSSTChanged();
     bool resetSettings;
 
     bool isColdStakingScreenEnabled() { return showColdStakingScreen; }

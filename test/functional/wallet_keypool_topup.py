@@ -16,7 +16,6 @@ from test_framework.test_framework import JokeCoinTestFramework
 from test_framework.util import (
     assert_equal,
     connect_nodes,
-    sync_blocks,
 )
 
 class KeypoolRestoreTest(JokeCoinTestFramework):
@@ -51,7 +50,7 @@ class KeypoolRestoreTest(JokeCoinTestFramework):
         self.nodes[0].generate(1)
         self.nodes[0].sendtoaddress(addr_extpool, 5)
         self.nodes[0].generate(1)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
 
         self.log.info("Restart node with wallet backup")
 

@@ -6,13 +6,12 @@
 // Unit tests for block.CheckBlock()
 //
 
-
+#include "test/test_jokecoin.h"
 
 #include "clientversion.h"
 #include "fs.h"
-#include "main.h"
 #include "utiltime.h"
-#include "test/test_jokecoin.h"
+#include "validation.h"
 
 #include <cstdio>
 

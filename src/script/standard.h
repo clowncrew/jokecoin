@@ -7,6 +7,7 @@
 #ifndef BITCOIN_SCRIPT_STANDARD_H
 #define BITCOIN_SCRIPT_STANDARD_H
 
+#include "chainparams.h"
 #include "script/interpreter.h"
 #include "uint256.h"
 
@@ -51,7 +52,6 @@ enum txnouttype
     TX_SCRIPTHASH,
     TX_MULTISIG,
     TX_NULL_DATA,
-    TX_ZEROCOINMINT,
     TX_COLDSTAKE
 };
 
@@ -84,5 +84,7 @@ CScript GetScriptForDestination(const CTxDestination& dest);
 CScript GetScriptForRawPubKey(const CPubKey& pubKey);
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
 CScript GetScriptForStakeDelegation(const CKeyID& stakingKey, const CKeyID& spendingKey);
+CScript GetScriptForStakeDelegationLOF(const CKeyID& stakingKey, const CKeyID& spendingKey);
+CScript GetScriptForOpReturn(const uint256& message);
 
 #endif // BITCOIN_SCRIPT_STANDARD_H

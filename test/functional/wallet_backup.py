@@ -30,11 +30,17 @@ confirm 1/2/3/4 balances are same as before.
 Shutdown again, restore using importwallet,
 and confirm again balances are correct.
 """
+from decimal import Decimal
+import os
 from random import randint
 import shutil
 
 from test_framework.test_framework import JokeCoinTestFramework
-from test_framework.util import *
+from test_framework.util import (
+    assert_equal,
+    assert_raises_rpc_error,
+    connect_nodes,
+)
 
 class WalletBackupTest(JokeCoinTestFramework):
     def set_test_params(self):
@@ -70,9 +76,9 @@ class WalletBackupTest(JokeCoinTestFramework):
 
         # Have the miner (node3) mine a block.
         # Must sync mempools before mining.
-        sync_mempools(self.nodes)
+        self.sync_mempools()
         self.nodes[3].generate(1)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
 
     # As above, this mirrors the original bash test.
     def start_three(self):
@@ -97,13 +103,13 @@ class WalletBackupTest(JokeCoinTestFramework):
     def run_test(self):
         self.log.info("Generating initial blockchain")
         self.nodes[0].generate(1)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
         self.nodes[1].generate(1)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
         self.nodes[2].generate(1)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
         self.nodes[3].generate(100)
-        sync_blocks(self.nodes)
+        self.sync_blocks()
 
         assert_equal(self.nodes[0].getbalance(), 250)
         assert_equal(self.nodes[1].getbalance(), 250)
@@ -160,7 +166,7 @@ class WalletBackupTest(JokeCoinTestFramework):
 
         self.log.info("Re-starting nodes")
         self.start_three()
-        sync_blocks(self.nodes)
+        self.sync_blocks()
 
         assert_equal(self.nodes[0].getbalance(), balance0)
         assert_equal(self.nodes[1].getbalance(), balance1)
@@ -184,7 +190,7 @@ class WalletBackupTest(JokeCoinTestFramework):
         self.nodes[1].importwallet(tmpdir + "/node1/wallet.dump")
         self.nodes[2].importwallet(tmpdir + "/node2/wallet.dump")
 
-        sync_blocks(self.nodes)
+        self.sync_blocks()
 
         assert_equal(self.nodes[0].getbalance(), balance0)
         assert_equal(self.nodes[1].getbalance(), balance1)

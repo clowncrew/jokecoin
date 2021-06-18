@@ -1,11 +1,12 @@
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2019 The JokeCoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#include "netbase.h"
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or https://www.opensource.org/licenses/mit-license.php.
 #include "masternodeconfig.h"
-#include "util.h"
+
+#include "fs.h"
+#include "netbase.h"
+#include "util/system.h"
 #include "guiinterface.h"
 #include <base58.h>
 
@@ -19,6 +20,7 @@ CMasternodeConfig::CMasternodeEntry* CMasternodeConfig::add(std::string alias, s
 }
 
 void CMasternodeConfig::remove(std::string alias) {
+    LOCK(cs_entries);
     int pos = -1;
     for (int i = 0; i < ((int) entries.size()); ++i) {
         CMasternodeEntry e = entries[i];
@@ -32,6 +34,7 @@ void CMasternodeConfig::remove(std::string alias) {
 
 bool CMasternodeConfig::read(std::string& strErr)
 {
+    LOCK(cs_entries);
     int linenumber = 1;
     fs::path pathMasternodeConfigFile = GetMasternodeConfigFile();
     fs::ifstream streamConfig(pathMasternodeConfigFile);
@@ -83,7 +86,7 @@ bool CMasternodeConfig::read(std::string& strErr)
             return false;
         }
 
-        if (port != nDefaultPort) {
+        if (port != nDefaultPort && !Params().IsRegTestNet()) {
             strErr = strprintf(_("Invalid port %d detected in masternode.conf"), port) + "\n" +
                      strprintf(_("Line: %d"), linenumber) + "\n\"" + ip + "\"" + "\n" +
                      strprintf(_("(must be %d for %s-net)"), nDefaultPort, Params().NetworkIDString());

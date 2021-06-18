@@ -3,6 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "zjoke/zpos.h"
+
+#include "validation.h"
 #include "zjokechain.h"
 
 
@@ -16,22 +18,21 @@ uint32_t ParseAccChecksum(uint256 nCheckpoint, const libzerocoin::CoinDenominati
 {
     int pos = std::distance(libzerocoin::zerocoinDenomList.begin(),
             find(libzerocoin::zerocoinDenomList.begin(), libzerocoin::zerocoinDenomList.end(), denom));
-    nCheckpoint = nCheckpoint >> (32*((libzerocoin::zerocoinDenomList.size() - 1) - pos));
-    return nCheckpoint.Get32();
+    return (UintToArith256(nCheckpoint) >> (32*((libzerocoin::zerocoinDenomList.size() - 1) - pos))).Get32();
 }
 
-bool CLegacyZJokeStake::InitFromTxIn(const CTxIn& txin)
+bool CLegacyZPivStake::InitFromTxIn(const CTxIn& txin)
 {
     // Construct the stakeinput object
     if (!txin.IsZerocoinSpend())
-        return error("%s: unable to initialize CLegacyZJokeStake from non zc-spend", __func__);
+        return error("%s: unable to initialize CLegacyZPivStake from non zc-spend", __func__);
 
     // Check spend type
     libzerocoin::CoinSpend spend = TxInToZerocoinSpend(txin);
     if (spend.getSpendType() != libzerocoin::SpendType::STAKE)
         return error("%s : spend is using the wrong SpendType (%d)", __func__, (int)spend.getSpendType());
 
-    *this = CLegacyZJokeStake(spend);
+    *this = CLegacyZPivStake(spend);
 
     // Find the pindex with the accumulator checksum
     if (!GetIndexFrom())
@@ -41,15 +42,15 @@ bool CLegacyZJokeStake::InitFromTxIn(const CTxIn& txin)
     return true;
 }
 
-CLegacyZJokeStake::CLegacyZJokeStake(const libzerocoin::CoinSpend& spend)
+CLegacyZPivStake::CLegacyZPivStake(const libzerocoin::CoinSpend& spend) : CStakeInput(nullptr)
 {
     this->nChecksum = spend.getAccumulatorChecksum();
     this->denom = spend.getDenomination();
-    uint256 nSerial = spend.getCoinSerialNumber().getuint256();
+    arith_uint256 nSerial = spend.getCoinSerialNumber().getuint256();
     this->hashSerial = Hash(nSerial.begin(), nSerial.end());
 }
 
-CBlockIndex* CLegacyZJokeStake::GetIndexFrom()
+const CBlockIndex* CLegacyZPivStake::GetIndexFrom() const
 {
     // First look in the legacy database
     int nHeightChecksum = 0;
@@ -77,12 +78,12 @@ CBlockIndex* CLegacyZJokeStake::GetIndexFrom()
     return nullptr;
 }
 
-CAmount CLegacyZJokeStake::GetValue() const
+CAmount CLegacyZPivStake::GetValue() const
 {
     return denom * COIN;
 }
 
-CDataStream CLegacyZJokeStake::GetUniqueness() const
+CDataStream CLegacyZPivStake::GetUniqueness() const
 {
     CDataStream ss(SER_GETHASH, 0);
     ss << hashSerial;
@@ -90,7 +91,7 @@ CDataStream CLegacyZJokeStake::GetUniqueness() const
 }
 
 // Verify stake contextual checks
-bool CLegacyZJokeStake::ContextCheck(int nHeight, uint32_t nTime)
+bool CLegacyZPivStake::ContextCheck(int nHeight, uint32_t nTime)
 {
     const Consensus::Params& consensus = Params().GetConsensus();
     if (!consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_ZC_V2) || nHeight >= consensus.height_last_ZC_AccumCheckpoint)

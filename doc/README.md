@@ -16,6 +16,8 @@ Unpack the files into a directory and run:
 - `bin/jokecoin-qt` (GUI) or
 - `bin/jokecoind` (headless)
 
+If this is the first time running JokeCoin Core (since v5.0.0), you'll need to install the sapling params by running the included `install-params.sh` script, which copies the two params files to `$HOME/.jokecoin-params`
+
 ### Windows
 
 Unpack the files into a directory, and then run jokecoin-qt.exe.
@@ -62,6 +64,8 @@ The JokeCoin repo's [root README](/README.md) contains relevant information on t
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
 - [Files](files.md)
+- [Fuzz-testing](fuzzing.md)
+- [Reduce Memory](reduce-memory.md)
 - [Tor Support](tor.md)
 - [Init Scripts (systemd/upstart/openrc)](init.md)
 

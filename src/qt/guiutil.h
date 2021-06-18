@@ -59,6 +59,8 @@ CAmount parseValue(const QString& text, int displayUnit, bool* valid_out = 0);
 
 // Format an amount
 QString formatBalance(CAmount amount, int nDisplayUnit = 0, bool isZjoke = false);
+QString formatBalanceWithoutHtml(CAmount amount, int nDisplayUnit = 0, bool isZjoke = false);
+
 
 // Set up widgets for address and amounts
 void setupAddressWidget(QValidatedLineEdit* widget, QWidget* parent);
@@ -265,6 +267,26 @@ QString formatTimeOffset(int64_t nTimeOffset);
 #else
     typedef QProgressBar ProgressBar;
 #endif
+
+/**
+* Splits the string into substrings wherever separator occurs, and returns
+* the list of those strings. Empty strings do not appear in the result.
+*
+* QString::split() signature differs in different Qt versions:
+*  - QString::SplitBehavior is deprecated since Qt 5.15
+*  - Qt::SplitBehavior was introduced in Qt 5.14
+* If {QString|Qt}::SkipEmptyParts behavior is required, use this
+* function instead of QString::split().
+*/
+template <typename SeparatorType>
+QStringList SplitSkipEmptyParts(const QString& string, const SeparatorType& separator)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+    return string.split(separator, Qt::SkipEmptyParts);
+#else
+    return string.split(separator, QString::SkipEmptyParts);
+#endif
+}
 
 } // namespace GUIUtil
 

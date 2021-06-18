@@ -9,16 +9,13 @@
 #include "primitives/transaction.h"
 #include "script/script.h"
 #include "script/standard.h"
+#include "sapling/sapling_core_write.h"
 #include "serialize.h"
 #include "streams.h"
 #include <univalue.h>
-#include "util.h"
+#include "util/system.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
-
-#include <boost/assign/list_of.hpp>
-
-
 
 std::string FormatScript(const CScript& script)
 {
@@ -55,15 +52,14 @@ std::string FormatScript(const CScript& script)
     return ret.substr(0, ret.size() - 1);
 }
 
-const std::map<unsigned char, std::string> mapSigHashTypes =
-    boost::assign::map_list_of
-    (static_cast<unsigned char>(SIGHASH_ALL), std::string("ALL"))
-    (static_cast<unsigned char>(SIGHASH_ALL|SIGHASH_ANYONECANPAY), std::string("ALL|ANYONECANPAY"))
-    (static_cast<unsigned char>(SIGHASH_NONE), std::string("NONE"))
-    (static_cast<unsigned char>(SIGHASH_NONE|SIGHASH_ANYONECANPAY), std::string("NONE|ANYONECANPAY"))
-    (static_cast<unsigned char>(SIGHASH_SINGLE), std::string("SINGLE"))
-    (static_cast<unsigned char>(SIGHASH_SINGLE|SIGHASH_ANYONECANPAY), std::string("SINGLE|ANYONECANPAY"))
-    ;
+const std::map<unsigned char, std::string> mapSigHashTypes = {
+    {static_cast<unsigned char>(SIGHASH_ALL), std::string("ALL")},
+    {static_cast<unsigned char>(SIGHASH_ALL | SIGHASH_ANYONECANPAY), std::string("ALL|ANYONECANPAY")},
+    {static_cast<unsigned char>(SIGHASH_NONE), std::string("NONE")},
+    {static_cast<unsigned char>(SIGHASH_NONE | SIGHASH_ANYONECANPAY), std::string("NONE|ANYONECANPAY")},
+    {static_cast<unsigned char>(SIGHASH_SINGLE), std::string("SINGLE")},
+    {static_cast<unsigned char>(SIGHASH_SINGLE | SIGHASH_ANYONECANPAY), std::string("SINGLE|ANYONECANPAY")}
+};
 
 /**
  * Create the assembly string representation of a CScript object.
@@ -136,7 +132,11 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
         out.pushKV("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end()));
 
     if (!ExtractDestinations(scriptPubKey, type, addresses, nRequired)) {
-        out.pushKV("type", GetTxnOutputType(type));
+        if (!scriptPubKey.empty() && scriptPubKey.IsZerocoinMint()) {
+            out.pushKV("type", "zerocoinmint"); // unsupported type.
+        } else {
+            out.pushKV("type", GetTxnOutputType(type));
+        }
         return;
     }
 
@@ -154,10 +154,19 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
     out.pushKV("addresses", a);
 }
 
+static void SpecialTxToJSON(const CTransaction& tx, UniValue& entry)
+{
+    if (tx.IsSpecialTx()) {
+        entry.pushKV("extraPayloadSize", (int)tx.extraPayload->size());
+        entry.pushKV("extraPayload", HexStr(*(tx.extraPayload)));
+    }
+}
+
 void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry)
 {
     entry.pushKV("txid", tx.GetHash().GetHex());
     entry.pushKV("version", tx.nVersion);
+    entry.pushKV("type", tx.nType);
     entry.pushKV("size", (int)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION));
     entry.pushKV("locktime", (int64_t)tx.nLockTime);
 
@@ -195,6 +204,12 @@ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry)
         vout.push_back(out);
     }
     entry.pushKV("vout", vout);
+
+    // Sapling
+    TxSaplingToJSON(tx, entry);
+
+    // Special Txes
+    SpecialTxToJSON(tx, entry);
 
     if (!hashBlock.IsNull())
         entry.pushKV("blockhash", hashBlock.GetHex());

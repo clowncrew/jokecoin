@@ -519,7 +519,7 @@
             <item>
              <widget class="QLabel" name="labelMessage">
               <property name="text">
-               <string>Amount of JOKE and zJOKE staked.</string>
+               <string>Amount of staking rewards received.</string>
               </property>
              </widget>
             </item>
@@ -565,7 +565,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="labelAmountJoke">
+           <widget class="QLabel" name="labelAmountPiv">
             <property name="text">
              <string notr="true">0 JOKE</string>
             </property>
@@ -673,7 +673,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="labelSquareJoke">
+                 <widget class="QLabel" name="labelSquarePiv">
                   <property name="minimumSize">
                    <size>
                     <width>14</width>
@@ -692,7 +692,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="labelJoke">
+                 <widget class="QLabel" name="labelPiv">
                   <property name="text">
                    <string notr="true">JOKE</string>
                   </property>
@@ -715,7 +715,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="labelSquarezJoke">
+                 <widget class="QLabel" name="labelSquarezPiv">
                   <property name="minimumSize">
                    <size>
                     <width>14</width>

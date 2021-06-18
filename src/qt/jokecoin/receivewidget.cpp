@@ -47,6 +47,12 @@ ReceiveWidget::ReceiveWidget(JokeCoinGUI* parent) :
     // Address
     setCssProperty(ui->labelAddress, "label-address-box");
 
+    /* Button Group */
+    setCssProperty(ui->pushLeft, "btn-check-left");
+    setCssProperty(ui->pushRight, "btn-check-right");
+    setCssSubtitleScreen(ui->labelSubtitle2);
+    ui->labelSubtitle2->setContentsMargins(0,2,4,0);
+
     setCssSubtitleScreen(ui->labelDate);
     setCssSubtitleScreen(ui->labelLabel);
 
@@ -69,6 +75,8 @@ ReceiveWidget::ReceiveWidget(JokeCoinGUI* parent) :
     ui->pushButtonCopy->setLayoutDirection(Qt::RightToLeft);
     setCssProperty(ui->pushButtonCopy, "btn-secundary-copy");
 
+    setCssProperty(ui->labelQrImg, "text-subtitle");
+
     // List Addresses
     setCssProperty(ui->listViewAddress, "container");
     ui->listViewAddress->setItemDelegate(delegate);
@@ -82,6 +90,10 @@ ReceiveWidget::ReceiveWidget(JokeCoinGUI* parent) :
     ui->btnMyAddresses->setChecked(true);
     ui->container_right->addItem(spacer);
     ui->listViewAddress->setVisible(false);
+
+    // My Address search filter
+    initCssEditLine(ui->lineEditFilter, true);
+    ui->lineEditFilter->setStyleSheet("font: 14px;");
 
     // Sort Controls
     SortEdit* lineEdit = new SortEdit(ui->comboBoxSort);
@@ -100,6 +112,11 @@ ReceiveWidget::ReceiveWidget(JokeCoinGUI* parent) :
     connect(ui->listViewAddress, &QListView::clicked, this, &ReceiveWidget::handleAddressClicked);
     connect(ui->btnRequest, &OptionButton::clicked, this, &ReceiveWidget::onRequestClicked);
     connect(ui->btnMyAddresses, &OptionButton::clicked, this, &ReceiveWidget::onMyAddressesClicked);
+    connect(ui->lineEditFilter, &QLineEdit::textChanged, [this](){filterChanged(ui->lineEditFilter->text());});
+
+    ui->pushLeft->setChecked(true);
+    connect(ui->pushLeft, &QPushButton::clicked, [this](){onTransparentSelected(true);});
+    connect(ui->pushRight,  &QPushButton::clicked, [this](){onTransparentSelected(false);});
 }
 
 void ReceiveWidget::loadWalletModel()
@@ -123,31 +140,36 @@ void ReceiveWidget::loadWalletModel()
 void ReceiveWidget::refreshView(const QModelIndex& tl, const QModelIndex& br)
 {
     const QModelIndex& index = tl.sibling(tl.row(), AddressTableModel::Address);
+    const QString& typeRole = index.data(AddressTableModel::TypeRole).toString();
+    if (shieldedMode && typeRole != AddressTableModel::ShieldedReceive) return;
+    if (!shieldedMode && typeRole != AddressTableModel::Receive) return;
     return refreshView(index.data(Qt::DisplayRole).toString());
 }
 
 void ReceiveWidget::refreshView(QString refreshAddress)
 {
     try {
-        QString latestAddress = (refreshAddress.isEmpty()) ? this->addressTableModel->getAddressToShow() : refreshAddress;
-        if (latestAddress.isEmpty()) { // new default address
-            Destination newAddress;
-            PairResult r = walletModel->getNewAddress(newAddress, "Default");
+        QString latestAddress = (refreshAddress.isEmpty()) ? this->addressTableModel->getAddressToShow(shieldedMode) : refreshAddress;
+
+        if (latestAddress.isEmpty()) {
             // Check for generation errors
-            if (!r.result) {
-                ui->labelQrImg->setText(tr("No available address, try unlocking the wallet"));
-                inform(tr("Error generating address"));
-                return;
-            }
-            latestAddress = QString::fromStdString(newAddress.ToString());
+            ui->labelQrImg->setText(tr("No available address\ntry unlocking the wallet"));
+            inform(tr("Error generating address"));
+            return;
         }
-        ui->labelAddress->setText(latestAddress);
-        int64_t time = walletModel->getKeyCreationTime(DecodeDestination(latestAddress.toStdString()));
+
+        QString addressToShow = latestAddress;
+        int64_t time = walletModel->getKeyCreationTime(latestAddress.toStdString());
+        if (shieldedMode) {
+            addressToShow = addressToShow.left(20) + "..." + addressToShow.right(19);
+        }
+
+        ui->labelAddress->setText(addressToShow);
         ui->labelDate->setText(GUIUtil::dateTimeStr(QDateTime::fromTime_t(static_cast<uint>(time))));
         updateQr(latestAddress);
         updateLabel();
     } catch (const std::runtime_error& error) {
-        ui->labelQrImg->setText(tr("No available address, try unlocking the wallet"));
+        ui->labelQrImg->setText(tr("No available address\ntry unlocking the wallet"));
         inform(tr("Error generating address"));
     }
 }
@@ -163,11 +185,12 @@ void ReceiveWidget::updateLabel()
             ui->pushButtonLabel->setText(tr("Edit Label"));
         } else {
             ui->labelLabel->setVisible(false);
+            ui->pushButtonLabel->setText(tr("Add Label"));
         }
     }
 }
 
-void ReceiveWidget::updateQr(QString address)
+void ReceiveWidget::updateQr(QString& address)
 {
     info->address = address;
     QString uri = GUIUtil::formatBitcoinURI(*info);
@@ -200,7 +223,7 @@ void ReceiveWidget::onLabelClicked()
         dialog->setData(info->address, addressTableModel->labelForAddress(info->address));
         if (openDialogWithOpaqueBackgroundY(dialog, window, 3.5, 6)) {
             QString label = dialog->getLabel();
-            const CTxDestination address = DecodeDestination(info->address.toUtf8().constData());
+            const CWDestination address = Standard::DecodeDestination(info->address.toUtf8().constData());
             if (!label.isEmpty() && walletModel->updateAddressBookLabels(
                     address,
                     label.toUtf8().constData(),
@@ -227,18 +250,24 @@ void ReceiveWidget::onNewAddressClicked()
             inform(tr("Cannot create new address, wallet locked"));
             return;
         }
-        Destination address;
-        PairResult r = walletModel->getNewAddress(address, "");
 
-        // Check for validity
+        QString strAddress;
+        PairResult r(false);
+        if (!shieldedMode) {
+            Destination address;
+            r = walletModel->getNewAddress(address, "");
+            strAddress = QString::fromStdString(address.ToString());
+        } else {
+            r = walletModel->getNewShieldedAddress(strAddress, "");
+        }
+
+        // Check validity
         if (!r.result) {
             inform(r.status->c_str());
             return;
         }
 
-        updateQr(QString::fromStdString(address.ToString()));
-        ui->labelAddress->setText(!info->address.isEmpty() ? info->address : tr("No address"));
-        updateLabel();
+        refreshView(strAddress);
         inform(tr("New address created"));
     } catch (const std::runtime_error& error) {
         // Error generating address
@@ -312,11 +341,23 @@ void ReceiveWidget::onSortOrderChanged(int idx)
     sortAddresses();
 }
 
+void ReceiveWidget::filterChanged(const QString& str)
+{
+    this->filter->setFilterRegExp(str);
+}
+
 void ReceiveWidget::sortAddresses()
 {
     if (this->filter)
         this->filter->sort(sortType, sortOrder);
 }
+
+void ReceiveWidget::onTransparentSelected(bool transparentSelected)
+{
+    shieldedMode = !transparentSelected;
+    refreshView();
+    this->filter->setType(shieldedMode ? AddressTableModel::ShieldedReceive : AddressTableModel::Receive);
+};
 
 void ReceiveWidget::changeTheme(bool isLightTheme, QString& theme)
 {

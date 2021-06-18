@@ -59,19 +59,11 @@ public:
     /** Set whether to hide orphan stakes. */
     void setHideOrphans(bool fHide);
 
-    /** Only zc txes **/
-    void setShowZcTxes(bool fOnlyZc);
-
     /** Only stakes txes **/
     void setOnlyStakes(bool fOnlyStakes);
 
-    /** Shows only p2cs-p2cs && xxx-p2cs **/
-    void setOnlyColdStakes(bool fOnlyColdStakes);
-
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     static bool isOrphan(const int status, const int type);
-
-    //QVariant dataFromSourcePos(int sourceRow, int role) const;
 
 protected:
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;

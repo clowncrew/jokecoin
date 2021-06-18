@@ -8,7 +8,6 @@
 #ifndef JokeCoin_KERNEL_H
 #define JokeCoin_KERNEL_H
 
-#include "main.h"
 #include "stakeinput.h"
 
 class CStakeKernel {

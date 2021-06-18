@@ -41,11 +41,6 @@ class CBlockIndex;
 class CScheduler;
 class CNode;
 
-namespace boost
-{
-class thread_group;
-} // namespace boost
-
 /** Time between pings automatically sent out for latency probing and keepalive (in seconds). */
 static const int PING_INTERVAL = 2 * 60;
 /** Time after which to disconnect, after waiting for a ping response (or inactivity). */
@@ -74,6 +69,8 @@ static const bool DEFAULT_UPNP = false;
 #endif
 /** The maximum number of entries in mapAskFor */
 static const size_t MAPASKFOR_MAX_SZ = MAX_INV_SZ;
+/** The maximum number of entries in setAskFor (larger due to getdata latency)*/
+static const size_t SETASKFOR_MAX_SZ = 2 * MAX_INV_SZ;
 /** The maximum number of peer connections to maintain. */
 static const unsigned int DEFAULT_MAX_PEER_CONNECTIONS = 125;
 /** Disconnected peers are added to setOffsetDisconnectedPeers only if node has less than ENOUGH_CONNECTIONS */
@@ -90,8 +87,6 @@ static const size_t DEFAULT_MAXSENDBUFFER    = 1 * 1000;
 // NOTE: When adjusting this, update rpcnet:setban's help ("24h")
 static const unsigned int DEFAULT_MISBEHAVING_BANTIME = 60 * 60 * 24;  // Default 24-hour ban
 
-bool RecvLine(SOCKET hSocket, std::string& strLine);
-
 typedef int NodeId;
 
 struct AddedNodeInfo
@@ -100,6 +95,13 @@ struct AddedNodeInfo
     CService resolvedAddress;
     bool fConnected;
     bool fInbound;
+
+    AddedNodeInfo(const std::string& _strAddedNode, const CService& _resolvedAddress, bool _fConnected, bool _fInbound):
+        strAddedNode(_strAddedNode),
+        resolvedAddress(_resolvedAddress),
+        fConnected(_fConnected),
+        fInbound(_fInbound)
+    {}
 };
 
 class CTransaction;
@@ -210,8 +212,10 @@ public:
         post();
     };
 
-    void RelayTransactionLockReq(const CTransaction& tx, bool relayToAll = false);
     void RelayInv(CInv& inv);
+    bool IsNodeConnected(const CAddress& addr);
+    // Retrieves a connected peer (if connection success). Used only to check peer address availability for now.
+    CNode* ConnectNode(CAddress addrConnect);
 
     // Addrman functions
     size_t GetAddressCount() const;
@@ -220,7 +224,6 @@ public:
     void AddNewAddress(const CAddress& addr, const CAddress& addrFrom, int64_t nTimePenalty = 0);
     void AddNewAddresses(const std::vector<CAddress>& vAddr, const CAddress& addrFrom, int64_t nTimePenalty = 0);
     std::vector<CAddress> GetAddresses();
-    void AddressCurrentlyConnected(const CService& addr);
 
     // Denial-of-service detection/prevention
     // The idea is to detect peers that are behaving
@@ -327,22 +330,22 @@ private:
     // Network usage totals
     RecursiveMutex cs_totalBytesRecv;
     RecursiveMutex cs_totalBytesSent;
-    uint64_t nTotalBytesRecv;
-    uint64_t nTotalBytesSent;
+    uint64_t nTotalBytesRecv{0};
+    uint64_t nTotalBytesSent{0};
 
     // Whitelisted ranges. Any node connecting from these is automatically
     // whitelisted (as well as those connecting to whitelisted binds).
     std::vector<CSubNet> vWhitelistedRange;
     RecursiveMutex cs_vWhitelistedRange;
 
-    unsigned int nSendBufferMaxSize;
-    unsigned int nReceiveFloodSize;
+    unsigned int nSendBufferMaxSize{0};
+    unsigned int nReceiveFloodSize{0};
 
     std::vector<ListenSocket> vhListenSocket;
     banmap_t setBanned;
     RecursiveMutex cs_setBanned;
-    bool setBannedIsDirty;
-    bool fAddressesInitialized;
+    bool setBannedIsDirty{false};
+    bool fAddressesInitialized{false};
     CAddrMan addrman;
     std::deque<std::string> vOneShots;
     RecursiveMutex cs_vOneShots;
@@ -354,23 +357,23 @@ private:
     std::atomic<NodeId> nLastNodeId;
 
     /** Services this instance offers */
-    ServiceFlags nLocalServices;
+    ServiceFlags nLocalServices{NODE_NONE};
 
     /** Services this instance cares about */
-    ServiceFlags nRelevantServices;
+    ServiceFlags nRelevantServices{NODE_NONE};
 
-    CSemaphore *semOutbound;
-    int nMaxConnections;
-    int nMaxOutbound;
-    int nMaxFeeler;
+    CSemaphore *semOutbound{nullptr};
+    int nMaxConnections{0};
+    int nMaxOutbound{0};
+    int nMaxFeeler{0};
     std::atomic<int> nBestHeight;
-    CClientUIInterface* clientInterface;
+    CClientUIInterface* clientInterface{nullptr};
 
     /** SipHasher seeds for deterministic randomness */
-    const uint64_t nSeed0, nSeed1;
+    const uint64_t nSeed0{0}, nSeed1{0};
 
     /** flag for waking the message processor. */
-    bool fMsgProcWake;
+    bool fMsgProcWake{false};
 
     std::condition_variable condMsgProc;
     std::mutex mutexMsgProc;
@@ -385,8 +388,10 @@ private:
     std::thread threadMessageHandler;
 };
 extern std::unique_ptr<CConnman> g_connman;
-void Discover(boost::thread_group& threadGroup);
-void MapPort(bool fUseUPnP);
+void Discover();
+void StartMapPort();
+void InterruptMapPort();
+void StopMapPort();
 unsigned short GetListenPort();
 bool BindListenPort(const CService& bindAddr, std::string& strError, bool fWhitelisted = false);
 void CheckOffsetDisconnectedPeers(const CNetAddr& ip);
@@ -448,10 +453,6 @@ bool validateMasternodeIP(const std::string& addrStr);          // valid, reacha
 
 extern bool fDiscover;
 extern bool fListen;
-
-extern std::map<CInv, CDataStream> mapRelay;
-extern std::deque<std::pair<int64_t, CInv> > vRelayExpiration;
-extern RecursiveMutex cs_mapRelay;
 
 extern limitedmap<CInv, int64_t> mapAlreadyAskedFor;
 
@@ -583,7 +584,7 @@ public:
     // a) it allows us to not relay tx invs before receiving the peer's version message
     // b) the peer may tell us in their version message that we should not relay tx invs
     //    until they have initialized their bloom filter.
-    bool fRelayTxes;
+    bool fRelayTxes; //protected by cs_filter
     CSemaphoreGrant grantOutbound;
     RecursiveMutex cs_filter;
     CBloomFilter* pfilter;
@@ -613,11 +614,25 @@ public:
 
     // inventory based relay
     CRollingBloomFilter filterInventoryKnown;
-    std::vector<CInv> vInventoryToSend;
+    // Set of transaction ids we still have to announce.
+    // They are sorted by the mempool before relay, so the order is not important.
+    std::set<uint256> setInventoryTxToSend;
+    // List of block ids we still have announce.
+    // There is no final sorting before sending, as they are always sent immediately
+    // and in the order requested.
+    std::vector<uint256> vInventoryBlockToSend;
+    // Set of tier two messages ids we still have to announce.
+    std::vector<CInv> vInventoryTierTwoToSend;
     RecursiveMutex cs_inventory;
     std::multimap<int64_t, CInv> mapAskFor;
+    std::set<uint256> setAskFor;
     std::vector<uint256> vBlockRequested;
     int64_t nNextInvSend;
+    // Used for BIP35 mempool sending, also protected by cs_inventory
+    bool fSendMempool;
+
+    // Last time a "MEMPOOL" request was serviced.
+    std::atomic<int64_t> timeLastMempoolReq{0};
 
     // Ping time measurement:
     // The pong reply we're expecting, or 0 if no pong expected.
@@ -738,11 +753,15 @@ public:
 
     void PushInventory(const CInv& inv)
     {
-        {
-            LOCK(cs_inventory);
-            if (inv.type == MSG_TX && filterInventoryKnown.contains(inv.hash))
-                return;
-            vInventoryToSend.push_back(inv);
+        LOCK(cs_inventory);
+        if (inv.type == MSG_TX) {
+            if (!filterInventoryKnown.contains(inv.hash)) {
+                setInventoryTxToSend.insert(inv.hash);
+            }
+        } else if (inv.type == MSG_BLOCK) {
+            vInventoryBlockToSend.push_back(inv.hash);
+        } else {
+            vInventoryTierTwoToSend.emplace_back(inv);
         }
     }
 
@@ -774,9 +793,6 @@ public:
         vecRequestsFulfilled.push_back(strRequest);
     }
 
-    bool IsSubscribed(unsigned int nChannel);
-    void Subscribe(unsigned int nChannel, unsigned int nHops = 0);
-    void CancelSubscribe(unsigned int nChannel);
     void CloseSocketDisconnect();
     bool DisconnectOldProtocol(int nVersionIn, int nVersionRequired, std::string strLastCommand = "");
 

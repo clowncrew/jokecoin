@@ -48,6 +48,8 @@ public:
     void run(int type) override;
     void onError(QString error, int type) override;
 
+    void showEvent(QShowEvent *event) override;
+
 public Q_SLOTS:
     void walletSynced(bool sync);
 
@@ -101,8 +103,8 @@ private:
     bool isShowingDialog = false;
     bool isChainSync = false;
 
-    bool isContactOwnerSelected;
-    int64_t lastRefreshTime = 0;
+    bool isContactOwnerSelected{false};
+    int64_t lastRefreshTime{0};
     std::atomic<bool> isLoading;
 
     // Cached index
@@ -113,7 +115,7 @@ private:
     AddressTableModel::ColumnIndex sortType = AddressTableModel::Label;
     Qt::SortOrder sortOrder = Qt::AscendingOrder;
 
-    int nDisplayUnit;
+    int nDisplayUnit{0};
 
     void showAddressGenerationDialog(bool isPaymentRequest);
     void onContactsClicked();

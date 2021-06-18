@@ -86,6 +86,7 @@
         <file alias="ic-check">jokecoin/res/img/ic-check.svg</file>
         <file alias="ic-chevron-left">jokecoin/res/img/ic-chevron-left.svg</file>
         <file alias="ic-chevron-right">jokecoin/res/img/ic-chevron-right.svg</file>
+        <file alias="ic-chevron-right-liliac">jokecoin/res/img/ic-chevron-right-liliac.svg</file>
         <file alias="ic-clear-liliac">jokecoin/res/img/ic-clear-liliac.svg</file>
         <file alias="ic-clear-purple">jokecoin/res/img/ic-clear-purple.svg</file>
         <file alias="ic-close-white">jokecoin/res/img/ic-close-white.svg</file>
@@ -219,5 +220,7 @@
         <file alias="ic-check-cold-staking">jokecoin/res/img/ic-check-cold-staking.svg</file>
         <file alias="ic-check-cold-staking-off">jokecoin/res/img/ic-check-cold-staking-off.svg</file>
         <file alias="ic-check-cold-staking-enabled">jokecoin/res/img/ic-check-cold-staking-enabled.svg</file>
+        <file alias="ic-information">jokecoin/res/img/ic-information.svg</file>
+        <file alias="ic-information-hover">jokecoin/res/img/ic-information-hover.svg</file>
     </qresource>
 </RCC>

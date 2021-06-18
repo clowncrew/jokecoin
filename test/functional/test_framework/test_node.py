@@ -4,6 +4,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Class for jokecoind node under test"""
 
+import contextlib
 import decimal
 import errno
 import http.client
@@ -47,11 +48,7 @@ class TestNode():
         self.index = i
         self.datadir = os.path.join(dirname, "node" + str(i))
         self.rpchost = rpchost
-        if timewait:
-            self.rpc_timeout = timewait
-        else:
-            # Wait for up to 60 seconds for the RPC server to respond
-            self.rpc_timeout = 600
+        self.rpc_timeout = timewait
         if binary is None:
             self.binary = os.getenv("BITCOIND", "jokecoind")
         else:
@@ -124,13 +121,36 @@ class TestNode():
         for _ in range(poll_per_s * self.rpc_timeout):
             assert self.process.poll() is None, "jokecoind exited with status %i during initialization" % self.process.returncode
             try:
-                self.rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.rpchost), self.index, timeout=self.rpc_timeout, coveragedir=self.coverage_dir)
-                while self.rpc.getblockcount() < 0:
-                    time.sleep(1)
+                rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.rpchost),
+                                    self.index,
+                                    timeout=self.rpc_timeout,
+                                    coveragedir=self.coverage_dir)
+                rpc.getblockcount()
+                wait_until(lambda: rpc.getmempoolinfo()['loaded'])
+                # Wait for the node to finish reindex, block import, and
+                # loading the mempool. Usually importing happens fast or
+                # even "immediate" when the node is started. However, there
+                # is no guarantee and sometimes ThreadImport might finish
+                # later. This is going to cause intermittent test failures,
+                # because generally the tests assume the node is fully
+                # ready after being started.
+                #
+                # For example, the node will reject block messages from p2p
+                # when it is still importing with the error "Unexpected
+                # block message received"
+                #
+                # The wait is done here to make tests as robust as possible
+                # and prevent racy tests and intermittent failures as much
+                # as possible. Some tests might not need this, but the
+                # overhead is trivial, and the added gurantees are worth
+                # the minimal performance cost.
                 # If the call to getblockcount() succeeds then the RPC connection is up
+                self.log.debug("RPC successfully started")
+                if self.use_cli:
+                    return
+                self.rpc = rpc
                 self.rpc_connected = True
                 self.url = self.rpc.url
-                self.log.debug("RPC successfully started")
                 return
             except IOError as e:
                 if e.errno != errno.ECONNREFUSED:  # Port not yet open?
@@ -187,6 +207,23 @@ class TestNode():
 
     def wait_until_stopped(self, timeout=BITCOIND_PROC_WAIT_TIMEOUT):
         wait_until(self.is_node_stopped, timeout=timeout)
+
+    @contextlib.contextmanager
+    def assert_debug_log(self, expected_msgs):
+        debug_log = os.path.join(self.datadir, 'regtest', 'debug.log')
+        with open(debug_log, encoding='utf-8') as dl:
+            dl.seek(0, 2)
+            prev_size = dl.tell()
+        try:
+            yield
+        finally:
+            with open(debug_log, encoding='utf-8') as dl:
+                dl.seek(prev_size)
+                log = dl.read()
+            print_log = " - " + "\n - ".join(log.splitlines())
+            for expected_msg in expected_msgs:
+                if re.search(re.escape(expected_msg), log, flags=re.MULTILINE) is None:
+                    raise AssertionError('Expected message "{}" does not partially match log:\n\n{}\n\n'.format(expected_msg, print_log))
 
     def node_encrypt_wallet(self, passphrase):
         """"Encrypts the wallet.

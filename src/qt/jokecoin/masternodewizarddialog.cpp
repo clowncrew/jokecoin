@@ -11,6 +11,7 @@
 #include "qt/jokecoin/mnmodel.h"
 #include "qt/jokecoin/guitransactionsutils.h"
 #include "qt/jokecoin/qtutils.h"
+#include "qt/walletmodeltransaction.h"
 
 #include <QFile>
 #include <QIntValidator>
@@ -222,7 +223,7 @@ bool MasterNodeWizardDialog::createMN()
         WalletModel::SendCoinsReturn prepareStatus;
 
         // no coincontrol, no P2CS delegations
-        prepareStatus = walletModel->prepareTransaction(currentTransaction, nullptr, false);
+        prepareStatus = walletModel->prepareTransaction(&currentTransaction, nullptr, false);
 
         QString returnMsg = tr("Unknown error");
         // process prepareStatus and on error generate message shown to user
@@ -257,12 +258,12 @@ bool MasterNodeWizardDialog::createMN()
         }
 
         // look for the tx index of the collateral
-        CWalletTx* walletTx = currentTransaction.getTransaction();
+        CTransactionRef walletTx = currentTransaction.getTransaction();
         std::string txID = walletTx->GetHash().GetHex();
         int indexOut = -1;
         for (int i=0; i < (int)walletTx->vout.size(); i++) {
-            CTxOut& out = walletTx->vout[i];
-            if (out.nValue == 10000 * COIN) {
+            const CTxOut& out = walletTx->vout[i];
+            if (out.nValue == Params().GetConsensus().nMNCollateralAmt) {
                 indexOut = i;
                 break;
             }
@@ -363,7 +364,7 @@ bool MasterNodeWizardDialog::createMN()
     // Lock collateral output
     walletModel->lockCoin(collateralOut);
 
-    returnStr = tr("Master node created! Wait %1 confirmations before starting it.").arg(MASTERNODE_MIN_CONFIRMATIONS);
+    returnStr = tr("Master node created! Wait %1 confirmations before starting it.").arg(MasternodeCollateralMinConf());
     return true;
 }
 

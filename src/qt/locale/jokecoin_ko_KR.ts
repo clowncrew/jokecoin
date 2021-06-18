@@ -6,6 +6,10 @@
         <translation>Dialog</translation>
     </message>
     <message>
+        <source>New Address</source>
+        <translation>새로운 주소</translation>
+    </message>
+    <message>
         <source>Address</source>
         <translation>주소</translation>
     </message>
@@ -39,6 +43,10 @@
     <message>
         <source>Set a label for the selected address</source>
         <translation>선택된 주소에 라벨 설정하기</translation>
+    </message>
+    <message>
+        <source>Enter a label for the address (e.g. Exchange)</source>
+        <translation>이 주소에 대한 이름을 입력하세요. (예: 거래소)</translation>
     </message>
     <message>
         <source>SAVE</source>
@@ -219,6 +227,14 @@
         <translation>저장</translation>
     </message>
     <message>
+        <source>Add new contact</source>
+        <translation>새로운 주소 추가</translation>
+    </message>
+    <message>
+        <source>Generate a new address to receive tokens.</source>
+        <translation>토큰을 받을 새로운 주소 생성</translation>
+    </message>
+    <message>
         <source>Invalid Contact Address</source>
         <translation>연락처 주소가 잘못 되었습니다.</translation>
     </message>
@@ -357,6 +373,18 @@ for staking</source>
         <translation>지갑 암호화 완료</translation>
     </message>
     <message>
+        <source>WARNING:</source>
+        <translation>경고:</translation>
+    </message>
+    <message>
+        <source>The caps lock key is on!</source>
+        <translation>Caps Lock 키가 켜져 있습니다!</translation>
+    </message>
+    <message>
+        <source>Passphrases do not match!</source>
+        <translation>암호가 일치하지 않습니다!</translation>
+    </message>
+    <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
         <translation>중요: 이전에 지갑 파일로 백업 한 경우 지갑 파일을 암호화 된 지갑 파일로 대체해야 합니다. 보안상 문제로, 암호화되지 않은 지갑 파일의 이전 백업은 새롭게 암호화 된 지갑을 사용하게 되면 쓸모없게 될 것입니다.</translation>
     </message>
@@ -377,6 +405,10 @@ for staking</source>
         <translation>암호가 일치하지 않습니다.</translation>
     </message>
     <message>
+        <source>LOSE ALL OF YOUR COINS</source>
+        <translation>모든 코인을 잃게 됩니다</translation>
+    </message>
+    <message>
         <source>Wallet unlock failed</source>
         <translation>지갑 잠금해제 실패</translation>
     </message>
@@ -391,6 +423,25 @@ for staking</source>
     <message>
         <source>Wallet passphrase was successfully changed.</source>
         <translation>지갑 암호가 변경되었습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>양식</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>0.00 jokecoin</source>
+        <translation>0.00 jokecoin</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
     </message>
 </context>
 <context>
@@ -589,52 +640,20 @@ for staking</source>
         <translation>잔돈 복사됨</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>9 최고</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>8 매우 높음</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>7 높음</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>6 약간 높음</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>5 중간</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>4 낮은 중간</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>3 낮음</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>2 매우 낮음</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>1 최저</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 잠김)</translation>
     </message>
     <message>
-        <source>none</source>
-        <translation>없음</translation>
-    </message>
-    <message>
         <source>yes</source>
         <translation>예</translation>
+    </message>
+    <message>
+        <source>Can vary +/- %1 u%2 per input.</source>
+        <translation>입력당 +/- %1 u%2 달라질 수 있습니다.</translation>
+    </message>
+    <message>
+        <source>change in %1</source>
+        <translation>%1의 변화</translation>
     </message>
     <message>
         <source>delegated to %1 for cold staking</source>
@@ -661,24 +680,8 @@ for staking</source>
         <translation>입력당 +/- 1 byte 조절 가능.</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>우선 순위가 높은 트랜잭션이 블록에 포함 될 확률이 높아집니다.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>우선 순위가 "중간" 보다 낮으면 라벨이 빨간색으로 변경됩니다.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>받는 사람이 %1 보다 작은 금액을 받으면 라벨이 빨간색으로 변경됩니다.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(라벨 없음)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>%1 (%2) 에서 변경</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -773,6 +776,28 @@ stake on your behalf, while you keep the keys securely offline.</source>
         <translation>코인 설정</translation>
     </message>
     <message>
+        <source>Select %1 outputs to delegate.</source>
+        <translation>위임할 %1 outputs을 선택하세요.</translation>
+    </message>
+    <message>
+        <source>Create Cold Staking Address</source>
+        <translation>콜드 스테이킹 주소 생성하기</translation>
+    </message>
+    <message>
+        <source>Creates an address to receive delegated coins
+and stake them on their owner's behalf.</source>
+        <translation>위임한 코인을 받을 주소 생성하기
+이 주소는 위임자를 대신하여 스테이킹할 때 이용됩니다.</translation>
+    </message>
+    <message>
+        <source>My Cold Staking Addresses</source>
+        <translation>나의 콜드 스테이킹 주소</translation>
+    </message>
+    <message>
+        <source>List your own cold staking addresses.</source>
+        <translation>보유한 콜드 스테이킹 주소 리스트</translation>
+    </message>
+    <message>
         <source>Invalid entry</source>
         <translation>잘못된 입력</translation>
     </message>
@@ -814,6 +839,10 @@ Do you wish to proceed?</source>
     <message>
         <source>Coins delegated</source>
         <translation>위임된 코인</translation>
+    </message>
+    <message>
+        <source>You don't have any %1 to select.</source>
+        <translation>선택할 수 있는 %1을 가지고 있지 않습니다.</translation>
     </message>
     <message>
         <source>Cannot perform operation, wallet locked</source>
@@ -918,6 +947,14 @@ address</source>
     <message>
         <source>Staking statistics</source>
         <translation>스테이킹 통계</translation>
+    </message>
+    <message>
+        <source>View your account's history</source>
+        <translation>계정의 거래 이력 보기</translation>
+    </message>
+    <message>
+        <source>How to get JOKE</source>
+        <translation>JOKE를 얻을 수 있는 방법</translation>
     </message>
     <message>
         <source>Sort by</source>
@@ -1243,7 +1280,15 @@ It will start automatically as soon as the wallet has enough confirmations on an
         <source>Form</source>
         <translation>양식</translation>
     </message>
-    </context>
+    <message>
+        <source>Collateral tx not found</source>
+        <translation>Collateral tx를 찾을 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>Status: %1</source>
+        <translation>상태: %1</translation>
+    </message>
+</context>
 <context>
     <name>MasterNodeWizardDialog</name>
     <message>
@@ -1331,6 +1376,10 @@ It will start automatically as soon as the wallet has enough confirmations on an
         <translation>유효하지 않은 IP 주소 임</translation>
     </message>
     <message>
+        <source>Unknown error</source>
+        <translation>알 수 없는 오류</translation>
+    </message>
+    <message>
         <source>Prepare master node failed.
 
 %1
@@ -1355,6 +1404,10 @@ It will start automatically as soon as the wallet has enough confirmations on an
         <translation>담보하려는 트랜잭션을 보낼 수 없습니다.
 
 %1</translation>
+    </message>
+    <message>
+        <source>walletModel not set</source>
+        <translation>walletModel이 설정되지 않았습니다.</translation>
     </message>
     <message>
         <source>Invalid masternode.conf file</source>
@@ -1469,12 +1522,28 @@ Please wait few more minutes (masternode collaterals require %1 confirmations).<
         <translation>마스터노드 정보가 클립보드에 복사되었습니다.</translation>
     </message>
     <message>
+        <source>Not enough balance to create a masternode, 10,000 %1 required.</source>
+        <translation>마스터노드 생성에 필요한 10,000 %1 보다 잔고가 부족합니다.</translation>
+    </message>
+    <message>
         <source>Remote Masternode Data</source>
         <translation>마스터노드 데이터 원격 조종</translation>
     </message>
     <message>
         <source>What is a Masternode?</source>
         <translation>마스터로드란?</translation>
+    </message>
+    <message>
+        <source>FAQ explaining what Masternodes are</source>
+        <translation>마스터노드가 무엇인지 FAQ에 설명되어 있습니다.</translation>
+    </message>
+    <message>
+        <source>What is a Controller?</source>
+        <translation>Controller란 무엇인가요?</translation>
+    </message>
+    <message>
+        <source>FAQ explaining what is a Masternode Controller</source>
+        <translation>마스터노드 Controller가 무엇인지 FAQ에 설명되어 있습니다.</translation>
     </message>
     <message>
         <source>You are just about to export the required data to run a Masternode
@@ -1566,7 +1635,15 @@ Are you sure?</source>
         <source>Export data to run the Masternode on a remote server</source>
         <translation>마스터노드를 원격 서버에 운용하기 위한 정보 추출</translation>
     </message>
-    </context>
+    <message>
+        <source>Masternode public key copied</source>
+        <translation>마스터노드 public key가 복사되었습니다.</translation>
+    </message>
+    <message>
+        <source>Collateral tx id copied</source>
+        <translation>Collateral tx id가 복사되었습니다.</translation>
+    </message>
+</context>
 <context>
     <name>MyAddressRow</name>
     <message>
@@ -1579,6 +1656,48 @@ Are you sure?</source>
     <message>
         <source>Form</source>
         <translation>양식</translation>
+    </message>
+    <message>
+        <source>HOME
+</source>
+        <translation>홈
+</translation>
+    </message>
+    <message>
+        <source>SEND
+</source>
+        <translation>보내기
+</translation>
+    </message>
+    <message>
+        <source>RECEIVE
+</source>
+        <translation>받기
+</translation>
+    </message>
+    <message>
+        <source>CONTACTS
+</source>
+        <translation>연락처
+</translation>
+    </message>
+    <message>
+        <source>MASTER
+NODES</source>
+        <translation>마스터
+노드</translation>
+    </message>
+    <message>
+        <source>COLD
+STAKING</source>
+        <translation>콜드
+스테이킹</translation>
+    </message>
+    <message>
+        <source>SETTINGS
+</source>
+        <translation>설정
+</translation>
     </message>
     <message>
         <source>V 1.0.0</source>
@@ -2100,7 +2219,11 @@ Address: %4
         <source>Ping Time</source>
         <translation>응답 시간</translation>
     </message>
-    </context>
+    <message>
+        <source>NodeID</source>
+        <translation>노드ID</translation>
+    </message>
+</context>
 <context>
     <name>QObject</name>
     <message>
@@ -2162,6 +2285,18 @@ Address: %4
     <message>
         <source>Error: Specified data directory "%1" does not exist.</source>
         <translation>Error: Specified data directory "%1" does not exist.</translation>
+    </message>
+    <message>
+        <source>Error: Cannot parse configuration file: %1. Only use key=value syntax.</source>
+        <translation>오류: 설정 파일을 분석할 수 없습니다: %1. 항상 key=value 문법을 사용해 주세요.</translation>
+    </message>
+    <message>
+        <source>Error: Invalid combination of -regtest and -testnet.</source>
+        <translation>오류: -regtest와 -testnet은 함께 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>Error reading masternode configuration file: %1</source>
+        <translation>마스터노드 설정 파일 읽기 오류: %1</translation>
     </message>
     <message>
         <source>JokeCoin Core didn't yet exit safely...</source>
@@ -2228,6 +2363,10 @@ Address: %4
         <translation>보냄</translation>
     </message>
     <message>
+        <source>Shield</source>
+        <translation>Shield</translation>
+    </message>
+    <message>
         <source>Mined</source>
         <translation>채굴</translation>
     </message>
@@ -2246,6 +2385,66 @@ Address: %4
     <message>
         <source>Cold stakes</source>
         <translation>콜드 스테이크</translation>
+    </message>
+    <message>
+        <source>by Label</source>
+        <translation>이름으로</translation>
+    </message>
+    <message>
+        <source>by Address</source>
+        <translation>주소로</translation>
+    </message>
+    <message>
+        <source>by Date</source>
+        <translation>날짜로</translation>
+    </message>
+    <message>
+        <source>Jan</source>
+        <translation>1월</translation>
+    </message>
+    <message>
+        <source>Feb</source>
+        <translation>2월</translation>
+    </message>
+    <message>
+        <source>Mar</source>
+        <translation>3월</translation>
+    </message>
+    <message>
+        <source>Apr</source>
+        <translation>4월</translation>
+    </message>
+    <message>
+        <source>May</source>
+        <translation>5월</translation>
+    </message>
+    <message>
+        <source>Jun</source>
+        <translation>6월</translation>
+    </message>
+    <message>
+        <source>Jul</source>
+        <translation>7월</translation>
+    </message>
+    <message>
+        <source>Aug</source>
+        <translation>8월</translation>
+    </message>
+    <message>
+        <source>Sep</source>
+        <translation>9월</translation>
+    </message>
+    <message>
+        <source>Oct</source>
+        <translation>10월</translation>
+    </message>
+    <message>
+        <source>Nov</source>
+        <translation>11월</translation>
+    </message>
+    <message>
+        <source>Dec</source>
+        <translation>12월</translation>
     </message>
     </context>
 <context>
@@ -2678,8 +2877,16 @@ Address: %4
         <translation>양식</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>주소 없음</translation>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
+    </message>
+    <message>
+        <source>Accept transparent or shielded JOKE</source>
+        <translation>Transparent / Shielded JOKE 받기 주소 선택</translation>
     </message>
     <message>
         <source>Add Label</source>
@@ -2696,10 +2903,6 @@ Address: %4
     <message>
         <source>Receive</source>
         <translation>받기</translation>
-    </message>
-    <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>사용 가능한 주소가 없습니다. 지갑 잠금을 풀어 보십시요.</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -2919,6 +3122,21 @@ Address: %4
     </message>
     </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialog</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>저장</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>취소</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -2932,7 +3150,11 @@ Address: %4
         <source>Enter label</source>
         <translation>라벨 입력</translation>
     </message>
-</context>
+    <message>
+        <source>Add encrypted memo</source>
+        <translation>암호화된 개인 메세지 추가</translation>
+    </message>
+    </context>
 <context>
     <name>SendWidget</name>
     <message>
@@ -2958,10 +3180,6 @@ Address: %4
     <message>
         <source>Cannot send, wallet locked</source>
         <translation>전송 불가, 지갑 잠김</translation>
-    </message>
-    <message>
-        <source>Cannot create transaction.</source>
-        <translation>전송 불가</translation>
     </message>
     <message>
         <source>WARNING:
@@ -2998,6 +3216,46 @@ Cold-staking 중인 코인을 사용하여 전송하며, 무효화됩니다.
     <message>
         <source>Open URI</source>
         <translation>URI 열기</translation>
+    </message>
+    <message>
+        <source>Shield Coins</source>
+        <translation>코인을 Shield 하기</translation>
+    </message>
+    <message>
+        <source>Convert all transparent coins into shielded coins</source>
+        <translation>보유한 Transparent 코인을 전부 Shield 화 하기</translation>
+    </message>
+    <message>
+        <source>Cannot send memo to address
+%1
+
+Encrypted memo messages are available only for shielded recipients.
+
+Do you wish to proceed without memo?
+</source>
+        <translation>암호화된 개인 메세지 전송이 불가합니다.
+%1
+
+암호화된 개인 메세지는 Shield 주소로만 전송이 가능합니다.
+
+메세지 없이 전송하겠습니까?
+</translation>
+    </message>
+    <message>
+        <source>Cannot perform shielded operations, v5 upgrade isn't being enforced yet!</source>
+        <translation>현재 Shield 전송이 불가합니다. 아직 네트워크의 v5 업그레이드가 완료되지 않았습니다.</translation>
+    </message>
+    <message>
+        <source>Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)</source>
+        <translation>Shield 프로토콜이 현재 관리 모드 상태임으로  Shield 전송이 임시 사용 중단 되었습니다. (SPORK 20 활성화됨)</translation>
+    </message>
+    <message>
+        <source>You don't have any %1 to select.</source>
+        <translation>선택할 수 있는 %1을 가지고 있지 않습니다.</translation>
+    </message>
+    <message>
+        <source>You don't have any transparent JOKEs to shield.</source>
+        <translation>Shield 가 가능한 Transparent JOKE 가 없습니다.</translation>
     </message>
     <message>
         <source>No contacts available, you can go to the contacts screen and add some there!</source>
@@ -3415,11 +3673,7 @@ Verify that you have installed a predetermined text editor.</source>
         <source>Frequently Asked Questions</source>
         <translation>자주 하는 질문들</translation>
     </message>
-    <message>
-        <source>Exit</source>
-        <translation>닫기</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>SettingsInformationWidget</name>
     <message>
@@ -3518,7 +3772,7 @@ Verify that you have installed a predetermined text editor.</source>
         <source>Out:</source>
         <translation>출력:</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -4146,6 +4400,10 @@ Are you sure?
         <translation>양식</translation>
     </message>
     <message>
+        <source>shielded</source>
+        <translation>shielded</translation>
+    </message>
+    <message>
         <source>Available</source>
         <translation>가능함</translation>
     </message>
@@ -4222,6 +4480,10 @@ NOTE: 업그레이드 이후에는
     <message>
         <source>FAQ</source>
         <translation>FAQ</translation>
+    </message>
+    <message>
+        <source>Wallet Unencrypted</source>
+        <translation>지갑 암호화 풀림 완료</translation>
     </message>
     <message>
         <source>Available (Locked included)</source>
@@ -4342,8 +4604,28 @@ NOTE: 업그레이드 이후에는
         <translation>자신에게 지불</translation>
     </message>
     <message>
+        <source>Shielding coins to yourself</source>
+        <translation>자신의 코인을 Shield 주소로 전송</translation>
+    </message>
+    <message>
+        <source>Unshielding coins to yourself</source>
+        <translation>자신의 Shield 된 코인을 Transparent 주소로 전송</translation>
+    </message>
+    <message>
+        <source>Shielded change, transfer between own shielded addresses</source>
+        <translation>자신의 Shield 주소 사이로 전송됨. 잔돈은 따로 Shield 됨. </translation>
+    </message>
+    <message>
         <source>Mined</source>
         <translation>채굴</translation>
+    </message>
+    <message>
+        <source>Received with shielded</source>
+        <translation>Shielded 주소로 수신 됨</translation>
+    </message>
+    <message>
+        <source>Shielded send to</source>
+        <translation>Shielded 코인 발신 됨</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -4483,7 +4765,11 @@ NOTE: 업그레이드 이후에는
         <source>Form</source>
         <translation>양식</translation>
     </message>
-</context>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    </context>
 <context>
     <name>WalletModel</name>
     <message>
@@ -4519,7 +4805,7 @@ NOTE: 업그레이드 이후에는
     </message>
     <message>
         <source>Privacy</source>
-        <translation>Privacy</translation>
+        <translation>정보 보호</translation>
     </message>
     <message>
         <source>Masternodes</source>
@@ -4537,19 +4823,23 @@ JokeCoin Core Wallet</translation>
     </message>
     <message>
         <source>JokeCoin is the world’s most innovative Proof of Stake blockchain based technology. Developed by a team of highly experienced developers and cryptographers.</source>
-        <translation>JokeCoin 는 많은 경험과 뛰어난 실력을 겸비한 개발자와 암호학자로 구성된 팀이 개발하는 연신적인 Proof of Stake 블록체인 기술을 자랑하는 오픈소스 프로젝트 입니다. </translation>
+        <translation>JokeCoin 는 많은 경험과 뛰어난 실력을 겸비한 개발자와 암호학자로 구성된 팀이 개발하고 있으며, 혁신적인 지분증명 (Proof of Stake) 블록체인 기반의 오픈소스 프로젝트입니다.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;As our manifesto says: Privacy is a non-negotiable basic human right; it grants users the freedom to share their data whenever and with whomever they want - JokeCoin believes in self sovereignty.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;JokeCoin 는 Manifesto 선언서에 적힌대로: 프라이버시는 협상이 불가능한 인간의 기본적인 인권중 하나이다. 이로 인해 그 언제나 그 누구에게나 데이터를 공유할수 있는 자유를 얻게 될것이다. JokeCoin 프로젝트는 개인 독립을 추구한다. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;JokeCoin 선언서(manifesto) 내용: 프라이버시는 타협할 수 없는 인간의 기본적인 인권입니다. 사용자가 원한다면 언제든 누구에게든 정보를 공유할 수 있는 자유를 보장합니다. JokeCoin는 자기 주권(self sovereignty)을 추구합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>The masternode network is JokeCoin's second layer network on top of the blockchain that enables our DAO to provide decentralized governance and a treasury.</source>
+        <translation>마스터노드 네트워크는 JokeCoin 블록체인의 상위의 2nd 레이어 네트워크입니다. 이를 통해 탈중앙화 거버넌스 및 예산 관리가 가능한 DAO를 구현합니다.</translation>
     </message>
     <message>
         <source>How JokeCoin respects your privacy?</source>
-        <translation>JokeCoin 가 당신의 프라이버시를 존중하는 방법은?</translation>
+        <translation>JokeCoin는 프라이버시를 얼마나 중요하게 생각하나요?</translation>
     </message>
     <message>
         <source>What is a Masternode?</source>
-        <translation>마스터로드란?</translation>
+        <translation>마스터노드란 무엇인가요?</translation>
     </message>
     <message>
         <source>default</source>
@@ -4558,10 +4848,6 @@ JokeCoin Core Wallet</translation>
 </context>
 <context>
     <name>jokecoin-core</name>
-    <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = tx 메타 데이터 유지 예 : 계정 소유자 및 지불 요청 정보, 2 = tx 메타 데이터 삭제)</translation>
-    </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>지정된 소스에서 JSON-RPC 연결을 허용하십시오. 단일 IP (예 : 1.2.3.4), 네트워크/넷마스크 (예 : 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예 : 1.2.3.4/24)에 대해 &lt;ip&gt; 가 유효합니다. 이 옵션은 여러번 지정할 수 있습니다.</translation>
@@ -4599,10 +4885,6 @@ JokeCoin Core Wallet</translation>
         <translation>지갑의 모든 트랜잭션들을 삭제하고 오직 블록체인을 통한 트랜잭션 부분들만 복구합니다 -시작 시 다시 스캔</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>MIT 소프트웨어 라이센스에 따라 배포, 첨부 파일 COPYING 또는 &lt;http://www.opensource.org/licenses/mit-license.php&gt; 를 참조하십시오.</translation>
     </message>
@@ -4617,10 +4899,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>오류: 오는 연결들을 수신하는데 실패했습니다.(수신 중 오류 반환됨 %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Error: 트랜젝션의 크기가 혀용된 크기를 넘었습니다.</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -4649,10 +4927,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>이 모드에서 -genproclimit는 즉시 생성되는 블록 수를 제어합니다.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>확정 된 자금이 불충분하거나 부족한 경우 몇 분 후에 다시 시도하십시오.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -4707,10 +4981,6 @@ JokeCoin Core Wallet</translation>
         <translation>활성화 시에 코인 생성을 위한 스레드 숫자를 설정합니다 (-1= 모든 코어, 기본값: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>성공적으로 잠긴 트랜잭션에 대한 확인을 N으로 나타냅니다 (0-9999, 기본값: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>bloom필터를 사용한 블록 및 트랜잭션 필터링 지원 (기본값 : %u)</translation>
     </message>
@@ -4753,10 +5023,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>화이트리스트 피어들은 DoS 밴 될 수 없으며 그들이 이미 메모리 풀에 있을지라도 그들의 트랜잭션는 항상 중계됩니다. 예를들면 게이트웨이 같은 것에 유용</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>환경설정에서 masternodeprivkey를 지정해야 합니다. 도움말을 참조하십시오.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4847,24 +5113,12 @@ JokeCoin Core Wallet</translation>
         <translation>로딩 완료</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>&lt;address&gt; 에서 해시 전송 게시 가능 (SwiftTX로 설정된)</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>&lt;address&gt;에서 Raw 트랜잭션 게시 지원 (SwiftTX를 통해 잠겨진)</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>클라이언트가 마스터노드로 작동하는 것을 활성화 (0-1, 기본값: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>블록 데이터베이스를 초기화하는 중 오류가 발생했습니다.</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>지갑 데이터베이스 환경  %s 을 초기화하는 중 오류가 발생했습니다!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -4877,10 +5131,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>데이터베이스에서서 읽어오는 중 오류가 발생했습니다. 종료합니다.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>디스크에 zerocoinDB 쓰기 오류</translation>
     </message>
     <message>
         <source>Error</source>
@@ -4897,10 +5147,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>오류 : 지원하지 않는 인수 -tor가 발견되었습니다. -onion을 사용하십시오.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>오류 : 지갑이 잠겼습니다, 트랜잭션을 생성할 수 없습니다!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -4951,10 +5197,6 @@ JokeCoin Core Wallet</translation>
         <translation>초기화 정확성 검사에 실패 했습니다. JokeCoin Core가 종료됩니다.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>잔액이 충분하지 않음</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>충분하지 않은 금액.</translation>
     </message>
@@ -4967,48 +5209,12 @@ JokeCoin Core Wallet</translation>
         <translation>-paytxfee=&lt;amount&gt; 에 대한 유효하지 않은 값: '%s' (적어도 %s 가 필요합니다)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>잘못된 수량</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>마스터노드 개인 키가 잘못되었습니다. 설명서를 참조하십시오.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>-whitelist: '%s' 에 지정된 넷마스크가 유효하지 않습니다.</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>JOKE 공급 재계산중...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>제로코인 데이타베이스 재색인</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>제로코인 재 인덱싱 실패</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>지불대상보다 적은 코인 선택됨</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>SwiftX 옵션:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>이것은 사전 릴리스 테스트 빌드입니다 - 사용상 책임은 귀하에게 있습니다. - staking이나 상업적인 용도로는 절대 사용하지 마십시오!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>JokeCoin의 모든 특정 기능들을 비활성화합니다(마스터노드, 난독화, SwiftTX, Budgeting) (0-1, 기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>swiftTX 활성화, 잠긴 트랜잭션들에 대한 확인 표시 (bool, 기본값: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5019,20 +5225,8 @@ JokeCoin Core Wallet</translation>
         <translation>Execute command when the best block changes and its size is over (%s in cmd is replaced by block hash, %d with the block size)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Failed to find coin set amongst held coins with less than maxNumber of Spends</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftTX는 최소 6회 확인이 필요한 입력으로 몇 분 후에 다시 시도해야 할 수 있습니다.</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5073,22 +5267,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Error: A fatal internal error occurred, see debug.log for details</source>
         <translation>Error: 치명적 에러 발생 log 파일을 확인해주세요.</translation>
-    </message>
-    <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Error: 유효하지 않는 utxo!</translation>
-    </message>
-    <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>제로코인 선택 실패</translation>
-    </message>
-    <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>제로코인 DB 삭제 실패</translation>
-    </message>
-    <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>지갑에 코인 시리얼 번호 작성 실패</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -5171,10 +5349,6 @@ JokeCoin Core Wallet</translation>
         <translation>연결 당 최대 전송 버퍼, &lt;n&gt;*1000 바이트 (기본값: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>코인생성이 블록체인에 기록되지 않았습니다.</translation>
-    </message>
-    <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
         <translation>-whitebind: '%s' 의 포트를 지정해야 합니다</translation>
     </message>
@@ -5207,14 +5381,6 @@ JokeCoin Core Wallet</translation>
         <translation>JSON-RPC 연결 비밀번호</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>코인 생성이 포함된 거래를 찾을 수 없습니다 %s</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>코인 생성이 포함된 거래를 찾을 수 없습니다. txHash: %s</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>블록 스팸 필터 사용하기 (기본 : %u)</translation>
     </message>
@@ -5233,10 +5399,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Cannot resolve -%s address: '%s'</source>
         <translation>주소를 변환할 수 없습니다 주소 -%s: '%s'</translation>
-    </message>
-    <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>잔돈 액수가 정확히 일치하지 않아 받을 주소가 필요합니다.</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
@@ -5285,10 +5447,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>백그라운드에서 상주하며 실행하고 명령을 받습니다</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>무료 수수료 트랜잭션이 가능할 경우 무료 수수료로 트랜잭션을 전송합니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -5367,10 +5525,6 @@ JokeCoin Core Wallet</translation>
         <translation>자신의 공용 주소를 지정</translation>
     </message>
     <message>
-        <source>Spend Valid</source>
-        <translation>유효한 지출</translation>
-    </message>
-    <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>트랜잭션 전송시 승인되지 않은 잔돈을 전송합니다 (기본값: %u)</translation>
     </message>
@@ -5403,10 +5557,6 @@ JokeCoin Core Wallet</translation>
         <translation>sporks와 동기화 중입니다...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>zJOKE 지갑 동기화중...</translation>
-    </message>
-    <message>
         <source>This help message</source>
         <translation>도움말 메시지입니다</translation>
     </message>
@@ -5423,24 +5573,12 @@ JokeCoin Core Wallet</translation>
         <translation>제대로 동작하지 않는 피어와 연결을 끊을 임계값 (기본값: %u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>너무 많은 지출이 필요함</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Tor 컨트롤 포트 암호 (기본값: 공백)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>onion 활성화되었을 경우 사용할 Tor 코트롤 포트 (기본값: %s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>트랜잭션 취소됨</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>트랜잭션 생성 시작됨</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -5457,10 +5595,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Transaction too large</source>
         <translation>트랜잭션이 너무 큽니다</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>이미 전송된 리얼 번호를 보내려고 했습니다. 다시 시도하십시오.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -5499,20 +5633,12 @@ JokeCoin Core Wallet</translation>
         <translation>JSON-RPC 연결 사용자 이름</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Value is below the smallest available denomination (= 1) of zJOKE</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>블록 인증 중...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>지갑 인증 중...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>지갑 %s 가 데이터 디렉토리 외부에 존재합니다 %s</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -5543,10 +5669,6 @@ JokeCoin Core Wallet</translation>
         <translation>경고 : 지원하지 않는 인수 -debugnet 무시됨 -debug=net를 사용하십시오.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>지갑에 zJOKE 가 부족합니다.</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>-treindex를 변경하려면 -reindex를 사용하여 데이터베이스를 다시 빌드해야합니다.</translation>
     </message>
@@ -5557,10 +5679,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>ZeroMQ 알림 옵션:</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>제로코인 옵션:</translation>
     </message>
     <message>
         <source>on startup</source>
@@ -5576,6 +5694,22 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Send</source>
         <translation>보내기</translation>
+    </message>
+    <message>
+        <source>Transfer coins publicly or privately</source>
+        <translation>투명 / 쉴드 코인 전송 하기</translation>
+    </message>
+    <message>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <source>Shielded</source>
+        <translation>Shielded</translation>
+    </message>
+    <message>
+        <source>Select which coins to spend</source>
+        <translation>전송할 투명 / 쉴드 코인 선택 </translation>
     </message>
     <message>
         <source>JokeCoin address or contact label</source>

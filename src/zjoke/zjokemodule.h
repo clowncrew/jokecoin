@@ -26,20 +26,13 @@ class PublicCoinSpend : public libzerocoin::CoinSpend {
 public:
 
     PublicCoinSpend(libzerocoin::ZerocoinParams* params): pubCoin(params) {};
-    PublicCoinSpend(libzerocoin::ZerocoinParams* params, const uint8_t version, const CBigNum& serial, const CBigNum& randomness, const uint256& ptxHash, CPubKey* pubkey);
     template <typename Stream> PublicCoinSpend(libzerocoin::ZerocoinParams* params, Stream& strm);
 
     ~PublicCoinSpend(){};
 
     const uint256 signatureHash() const override;
-    void setVchSig(std::vector<unsigned char> vchSig) { this->vchSig = vchSig; };
     bool HasValidSignature() const;
     bool Verify() const;
-    static bool isAllowed(const bool fUseV1Params, const int spendVersion) { return !fUseV1Params || spendVersion >= PUBSPEND_SCHNORR; }
-    bool isAllowed() const {
-        const bool fUseV1Params = getCoinVersion() < libzerocoin::PrivateCoin::PUBKEY_VERSION;
-        return isAllowed(fUseV1Params, version);
-    }
     int getCoinVersion() const { return this->coinVersion; }
 
     // Members
@@ -66,7 +59,7 @@ public:
 
         } else {
             READWRITE(coinVersion);
-            if (coinVersion < libzerocoin::PrivateCoin::PUBKEY_VERSION) {
+            if (coinVersion < libzerocoin::PUBKEY_VERSION) {
                 READWRITE(coinSerialNumber);
             }
             else {
@@ -83,7 +76,6 @@ class CValidationState;
 
 namespace ZJOKEModule {
     CDataStream ScriptSigToSerializedSpend(const CScript& scriptSig);
-    bool createInput(CTxIn &in, CZerocoinMint& mint, uint256 hashTxOut, const int spendVersion);
     PublicCoinSpend parseCoinSpend(const CTxIn &in);
     bool parseCoinSpend(const CTxIn &in, const CTransaction& tx, const CTxOut &prevOut, PublicCoinSpend& publicCoinSpend);
     bool validateInput(const CTxIn &in, const CTxOut &prevOut, const CTransaction& tx, PublicCoinSpend& ret);

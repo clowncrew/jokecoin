@@ -6,21 +6,21 @@
 #define JokeCoin_TEST_TEST_JokeCoin_H
 
 #include "fs.h"
+#include "scheduler.h"
 #include "txdb.h"
 
 #include <boost/thread.hpp>
 
-extern uint256 insecure_rand_seed;
 extern FastRandomContext insecure_rand_ctx;
 
-static inline void SeedInsecureRand(bool fDeterministic = false)
+/**
+ * Flag to make GetRand in random.h return the same number
+ */
+extern bool g_mock_deterministic_tests;
+
+static inline void SeedInsecureRand(bool deterministic = false)
 {
-    if (fDeterministic) {
-        insecure_rand_seed = uint256();
-    } else {
-        insecure_rand_seed = GetRandHash();
-    }
-    insecure_rand_ctx = FastRandomContext(insecure_rand_seed);
+    insecure_rand_ctx = FastRandomContext(deterministic);
 }
 
 static inline uint32_t InsecureRand32() { return insecure_rand_ctx.rand32(); }
@@ -34,8 +34,15 @@ static inline std::vector<unsigned char> InsecureRandBytes(size_t len) { return 
  * This just configures logging and chain parameters.
  */
 struct BasicTestingSetup {
-    BasicTestingSetup();
+    ECCVerifyHandle globalVerifyHandle;
+
+    BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~BasicTestingSetup();
+
+    fs::path SetDataDir(const std::string& name);
+
+private:
+    const fs::path m_path_root;
 };
 
 /** Testing setup that configures a complete environment.
@@ -43,15 +50,56 @@ struct BasicTestingSetup {
  * and wallet (if enabled) setup.
  */
 class CConnman;
-struct TestingSetup: public BasicTestingSetup {
+class EvoNotificationInterface;
+struct TestingSetup: public BasicTestingSetup
+{
     CCoinsViewDB *pcoinsdbview;
-    fs::path pathTemp;
     boost::thread_group threadGroup;
     CConnman* connman;
-    ECCVerifyHandle globalVerifyHandle;
+    EvoNotificationInterface* pEvoNotificationInterface;
+    CScheduler scheduler;
 
-    TestingSetup();
+    TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~TestingSetup();
+};
+
+struct RegTestingSetup : public TestingSetup
+{
+    RegTestingSetup() : TestingSetup(CBaseChainParams::REGTEST) {}
+};
+
+class CBlock;
+struct CMutableTransaction;
+class CScript;
+
+// Test chain only available on regtest
+struct TestChainSetup : public TestingSetup
+{
+    TestChainSetup(int blockCount);
+    ~TestChainSetup();
+
+    // Create a new block with coinbase paying to scriptPubKey, and try to add it to the current chain.
+    // Include given transactions, and, if fNoMempoolTx=true, remove transactions coming from the mempool.
+    CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey, bool fNoMempoolTx = true);
+    CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CKey& scriptKey);
+    CBlock CreateBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey, bool fNoMempoolTx = true);
+    CBlock CreateBlock(const std::vector<CMutableTransaction>& txns, const CKey& scriptKey);
+
+    std::vector<CTransaction> coinbaseTxns; // For convenience, coinbase transactions
+    CKey coinbaseKey; // private/public key needed to spend coinbase transactions
+};
+
+// Testing fixture that pre-creates a 100-block REGTEST-mode blockchain
+struct TestChain100Setup : public TestChainSetup
+{
+    TestChain100Setup() : TestChainSetup(100) {}
+};
+
+// Testing fixture that pre-creates a 400-block REGTEST-mode blockchain
+// all 400 blocks are PoW. PoS starts at height 500
+struct TestChain400Setup : public TestChainSetup
+{
+    TestChain400Setup() : TestChainSetup(400) {}
 };
 
 class CTxMemPoolEntry;
@@ -83,5 +131,8 @@ struct TestMemPoolEntryHelper
     TestMemPoolEntryHelper &SpendsCoinbaseOrCoinstake(bool _flag) { spendsCoinbaseOrCoinstake = _flag; return *this; }
     TestMemPoolEntryHelper &SigOps(unsigned int _sigops) { sigOpCount = _sigops; return *this; }
 };
+
+// define an implicit conversion here so that uint256 may be used directly in BOOST_CHECK_*
+std::ostream& operator<<(std::ostream& os, const uint256& num);
 
 #endif

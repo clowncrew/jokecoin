@@ -397,6 +397,13 @@ for staking</source>
     </message>
 </context>
 <context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>来自</translation>
+    </message>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -592,48 +599,8 @@ for staking</source>
         <translation>修改完成复制</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>最高级</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>更高级</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>高级</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>中高级</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>中级</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>低中级</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>低级</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>更低级</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>最低级</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1已锁住)</translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation>无</translation>
     </message>
     <message>
         <source>yes</source>
@@ -664,24 +631,8 @@ for staking</source>
         <translation>每个输入可以浮动+/- 1 字节。</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>具有更高优先级的交易更有可能被包含到区块中。</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>如果优先级小于“中级”，则此标签变为红色。</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>如果任何收件人收到的金额小于%1，此标签将变为红色。</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>未设置标签</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>从 %1 (%2)更改</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -2725,10 +2676,6 @@ Address: %4
         <translation>来自</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>无地址</translation>
-    </message>
-    <message>
         <source>Add Label</source>
         <translation>添加标签</translation>
     </message>
@@ -2743,10 +2690,6 @@ Address: %4
     <message>
         <source>Receive</source>
         <translation>接收</translation>
-    </message>
-    <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>没有可用地址，尝试解锁钱包</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -2982,6 +2925,25 @@ Address: %4
     </message>
     </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>对话框</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>重置</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>删除</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -2995,7 +2957,7 @@ Address: %4
         <source>Enter label</source>
         <translation>输入标签</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SendWidget</name>
     <message>
@@ -3041,10 +3003,6 @@ Do you want to continue?</source>
     <message>
         <source>Cannot send, wallet locked</source>
         <translation>无法发送，钱包被锁了</translation>
-    </message>
-    <message>
-        <source>Cannot create transaction.</source>
-        <translation>无法创建交易</translation>
     </message>
     <message>
         <source>WARNING:
@@ -3535,34 +3493,6 @@ There was an error trying to save the address list to %1. Please try again.</sou
         <translation>JokeCoin是什么?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-JokeCoin是一种使用区块链技术的数字在线货币
-全球范围内快捷交易，即时，基本为
-零的交易费用。JokeCoin是市场上领先的安全和
-隐私加密货币，也是第一个PoS(股权证明)加密货币
-实现零币(zJOKE)和零币加注。
-&lt;/p&gt;&lt;p align="justify"&gt;
-JokeCoin使用了一个股权证明(PoS)一致系统算法，
-允许所有JokeCoin的所有者参与赚取区块奖励
-同时保护网络与完整的节点钱包，以及
-运行主节点创建和投票来进行提案。</translation>
-    </message>
-    <message>
         <source>2</source>
         <translation>2</translation>
     </message>
@@ -3717,10 +3647,6 @@ JokeCoin使用了一个股权证明(PoS)一致系统算法，
         <source>You can read more here</source>
         <translation>查看这里了解更多内容</translation>
     </message>
-    <message>
-        <source>Exit</source>
-        <translation>退出</translation>
-    </message>
 </context>
 <context>
     <name>SettingsInformationWidget</name>
@@ -3832,7 +3758,7 @@ JokeCoin使用了一个股权证明(PoS)一致系统算法，
         <source>Out:</source>
         <translation>出：</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -4849,7 +4775,11 @@ backup will be created.
         <source>Form</source>
         <translation>来自</translation>
     </message>
-</context>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    </context>
 <context>
     <name>WalletModel</name>
     <message>
@@ -4929,10 +4859,6 @@ JokeCoin核心钱包</translation>
 <context>
     <name>jokecoin-core</name>
     <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 =保留tx元数据，例如帐户所有者和付款请求信息，2 =删除tx元数据)</translation>
-    </message>
-    <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>允许来自指定源的JSON-RPC连接。适用于&lt;ip&gt;单一IP(如1.2.3.4)、网络/网掩码(如1.2.3.4/255.255.255.0)或网络/CIDR(如1.2.3.4/24)。可以多次指定此选项</translation>
     </message>
@@ -4969,10 +4895,6 @@ JokeCoin核心钱包</translation>
         <translation>删除所有钱包交易，只恢复那些部分的区块链-通过启动时进行重新扫描</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>删除所有已记录到区块链数据库的零币花费和铸造，并重新索引它们(0-1，默认值:%u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>在MIT软件许可下发布，参见附带的文件复制或&lt;http://www.opensource.org/licenses/mit-license.php&gt;。</translation>
     </message>
@@ -4991,10 +4913,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>错误:监听传入连接失败(监听返回错误%s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>错误:交易大于交易最大限制值!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -5027,10 +4945,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>在这种模式下，genproclimit控制立即生成的区块的数量。</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>资金不足或确认资金不足，您可能需要等待几分钟，然后再试一次。</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5093,10 +5007,6 @@ JokeCoin核心钱包</translation>
         <translation>如果启用，设置生成硬币的线程数(-1 =所有核心，默认:%d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>显示一个成功锁定的交易的N个确认(0-9999，默认值:%u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>支持使用bloom过滤器过滤区块和交易(默认:%u)</translation>
     </message>
@@ -5147,10 +5057,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>白名单的端口不能被DoS禁止，它们的交易一直被中继，即使它们已经在内存池里面，这对网关很有用</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>您必须在配置中指定一个主节点privkey。有关帮助，请参阅文档。</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5245,24 +5151,12 @@ JokeCoin核心钱包</translation>
         <translation>下载完成</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>启用&lt;address&gt;发布哈希交易(通过SwiftX锁定)</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>启用&lt;address&gt;发布原始交易(通过SwiftX锁定)</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>允许客户端充当主节点(0-1，默认值:%u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>初始化区块数据库出错</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>初始化钱包数据库环境%s出错!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5275,10 +5169,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>数据库读取出错，正在关闭。</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>零币编码写入磁盘出错</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5295,10 +5185,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>误:发现不支持的参数-tor，使用-onion。</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>错误:钱包锁定，无法创建交易!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5349,10 +5235,6 @@ JokeCoin核心钱包</translation>
         <translation>初始化完整性检查失败。JokeCoin核心快要关闭了。</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>资金不足</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>资金不足</translation>
     </message>
@@ -5365,48 +5247,12 @@ JokeCoin核心钱包</translation>
         <translation>支付tx费用金额无效=:'&lt;amount&gt;%s'(必须至少是%s)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>金额无效</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>主节点私钥无效。请参阅文件。</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>白名单中指定的无效网络掩码:'%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>重新计算JOKE供应量……</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>重新索引零币数据库。</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>重建索引零币失败</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>所选择币价值低于支付目标金额</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>SwiftX 选项：</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>这是一个预发行测试版本 - 您自己承担风险 - 不要用于商业应用！</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>禁用所有JokeCoin特定功能(主节点, 零币, SwiftX, budget)(0-1，默认值:%u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>启用SwiftX，显示锁定交易的确认(bool，默认值:%s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5417,20 +5263,8 @@ JokeCoin核心钱包</translation>
         <translation>当最佳区块发生变化且大小超过时执行命令(cmd中的%s被替换为区块散列，%d是区块大小)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>在持有的币中找到小于最大花费数的币集失败</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>在极少数情况下，7个硬币的花费超过了我们的最大允许交易大小，请重试使用6个或更少的硬币</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>指定自定义备份路径去添加任何钱包备份的副本。如果将其设置为dir，则每个备份将生成一个时间戳文件。如果设置为文件，将重写到每次备份的该文件</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftX要求输入至少6个确认，您可能需要等待几分钟，然后重试。</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5439,10 +5273,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>尝试强制区块链腐败恢复</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>不能创造公共花费投入</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -5475,26 +5305,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Error: A fatal internal error occurred, see debug.log for details</source>
         <translation>错误:出现一个致命的内部错误，详情请参阅debug.log</translation>
-    </message>
-    <message>
-        <source>Error: No valid utxo!</source>
-        <translation>错误:没有有效的utxo!</translation>
-    </message>
-    <message>
-        <source>Failed to parse public spend</source>
-        <translation>解析公共花费失败</translation>
-    </message>
-    <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>选择零币失败</translation>
-    </message>
-    <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>擦写零币DB失败</translation>
-    </message>
-    <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>硬币序列号写入钱包失败</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -5581,10 +5391,6 @@ JokeCoin核心钱包</translation>
         <translation>每个连接最大发送缓冲区，&lt;n&gt;*1000字节(默认:%u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>没有进入区块链铸造</translation>
-    </message>
-    <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
         <translation>需要使用-whitebind指定端口:'%s'</translation>
     </message>
@@ -5625,14 +5431,6 @@ JokeCoin核心钱包</translation>
         <translation>由于时间差异，节点被断开连接。</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>无法找到包含铸造 %s的交易</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>无法找到包含铸造, tx哈希: %s的交易</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>使用垃圾邮件过滤器块(默认:%u)</translation>
     </message>
@@ -5657,20 +5455,12 @@ JokeCoin核心钱包</translation>
         <translation>无法解析-%s地址:'%s'</translation>
     </message>
     <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>需要目的地或更改地址，因为更改不准确</translation>
-    </message>
-    <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
         <translation>在调试输出前加上时间戳(默认:%u)</translation>
     </message>
     <message>
         <source>Print version and exit</source>
         <translation>打印版本并退出</translation>
-    </message>
-    <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>公共币没有发现在铸造tx</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -5711,10 +5501,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>作为守护进程在后台运行并接受命令</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>可以的话，以零费用方式发送交易(默认:%u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -5793,10 +5579,6 @@ JokeCoin核心钱包</translation>
         <translation>指定您自己的公共地址</translation>
     </message>
     <message>
-        <source>Spend Valid</source>
-        <translation>花费有效</translation>
-    </message>
-    <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
         <translation>发送交易时花费未确认更改(默认值:%u)</translation>
     </message>
@@ -5829,10 +5611,6 @@ JokeCoin核心钱包</translation>
         <translation>正在同步分叉...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>正在同步zJOKE钱包……</translation>
-    </message>
-    <message>
         <source>This help message</source>
         <translation>这个帮助信息</translation>
     </message>
@@ -5849,24 +5627,12 @@ JokeCoin核心钱包</translation>
         <translation>断开错误的端口的阈值(默认值:%u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>太多花费被需求</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Tor控制端口密码(默认:空)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>洋葱监听启用时使用的Tor控制端口(默认:%s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>交易已创建</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>交易铸造已经开始</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -5883,10 +5649,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Transaction too large</source>
         <translation>交易过大</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>尝试使用已使用的序列号，再试一次。</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -5933,20 +5695,12 @@ JokeCoin核心钱包</translation>
         <translation>JSON-RPC连接的用户名</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>值小于zJOKE的最小可用面额(= 1)</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>正在验证区块……</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>正在验证钱包……</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>钱包%s驻留在数据目录%s之外</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -5977,10 +5731,6 @@ JokeCoin核心钱包</translation>
         <translation>警告:不支持的参数-debugnet被忽略，使用-debug=net。</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>你的钱包里没有足够的零币</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>您需要使用-reindex来更改-txindex来重新构建数据库</translation>
     </message>
@@ -5991,14 +5741,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>ZeroMQ通知选项:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>零币铸造只能在regtest可用</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>零币选项：</translation>
     </message>
     <message>
         <source>on startup</source>

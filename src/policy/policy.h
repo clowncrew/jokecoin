@@ -7,6 +7,7 @@
 #define BITCOIN_POLICY_H
 
 #include "consensus/consensus.h"
+#include "feerate.h"
 #include "script/interpreter.h"
 #include "script/standard.h"
 
@@ -14,6 +15,7 @@
 
 class CChainParams;
 class CCoinsViewCache;
+class CTxOut;
 
 /** Default for -blockmaxsize and -blockminsize, which control the range of sizes the mining code will create **/
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 750000;
@@ -27,6 +29,12 @@ static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 300;
 /** Default for -permitbaremultisig */
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
 extern bool fIsBareMultisigStd;
+/** Min feerate for defining dust. Historically this has been based on the
+ * minRelayTxFee, however changing the dust limit changes which transactions are
+ * standard and should be done with care and ideally rarely. It makes sense to
+ * only increase the dust limit after prior releases were already not creating
+ * outputs below the new threshold */
+static const unsigned int DUST_RELAY_TX_FEE = 30000;
 
 /**
  * Standard script verification flags that standard transactions will comply
@@ -48,12 +56,19 @@ static constexpr unsigned int STANDARD_NOT_MANDATORY_VERIFY_FLAGS = STANDARD_SCR
 BOOST_STATIC_ASSERT(DEFAULT_BLOCK_MAX_SIZE <= MAX_BLOCK_SIZE_CURRENT);
 BOOST_STATIC_ASSERT(DEFAULT_BLOCK_PRIORITY_SIZE <= DEFAULT_BLOCK_MAX_SIZE);
 
+CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn);
+
+bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFeeIn);
+
+CAmount GetDustThreshold(const CFeeRate& dustRelayFeeIn);
+CAmount GetShieldedDustThreshold(const CFeeRate& dustRelayFeeIn);
+
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
 
 /** Check for standard transaction types
  * @return True if all outputs (scriptPubKeys) use only standard transaction forms
  */
-bool IsStandardTx(const CTransaction& tx, std::string& reason);
+bool IsStandardTx(const CTransactionRef& tx, int nBlockHeight, std::string& reason);
 
 /**
  * Check for standard transaction types
@@ -61,5 +76,7 @@ bool IsStandardTx(const CTransaction& tx, std::string& reason);
  * @return True if all inputs (scriptSigs) use only standard transaction forms
  */
 bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs);
+
+extern CFeeRate dustRelayFee;
 
 #endif // BITCOIN_POLICY_H

@@ -80,10 +80,10 @@ public:
 
     QMap<int, std::pair<qint64, qint64>> amountsByCache;
     qreal maxValue = 0;
-    qint64 totalJoke = 0;
+    qint64 totalPiv = 0;
     qint64 totalZjoke = 0;
-    QList<qreal> valuesJoke;
-    QList<qreal> valueszJoke;
+    QList<qreal> valuesPiv;
+    QList<qreal> valueszPiv;
     QStringList xLabels;
 };
 
@@ -133,42 +133,44 @@ private Q_SLOTS:
 #endif
 
 private:
-    Ui::DashboardWidget *ui;
-    FurAbstractListItemDelegate* txViewDelegate;
-    TransactionFilterProxy* filter;
-    TxViewHolder* txHolder;
-    TransactionTableModel* txModel;
-    int nDisplayUnit = -1;
-    bool isSync = false;
+    Ui::DashboardWidget *ui{nullptr};
+    FurAbstractListItemDelegate* txViewDelegate{nullptr};
+    TransactionFilterProxy* filter{nullptr};
+    TxViewHolder* txHolder{nullptr};
+    TransactionTableModel* txModel{nullptr};
+    int nDisplayUnit{-1};
+    bool isSync{false};
+
     void changeSort(int nSortIndex);
 
 #ifdef USE_QTCHARTS
 
-    int64_t lastRefreshTime = 0;
+    int64_t lastRefreshTime{0};
     std::atomic<bool> isLoading;
 
     // Chart
-    TransactionFilterProxy* stakesFilter = nullptr;
-    bool isChartInitialized = false;
-    QChartView *chartView = nullptr;
-    QBarSeries *series = nullptr;
-    QBarSet *set0 = nullptr;
-    QBarSet *set1 = nullptr;
+    TransactionFilterProxy* stakesFilter{nullptr};
+    bool isChartInitialized{false};
+    QChartView *chartView{nullptr};
+    QBarSeries *series{nullptr};
+    QBarSet *set0{nullptr};
+    QBarSet *set1{nullptr};
 
-    QBarCategoryAxis *axisX = nullptr;
-    QValueAxis *axisY = nullptr;
+    QBarCategoryAxis *axisX{nullptr};
+    QValueAxis *axisY{nullptr};
 
-    QChart *chart = nullptr;
-    bool isChartMin = false;
-    ChartShowType chartShow = YEAR;
-    int yearFilter = 0;
-    int monthFilter = 0;
-    int dayStart = 1;
-    bool hasZjokeStakes = false;
+    QChart *chart{nullptr};
+    bool isChartMin{false};
+    ChartShowType chartShow{YEAR};
+    int yearFilter{0};
+    int monthFilter{0};
+    int dayStart{1};
+    bool hasZjokeStakes{false};
 
-    ChartData* chartData = nullptr;
-    bool hasStakes = false;
-    bool fShowCharts = true;
+    ChartData* chartData{nullptr};
+    bool hasStakes{false};
+    bool fShowCharts{true};
+    std::atomic<bool> filterUpdateNeeded{false};
 
     void initChart();
     void showHideEmptyChart(bool show, bool loading, bool forceView = false);

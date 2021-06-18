@@ -429,6 +429,13 @@ voor bewijs van Inzet</translation>
     </message>
 </context>
 <context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>Formulier</translation>
+    </message>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -624,48 +631,8 @@ voor bewijs van Inzet</translation>
         <translation>Wissel Gekopieerd</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>hoogste</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>hoger</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>hoog</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>medium-hoog</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>medium</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>laag-medium</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>laag</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>lager</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>laagst</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 vergrendeld)</translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation>geen</translation>
     </message>
     <message>
         <source>yes</source>
@@ -700,24 +667,8 @@ voor bewijs van Inzet</translation>
         <translation>Kan variëren van +/- 1 byte per invoer.</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Transacties met hogere prioriteit zullen waarschijnlijk eerder in een blok opgenomen worden.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Dit label wordt rood, als de prioriteit lager is dan "medium".</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Dit label wordt rood, als een ontvanger een hoeveelheid kleiner dan %1 ontvangt.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(geen label)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>wijzig van %1 (%2)</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -2259,7 +2210,11 @@ Adres: %4
         <source>Ping Time</source>
         <translation>Pingtijd</translation>
     </message>
-    </context>
+    <message>
+        <source>NodeID</source>
+        <translation>NodeID</translation>
+    </message>
+</context>
 <context>
     <name>QObject</name>
     <message>
@@ -2936,10 +2891,6 @@ Adres: %4
         <translation>Formulier</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>Geen adres</translation>
-    </message>
-    <message>
         <source>Scan the QR code or copy the address to receive JOKE</source>
         <translation>Scan de QR code of kopieer het adres om JOKE te ontvangen</translation>
     </message>
@@ -2974,10 +2925,6 @@ Adres: %4
     <message>
         <source>Request payment with a fixed amount</source>
         <translation>Verzoek tot betaling met een vaste waarde</translation>
-    </message>
-    <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>Geen beschikbaar adres, probeer de portemonnee te ontgrendelen</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -3245,6 +3192,25 @@ Adres: %4
     </message>
 </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialoog</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>Opslaan</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>RESETTEN</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>Annuleren</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -3262,7 +3228,7 @@ Adres: %4
         <source>Enter label</source>
         <translation>Label toevoegen</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SendWidget</name>
     <message>
@@ -3308,10 +3274,6 @@ Wilt u verdergaan?</translation>
     <message>
         <source>Cannot send, wallet locked</source>
         <translation>Kan niet verzenden, portemonnee vergrendeld</translation>
-    </message>
-    <message>
-        <source>Cannot create transaction.</source>
-        <translation>Kan geen transactie aanmaken.</translation>
     </message>
     <message>
         <source>WARNING:
@@ -3856,36 +3818,6 @@ Er was een fout opgetreden tijdens het opslaan van deze adreslijst naar %1. Prob
         <translation>Wat is JokeCoin?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is a form of digital online money using blockchain technology
-                           that can be easily transferred globally, instantly, and with near
-                           zero fees.  JokeCoin incorporates market leading security &amp;
-                           privacy and is also the first PoS (Proof of Stake) Cryptocurrency
-                           to implement ZeroCoin(zJOKE) and Zerocoin staking.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin utilizes a Proof of Stake (PoS) consensus system algorithm,
-                           allowing all owners of JokeCoin to participate in earning block rewards
-                           while securing the network with full node wallets, as well as to
-                           run Masternodes to create and vote on proposals.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           JokeCoin is een vorm van digitaal online geld dat gebruik maakt van blockchain technologie.
-                           die gemakkelijk wereldwijd kan worden overgebracht, onmiddellijk en met bijna
-                           geen kosten.  JokeCoin omvat marktleidende beveiliging &amp;
-                           privacy en is ook de eerste PoS (Proof of Stake) Cryptovaluta
-                           om ZeroCoin (zJOKE) en Zerocoin staking te implementeren.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           JokeCoin gebruikt een Proof of Stake (PoS) consensussysteemalgoritme,
-                           waardoor alle eigenaren van JokeCoin kunnen deelnemen aan het verdienen van blokbeloningen
-                           en tegelijkertijd het netwerk te beveiligen met volledige node portemonnees, en ook om
-                           Masternodes uit te voeren en om voorstellen op te stellen en daarover te stemmen.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </translation>
-    </message>
-    <message>
         <source>2</source>
         <translation>2</translation>
     </message>
@@ -4085,10 +4017,6 @@ Er was een fout opgetreden tijdens het opslaan van deze adreslijst naar %1. Prob
         <source>You can read more here</source>
         <translation>Je kan er hier meer over lezen</translation>
     </message>
-    <message>
-        <source>Exit</source>
-        <translation>Sluit</translation>
-    </message>
 </context>
 <context>
     <name>SettingsInformationWidget</name>
@@ -4200,7 +4128,7 @@ Er was een fout opgetreden tijdens het opslaan van deze adreslijst naar %1. Prob
         <source>Out:</source>
         <translation>Uit:</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -5086,6 +5014,10 @@ nieuwe back-up aangemaakt worden.
         <translation>Portemonnee succesvol geüpgraded, maar geen back-up aangemaakt.</translation>
     </message>
     <message>
+        <source>WARNING: remember to make a copy of your wallet file!</source>
+        <translation>WAARSCHUWING: vergeet niet om je wallet.dat bestand te kopiëren!</translation>
+    </message>
+    <message>
         <source>Upgrade Wallet Error</source>
         <translation>Upgrade Portemonnee Error</translation>
     </message>
@@ -5357,16 +5289,16 @@ nieuwe back-up aangemaakt worden.
         <source>Form</source>
         <translation>Formulier</translation>
     </message>
-</context>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
         <translation>Verzend Munten</translation>
-    </message>
-    <message>
-        <source>SwiftX doesn't support sending values that high yet. Transactions are currently limited to %1 %2.</source>
-        <translation>SwiftTX ondersteunt geen verzendwaarden die zo hoog zijn. Transacties zijn momenteel beperkt tot %1 %2.</translation>
     </message>
     <message>
         <source>Transaction creation failed!
@@ -5453,10 +5385,6 @@ JokeCoin Core Portemonnee</translation>
 <context>
     <name>jokecoin-core</name>
     <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = houd tx meta data, bijvoorbeeld account eigenaar en betalingsverzoek informatie, 2 = drop tx meta data)</translation>
-    </message>
-    <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>Sta JSON-RPC connecties toe van de opgegeven bron. Geldig voor&lt;ip&gt;zijn een enkel IP (bijvoorbeeld 1.2.3.4), een netwerk/netmask (bijvoorbeeld 1.2.3.4/255.255.255.0) of een netwerk/CIDR (bijvoorbeeld 1.2.3.4/24). Deze optie kan meerdere keren worden opgegeven</translation>
     </message>
@@ -5493,10 +5421,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Verwijder alle portemonnee transacties en herstel alleen die delen van de blockchain via -rescan bij opstarten</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Verwijder alle bestede Zerocoin en mints die zijn geregistreerd in de blockchain database en her-indexeer ze (0-1, standaard: %u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Gedistribueerd onder de MIT software licentie, zie het bijgevoegde bestand COPYING of &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
@@ -5515,10 +5439,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>Fout: het luisteren naar inkomende verbindingen is mislukt (luister terug fout %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Fout: de transactie is groter dan de maximaal toegestane transactiegrootte!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -5551,10 +5471,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>In deze modus controleert -genproclimit hoeveel blokken er onmiddellijk worden gegenereerd.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>Onvoldoende of onvoldoende bevestigd geld, u moet mogelijk een paar minuten wachten en het opnieuw proberen.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5617,10 +5533,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Stel het aantal threads voor munt generatie in indien geactiveerd (-1 = alle kernen, standaard: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Toon N bevestigingen voor een succesvol opgesloten transactie (0-9999, standaard: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Ondersteun filteren van blokken en transactie met bloom filters (standaard: %u)</translation>
     </message>
@@ -5671,10 +5583,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>Whitelisted peers kunnen niet DoS banned worden en hun transacties worden altijd doorgestuurd, zelfs als ze al in de mempool zijn, nuttig bijv. voor een gateway</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Je moet een masternodeprivkey opgeven in de configuratie. Raadpleeg de documentatie voor hulp.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5769,24 +5677,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Klaar met laden</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Activeer publicatie hash transactie (vergrendeld via SwiftTX) in &lt;address&gt;</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Activeer publicatie raw transactie (vergrendeld via SwiftTX) in &lt;address&gt;</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>Schakel de client in als masternode (0-1, standaard: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Fout bij het initialiseren van blok database</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>Fout bij het initialiseren van de wallet database omgeving %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5799,10 +5695,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Error tijdens het lezen van de database, aan het afsluiten.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>Fout bij het schrijven van zerocoinDB naar schijf</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5819,10 +5711,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>Fout: Niet ondersteunde argument -tor gevonden, gebruik -onion.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Fout: Portemonnee vergrendeld, niet in staat om transactie te creëren!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5873,10 +5761,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Initialisatie saniteitscontrole mislukt. JokeCoin Core wordt afgesloten.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>Onvoldoende saldo.</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Onvoldoende saldo.</translation>
     </message>
@@ -5889,48 +5773,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Ongeldige hoeveelheid voor -paytxfee=&lt;amount&gt;: '%s' (moet tenminste %s zijn)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>Ongeldige hoeveelheid</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Ongeldige masternodeprivkey. Zie documentatie.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Ongeldige netmask opgegeven in -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>Hercalculatie van JOKE aanbod...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>Her-indexeren Zerocoin database...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>Her-indexeren Zerocoin database mislukt</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>Geselecteerde munt waarde is minder dan het betalingsdoel</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>SwiftTX opties:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>Dit is een pre-release test build - gebruik op eigen risico - niet gebruiken voor staking of handel applicaties!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>Schakel alle specifieke JokeCoin functionaliteit uit (Masternodes, Zerocoin, SwiftTX, Budgeting) (0-1, standaard: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Schakel SwiftX in, toon bevestigingen voor vergrendelde transacties (bool, standaard: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5941,20 +5789,8 @@ JokeCoin Core Portemonnee</translation>
         <translation>Voer het commando uit als het beste blok verandert en de grootte ervan voorbij is (%s in cmd wordt vervangen door blokhash, %d met de blokgrootte)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Het is niet gelukt om muntstukken te vinden onder de aangehouden munten met minder dan max. Aantal uitgaven</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>In zeldzame gevallen overschrijdt een besteding met 7 munten uw maximaal toegestane transactiegrootte. Probeer het opnieuw met 6 of minder munten</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Specificeer aangepast back-up pad om een kopie van elke portemonnee back-up toe te voegen. Indien ingesteld als dir zal elke back-up een bestand genereren met een tijdstempel. Indien ingesteld als file zal elke back-up herschreven worden naar dat bestand.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftTX vereist invoer van tenminste 6 bevestigingen, je dient wellicht een paar minuten te wachten en het opnieuw proberen.</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5963,10 +5799,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>Poging om blockchain corruptie herstel te forceren</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>Kon geen publiek besteedadres aanmaken</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -6001,24 +5833,50 @@ JokeCoin Core Portemonnee</translation>
         <translation>Fout: Er is een fatale interne fout opgetreden, zie debug.log voor meer informatie</translation>
     </message>
     <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Fout: geen geldige utxo!</translation>
+        <source>Accept connections from outside (default: %u if no -proxy or -connect/-noconnect)</source>
+        <translation>Accepteer verbindingen van buitenaf (standaard: %u als geen -proxy of -connect/noconnect)</translation>
     </message>
     <message>
-        <source>Failed to parse public spend</source>
-        <translation>Parsen van publieke uitgaven mislukt</translation>
+        <source>Cannot find the Sapling parameters in the following directory:
+%s
+Please run 'sapling-fetch-params' or './util/fetch-params.sh' and then restart.</source>
+        <translation>Kan de Sapling parameters niet terugvinden op de volgende locatie:
+%s
+Voer alstublieft 'sapling-fetch-params' of './util/fetch-params.sh' uit en herstart daarna.</translation>
     </message>
     <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>Het is niet gelukt om een zerocoin te selecteren</translation>
+        <source>Cannot upgrade to Sapling wallet (already running Sapling support). Version: %d</source>
+        <translation>Kan niet upgraden naar Sapling portemonnee (alreeds uitvoerende Sapling ondersteuning). Versie: %d</translation>
     </message>
     <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>Mislukt om zerocoinDB te legen.</translation>
+        <source>Warning: error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
+        <translation>Waarschuwing: fout bij het lezen van %s! Alle sleutels lezen correct in, maar transactiegegevens of adresboekgegevens kunnen ontbreken of incorrect zijn.</translation>
     </message>
     <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>Het serienummer van het muntstuk kan niet in de portemonnee worden geschreven</translation>
+        <source>Allow DNS lookups for -addnode, -seednode and -connect (default: %u)</source>
+        <translation>DNS lookups toestaan voor -addnode, -seednode en -connect (standaard: %u)</translation>
+    </message>
+    <message>
+        <source>Attempt to recover private keys from a corrupt wallet file</source>
+        <translation>Poging om privésleutels te herstellen van een corrupt wallet bestand</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet corrupted</source>
+        <translation>Error bij het laden van %s: Portemonnee beschadigd</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet requires newer version of JokeCoin Core</source>
+        <translation>Error bij het laden van %s: Portemonnee vereist een nieuwere versie van JokeCoin Core</translation>
+    </message>
+    <message>
+        <source>Error loading %s
+</source>
+        <translation>Error bij het laden van %s
+</translation>
+    </message>
+    <message>
+        <source>Error upgrading chainstate database</source>
+        <translation>Milsukt om de chainstate database te upgraden</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -6105,8 +5963,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Maximaal per connectie verstuur buffer, &lt;n&gt;*1000 bytes (standaard: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>Mint heeft de blockchain niet gehaald</translation>
+        <source>Mining/Staking options:</source>
+        <translation>Mining/Staking opties:</translation>
+    </message>
+    <message>
+        <source>Specify zk params directory (default: %s)</source>
+        <translation>Specifieer zk params locatie (standaard: %s)</translation>
     </message>
     <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
@@ -6149,16 +6011,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Peers worden verbroken vanwege tijdsverschillen.</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>Kan geen transactie terugvinden die munting %s bevat</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>Kan geen transactie terugvinden die munting, txHash %s bevat</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>Gebruik block-spamfilter (standaard: %u)</translation>
+    </message>
+    <message>
+        <source>Wallet debugging/testing options:</source>
+        <translation>Portemonnee's debugging/test opties:</translation>
     </message>
     <message>
         <source>isValid(): Invalid -proxy address or hostname: '%s'</source>
@@ -6253,10 +6111,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Error: -maxmempool moet minsten %d MB groot zijn</translation>
     </message>
     <message>
-        <source>Error: Invalid port %d for running a masternode.</source>
-        <translation>Error: Ongeldige poort %d voor het uitvoeren van een masternode.</translation>
-    </message>
-    <message>
         <source>Failed to accept tx in the memory pool (reason: %s)
 </source>
         <translation>Mislukt om transactie in memorypool te accepteren (reden: %s)
@@ -6295,16 +6149,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Limietgrootte van signature cache naar &lt;n&gt; MiB (standaard: %u)</translation>
     </message>
     <message>
-        <source>Masternodes are required to run on port %d for %s-net</source>
-        <translation>Masternodes zijn vereist om te draaien op poort %d voor %s-net</translation>
-    </message>
-    <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>Bestemmings- of wisseladres nodig omdat wissel niet exact is</translation>
-    </message>
-    <message>
         <source>No error</source>
         <translation>Geen error</translation>
+    </message>
+    <message>
+        <source>Number of automatic wallet backups (default: %d)</source>
+        <translation>Aantal automatische portemonnee back-ups (standaard: %d)</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
@@ -6313,10 +6163,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Print version and exit</source>
         <translation>Print versie en verlaat</translation>
-    </message>
-    <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>Pubcoin niet gevonden in mint tx</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -6333,10 +6179,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
         <translation>Herstel blockchain index van huidige blk000??.dat bestanden</translation>
-    </message>
-    <message>
-        <source>Reindex the %s and z%s money supply statistics</source>
-        <translation>Indexeer de %s en z%s geldvoorraadstatistieken opnieuw</translation>
     </message>
     <message>
         <source>Relay and mine data carrier transactions (default: %u)</source>
@@ -6361,10 +6203,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Voer op de achtergrond uit als een daemon en accepteer commando's</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Zend transacties als zero fee transacties indien mogelijk (standaard: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -6411,6 +6249,10 @@ JokeCoin Core Portemonnee</translation>
         <translation>Krimp debug.log bestand bij client startup (standaard: 1 wanneer geen -debug)</translation>
     </message>
     <message>
+        <source>Shutdown requested over the txs scan. Exiting.</source>
+        <translation>Afsluiting verzoekt door de txs scan. Afsluiten.</translation>
+    </message>
+    <message>
         <source>Signing transaction failed</source>
         <translation>Ondertekening transactie mislukt.</translation>
     </message>
@@ -6441,10 +6283,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Specify your own public address</source>
         <translation>Specificeer je eigen publieke addres</translation>
-    </message>
-    <message>
-        <source>Spend Valid</source>
-        <translation>Besteed geldig</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
@@ -6479,10 +6317,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Synchroniseren sporks...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>Synchroniseren zJOKE portemonnee...</translation>
-    </message>
-    <message>
         <source>The threshold value cannot be less than %s</source>
         <translation>De drempelwaarde kan niet lager zijn dan %s</translation>
     </message>
@@ -6511,24 +6345,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Drempel voor het verbreken van misdragende peers (standaard: %u)</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>Te veel uitgaven nodig</translation>
-    </message>
-    <message>
         <source>Tor control port password (default: empty)</source>
         <translation>Tor controle poort wachtwoord (standaard: leeg)</translation>
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
         <translation>Tor controle poort om te gebruiken als onion listening geactiveerd is (standaard: %s)</translation>
-    </message>
-    <message>
-        <source>Transaction Created</source>
-        <translation>Transactie gemaakt</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>Transactie startte met Mint</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -6549,10 +6371,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Transaction too large</source>
         <translation>Transactie te groot</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>Probeer een reeds bestaand serienummer nog een keer uit te geven, probeer het opnieuw.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -6583,6 +6401,10 @@ JokeCoin Core Portemonnee</translation>
         <translation>Upgrade portemonnee naar nieuwste formaat</translation>
     </message>
     <message>
+        <source>Upgrading coins database...</source>
+        <translation>Upgraden van munten database...</translation>
+    </message>
+    <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Gebruik UPnP om de luisterpoort te mappen (standaard: %u)</translation>
     </message>
@@ -6599,20 +6421,12 @@ JokeCoin Core Portemonnee</translation>
         <translation>Gebruikersnaam voor JSON-RPC verbindingen</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Waarde is minder dan de kleinst beschikbare denominatie (=1) van zJOKE</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Blokken verifiëren...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>Portemonnee verifiëren...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>Portemonnee %s verblijft buiten de data directory %s</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -6643,10 +6457,6 @@ JokeCoin Core Portemonnee</translation>
         <translation>Waarschuwing: Niet ondersteunde argument -debugnet genegeerd, gebruik -debug=net.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>Je hebt niet genoeg Zerocoins in je portemonnee</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>Je moet de database herbouwen met -reindex om -txindex te wijzigen</translation>
     </message>
@@ -6657,14 +6467,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>ZeroMQ notificatie opties:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>Zerocoin munting alleen beschikbaar via regtest</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>Zerocoin opties:</translation>
     </message>
     <message>
         <source>on startup</source>
@@ -6680,10 +6482,6 @@ JokeCoin Core Portemonnee</translation>
     <message>
         <source>Send</source>
         <translation>Zenden</translation>
-    </message>
-    <message>
-        <source>Send public coins (JOKE)</source>
-        <translation>Verstuur publieke munten (JOKE)</translation>
     </message>
     <message>
         <source>JokeCoin address or contact label</source>

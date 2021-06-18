@@ -16,7 +16,6 @@ QT_FORMS_UI = \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
   qt/forms/openuridialog.ui \
-  qt/forms/optionsdialog.ui \
   qt/forms/rpcconsole.ui \
   qt/jokecoin/forms/loadingdialog.ui \
   qt/jokecoin/forms/snackbar.ui \
@@ -24,6 +23,7 @@ QT_FORMS_UI = \
   qt/jokecoin/forms/lockunlock.ui \
   qt/jokecoin/forms/expandablebutton.ui \
   qt/jokecoin/forms/receivedialog.ui \
+  qt/jokecoin/forms/balancebubble.ui \
   qt/jokecoin/forms/topbar.ui \
   qt/jokecoin/forms/txrow.ui \
   qt/jokecoin/forms/dashboardwidget.ui \
@@ -36,10 +36,10 @@ QT_FORMS_UI = \
   qt/jokecoin/forms/masternodeswidget.ui \
   qt/jokecoin/forms/myaddressrow.ui \
   qt/jokecoin/forms/csrow.ui \
+  qt/jokecoin/forms/sendmemodialog.ui \
   qt/jokecoin/forms/sendchangeaddressdialog.ui \
   qt/jokecoin/forms/sendconfirmdialog.ui \
   qt/jokecoin/forms/sendcustomfeedialog.ui \
-  qt/jokecoin/forms/sendchangeaddressdialog.ui \
   qt/jokecoin/forms/sendmultirow.ui \
   qt/jokecoin/forms/send.ui \
   qt/jokecoin/forms/addnewaddressdialog.ui \
@@ -58,8 +58,6 @@ QT_FORMS_UI = \
   qt/jokecoin/settings/forms/settingsfaqwidget.ui \
   qt/jokecoin/settings/forms/settingsinformationwidget.ui \
   qt/jokecoin/settings/forms/settingsmainoptionswidget.ui \
-  qt/jokecoin/settings/forms/settingsmultisenddialog.ui \
-  qt/jokecoin/settings/forms/settingsmultisendwidget.ui \
   qt/jokecoin/settings/forms/settingssignmessagewidgets.ui \
   qt/jokecoin/settings/forms/settingswalletoptionswidget.ui \
   qt/jokecoin/settings/forms/settingswalletrepairwidget.ui \
@@ -86,7 +84,6 @@ QT_MOC_CPP = \
   qt/moc_macnotificationhandler.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
-  qt/moc_optionsdialog.cpp \
   qt/moc_optionsmodel.cpp \
   qt/moc_peertablemodel.cpp \
   qt/moc_paymentserver.cpp \
@@ -94,6 +91,7 @@ QT_MOC_CPP = \
   qt/moc_qvaluecombobox.cpp \
   qt/moc_recentrequeststablemodel.cpp \
   qt/moc_rpcconsole.cpp \
+  qt/moc_rpcexecutor.cpp \
   qt/moc_trafficgraphwidget.cpp \
   qt/moc_transactionfilterproxy.cpp \
   qt/moc_transactiontablemodel.cpp \
@@ -127,7 +125,7 @@ QT_MOC_CPP = \
   qt/jokecoin/moc_sendchangeaddressdialog.cpp \
   qt/jokecoin/moc_sendconfirmdialog.cpp \
   qt/jokecoin/moc_sendcustomfeedialog.cpp \
-  qt/jokecoin/moc_sendchangeaddressdialog.cpp \
+  qt/jokecoin/moc_sendmemodialog.cpp \
   qt/jokecoin/moc_sendmultirow.cpp \
   qt/jokecoin/moc_send.cpp \
   qt/jokecoin/moc_addnewaddressdialog.cpp \
@@ -146,8 +144,6 @@ QT_MOC_CPP = \
   qt/jokecoin/settings/moc_settingsfaqwidget.cpp \
   qt/jokecoin/settings/moc_settingsinformationwidget.cpp \
   qt/jokecoin/settings/moc_settingsmainoptionswidget.cpp \
-  qt/jokecoin/settings/moc_settingsmultisenddialog.cpp \
-  qt/jokecoin/settings/moc_settingsmultisendwidget.cpp \
   qt/jokecoin/settings/moc_settingssignmessagewidgets.cpp \
   qt/jokecoin/settings/moc_settingswalletoptionswidget.cpp \
   qt/jokecoin/settings/moc_settingswalletrepairwidget.cpp \
@@ -161,18 +157,12 @@ BITCOIN_MM = \
 
 QT_MOC = \
   qt/jokecoin.moc \
-  qt/intro.moc \
-  qt/rpcconsole.moc \
-  qt/jokecoin/settings/moc_settingsconsolewidget.cpp
+  qt/intro.moc
 
 QT_QRC_CPP = qt/qrc_jokecoin.cpp
 QT_QRC = qt/jokecoin.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_jokecoin_locale.cpp
 QT_QRC_LOCALE = qt/jokecoin_locale.qrc
-
-PROTOBUF_CC = qt/paymentrequest.pb.cc
-PROTOBUF_H = qt/paymentrequest.pb.h
-PROTOBUF_PROTO = qt/paymentrequest.proto
 
 BITCOIN_QT_H = \
   qt/addressbookpage.h \
@@ -195,9 +185,7 @@ BITCOIN_QT_H = \
   qt/networkstyle.h \
   qt/notificator.h \
   qt/openuridialog.h \
-  qt/optionsdialog.h \
   qt/optionsmodel.h \
-  qt/paymentrequestplus.h \
   qt/paymentserver.h \
   qt/peertablemodel.h \
   qt/platformstyle.h \
@@ -205,6 +193,7 @@ BITCOIN_QT_H = \
   qt/qvaluecombobox.h \
   qt/recentrequeststablemodel.h \
   qt/rpcconsole.h \
+  qt/rpcexecutor.h \
   qt/trafficgraphwidget.h \
   qt/transactionfilterproxy.h \
   qt/transactionrecord.h \
@@ -228,6 +217,7 @@ BITCOIN_QT_H = \
   qt/jokecoin/txviewholder.h \
   qt/jokecoin/qtutils.h \
   qt/jokecoin/expandablebutton.h \
+  qt/jokecoin/balancebubble.h \
   qt/jokecoin/topbar.h \
   qt/jokecoin/txrow.h \
   qt/jokecoin/addressholder.h \
@@ -248,7 +238,7 @@ BITCOIN_QT_H = \
   qt/jokecoin/sendchangeaddressdialog.h \
   qt/jokecoin/sendconfirmdialog.h \
   qt/jokecoin/sendcustomfeedialog.h \
-  qt/jokecoin/sendchangeaddressdialog.h \
+  qt/jokecoin/sendmemodialog.h \
   qt/jokecoin/sendmultirow.h \
   qt/jokecoin/send.h \
   qt/jokecoin/addnewaddressdialog.h \
@@ -267,8 +257,6 @@ BITCOIN_QT_H = \
   qt/jokecoin/settings/settingsfaqwidget.h \
   qt/jokecoin/settings/settingsinformationwidget.h \
   qt/jokecoin/settings/settingsmainoptionswidget.h \
-  qt/jokecoin/settings/settingsmultisenddialog.h \
-  qt/jokecoin/settings/settingsmultisendwidget.h \
   qt/jokecoin/settings/settingssignmessagewidgets.h \
   qt/jokecoin/settings/settingswalletoptionswidget.h \
   qt/jokecoin/settings/settingswalletrepairwidget.h \
@@ -365,6 +353,7 @@ RES_ICONS = \
   qt/jokecoin/res/img/img-empty-dark-transactions.svg \
   qt/jokecoin/res/img/ic-address-book-white.svg \
   qt/jokecoin/res/img/ic-chevron-right.svg \
+  qt/jokecoin/res/img/ic-chevron-right-liliac.svg \
   qt/jokecoin/res/img/ic-nav-send.svg \
   qt/jokecoin/res/img/img-empty-error.svg \
   qt/jokecoin/res/img/ic-address-book.svg \
@@ -492,10 +481,10 @@ RES_ICONS = \
   qt/jokecoin/res/img/ic-transaction-cs-contract.svg \
   qt/jokecoin/res/img/ic-transaction-cs-contract-inactive.svg \
   qt/jokecoin/res/img/ic-check-box-indeterminate.svg \
+  qt/jokecoin/res/img/ic-information.svg \
+  qt/jokecoin/res/img/ic-information-hover.svg \
   qt/jokecoin/res/img/ani-loading-dark.gif \
   qt/jokecoin/res/img/ani-loading.gif
-
-
 
 BITCOIN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
@@ -508,13 +497,13 @@ BITCOIN_QT_BASE_CPP = \
   qt/intro.cpp \
   qt/networkstyle.cpp \
   qt/notificator.cpp \
-  qt/optionsdialog.cpp \
   qt/optionsmodel.cpp \
   qt/peertablemodel.cpp \
   qt/platformstyle.cpp \
   qt/qvalidatedlineedit.cpp \
   qt/qvaluecombobox.cpp \
   qt/rpcconsole.cpp \
+  qt/rpcexecutor.cpp \
   qt/trafficgraphwidget.cpp \
   qt/utilitydialog.cpp
 
@@ -528,7 +517,6 @@ BITCOIN_QT_WALLET_CPP = \
   qt/coincontroltreewidget.cpp \
   qt/editaddressdialog.cpp \
   qt/openuridialog.cpp \
-  qt/paymentrequestplus.cpp \
   qt/paymentserver.cpp \
   qt/recentrequeststablemodel.cpp \
   qt/transactionfilterproxy.cpp \
@@ -548,6 +536,7 @@ BITCOIN_QT_WALLET_CPP = \
   qt/jokecoin/txviewholder.cpp \
   qt/jokecoin/qtutils.cpp \
   qt/jokecoin/expandablebutton.cpp \
+  qt/jokecoin/balancebubble.cpp \
   qt/jokecoin/topbar.cpp \
   qt/jokecoin/txrow.cpp \
   qt/jokecoin/addressholder.cpp \
@@ -568,7 +557,7 @@ BITCOIN_QT_WALLET_CPP = \
   qt/jokecoin/sendchangeaddressdialog.cpp \
   qt/jokecoin/sendconfirmdialog.cpp \
   qt/jokecoin/sendcustomfeedialog.cpp \
-  qt/jokecoin/sendchangeaddressdialog.cpp \
+  qt/jokecoin/sendmemodialog.cpp \
   qt/jokecoin/sendmultirow.cpp \
   qt/jokecoin/send.cpp \
   qt/jokecoin/addnewaddressdialog.cpp \
@@ -587,8 +576,6 @@ BITCOIN_QT_WALLET_CPP = \
   qt/jokecoin/settings/settingsfaqwidget.cpp \
   qt/jokecoin/settings/settingsinformationwidget.cpp \
   qt/jokecoin/settings/settingsmainoptionswidget.cpp \
-  qt/jokecoin/settings/settingsmultisenddialog.cpp \
-  qt/jokecoin/settings/settingsmultisendwidget.cpp \
   qt/jokecoin/settings/settingssignmessagewidgets.cpp \
   qt/jokecoin/settings/settingswalletoptionswidget.cpp \
   qt/jokecoin/settings/settingswalletrepairwidget.cpp \
@@ -622,15 +609,14 @@ BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
   -I$(builddir)/qt/forms -DQT_NO_KEYWORDS
 
 qt_libbitcoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
-  $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
+  $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
 qt_libbitcoinqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 qt_libbitcoinqt_a_OBJCXXFLAGS = $(AM_OBJCXXFLAGS) $(QT_PIE_FLAGS)
 
 qt_libbitcoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
-  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS)
+  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS)
 
-nodist_qt_libbitcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
-  $(PROTOBUF_H) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
+nodist_qt_libbitcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
 
 # forms/foo.h -> forms/ui_foo.h
 QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:.ui=.h))))
@@ -640,14 +626,9 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 $(QT_MOC): $(QT_FORMS_H)
 $(qt_libbitcoinqt_a_OBJECTS) $(qt_jokecoin_qt_OBJECTS) : | $(QT_MOC)
 
-#Generating these with a half-written protobuf header leads to wacky results.
-#This makes sure it's done.
-$(QT_MOC): $(PROTOBUF_H)
-$(QT_MOC_CPP): $(PROTOBUF_H)
-
 # jokecoin-qt binary #
 qt_jokecoin_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
-  $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
+  $(QT_INCLUDES) $(QR_CFLAGS) $(SVG_CFLAGS) $(CHARTS_CFLAGS)
 qt_jokecoin_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
 qt_jokecoin_qt_SOURCES = qt/jokecoin.cpp
@@ -665,7 +646,7 @@ if ENABLE_ZMQ
 qt_jokecoin_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
 qt_jokecoin_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBBITCOIN_ZEROCOIN) $(LIBSAPLING) $(LIBRUSTZCASH) $(LIBZCASH_LIBS) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
-  $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(SVG_LIBS) $(CHARTS_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
+  $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(SVG_LIBS) $(CHARTS_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 qt_jokecoin_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 qt_jokecoin_qt_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag CXX
@@ -690,12 +671,12 @@ $(QT_QRC_LOCALE_CPP): $(QT_QRC_LOCALE) $(QT_QM)
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 	@rm $(@D)/temp_$(<F)
 
-$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(PROTOBUF_H)
+$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS)
 	@test -f $(RCC)
 	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name jokecoin $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
-CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/temp_jokecoin_locale.qrc
+CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/jokecoin/*.gcda qt/jokecoin/*.gcno qt/jokecoin/settings/*.gcda qt/jokecoin/settings/*.gcno qt/temp_jokecoin_locale.qrc
 
 CLEANFILES += $(CLEAN_QT)
 

@@ -11,6 +11,6 @@
 
 bool SignBlockWithKey(CBlock& block, const CKey& key);
 bool SignBlock(CBlock& block, const CKeyStore& keystore);
-bool CheckBlockSignature(const CBlock& block, const bool enableP2PKH);
+bool CheckBlockSignature(const CBlock& block);
 
 #endif //JokeCoin_BLOCKSIGNATURE_H

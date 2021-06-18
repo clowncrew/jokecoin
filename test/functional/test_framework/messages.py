@@ -27,19 +27,23 @@ from test_framework.siphash import siphash256
 from test_framework.util import hex_str_to_bytes, bytes_to_hex_str
 
 MIN_VERSION_SUPPORTED = 60001
-MY_VERSION = 70918
+MY_VERSION = 70920
 MY_SUBVERSION = b"/python-mininode-tester:0.0.3/"
 MY_RELAY = 1 # from version 70001 onwards, fRelay should be appended to version messages (BIP37)
 
 MAX_INV_SZ = 50000
-MAX_BLOCK_BASE_SIZE = 1000000
-CURRENT_BLK_VERSION = 7
+MAX_BLOCK_BASE_SIZE = 2000000
+CURRENT_BLK_VERSION = 9
 
 COIN = 100000000 # 1 btc in satoshis
 
 NODE_NETWORK = (1 << 0)
 # NODE_GETUTXO = (1 << 1)
 NODE_BLOOM = (1 << 2)
+
+MSG_TX = 1
+MSG_BLOCK = 2
+MSG_TYPE_MASK = 0xffffffff >> 2
 
 # Serialization/deserialization tools
 def sha256(s):
@@ -209,7 +213,6 @@ class CAddress():
         return "CAddress(nServices=%i ip=%s port=%i)" % (self.nServices,
                                                          self.ip, self.port)
 
-
 class CInv():
     typemap = {
         0: "MSG_ERROR",
@@ -302,6 +305,9 @@ class COutPoint():
     def __repr__(self):
         return "COutPoint(hash=%064x n=%i)" % (self.hash, self.n)
 
+    def to_json(self):
+        return {"txid": "%064x" % self.hash, "vout": self.n}
+
 NullOutPoint = COutPoint(0, 0xffffffff)
 
 class CTxIn():
@@ -362,6 +368,7 @@ class CTransaction():
             self.nVersion = 1
             self.vin = []
             self.vout = []
+            self.sapData = b""
             self.nLockTime = 0
             self.sha256 = None
             self.hash = None
@@ -370,23 +377,17 @@ class CTransaction():
             self.vin = copy.deepcopy(tx.vin)
             self.vout = copy.deepcopy(tx.vout)
             self.nLockTime = tx.nLockTime
+            self.sapData = tx.sapData
             self.sha256 = tx.sha256
             self.hash = tx.hash
 
     def deserialize(self, f):
         self.nVersion = struct.unpack("<i", f.read(4))[0]
         self.vin = deser_vector(f, CTxIn)
-        flags = 0
-        if len(self.vin) == 0:
-            flags = struct.unpack("<B", f.read(1))[0]
-            # Not sure why flags can't be zero, but this
-            # matches the implementation in bitcoind
-            if (flags != 0):
-                self.vin = deser_vector(f, CTxIn)
-                self.vout = deser_vector(f, CTxOut)
-        else:
-            self.vout = deser_vector(f, CTxOut)
+        self.vout = deser_vector(f, CTxOut)
         self.nLockTime = struct.unpack("<I", f.read(4))[0]
+        if self.nVersion >= 2:
+            self.sapData = deser_string(f)
         self.sha256 = None
         self.hash = None
 
@@ -396,6 +397,8 @@ class CTransaction():
         r += ser_vector(self.vin)
         r += ser_vector(self.vout)
         r += struct.pack("<I", self.nLockTime)
+        if self.nVersion >= 2:
+            r += ser_string(self.sapData)
         return r
 
     # Regular serialization is with witness -- must explicitly
@@ -460,6 +463,7 @@ class CBlockHeader():
             self.nTime = header.nTime
             self.nBits = header.nBits
             self.nNonce = header.nNonce
+            self.hashFinalSaplingRoot = header.hashFinalSaplingRoot
             self.sha256 = header.sha256
             self.hash = header.hash
             self.calc_sha256()
@@ -471,6 +475,7 @@ class CBlockHeader():
         self.nTime = 0
         self.nBits = 0
         self.nNonce = 0
+        self.hashFinalSaplingRoot = 0
         self.sha256 = None
         self.hash = None
 
@@ -481,6 +486,8 @@ class CBlockHeader():
         self.nTime = struct.unpack("<I", f.read(4))[0]
         self.nBits = struct.unpack("<I", f.read(4))[0]
         self.nNonce = struct.unpack("<I", f.read(4))[0]
+        if self.nVersion >= 8:
+            self.hashFinalSaplingRoot = deser_uint256(f)
         self.sha256 = None
         self.hash = None
 
@@ -492,6 +499,8 @@ class CBlockHeader():
         r += struct.pack("<I", self.nTime)
         r += struct.pack("<I", self.nBits)
         r += struct.pack("<I", self.nNonce)
+        if self.nVersion >= 8:
+            r += ser_uint256(self.hashFinalSaplingRoot)
         return r
 
     def calc_sha256(self):
@@ -503,6 +512,8 @@ class CBlockHeader():
             r += struct.pack("<I", self.nTime)
             r += struct.pack("<I", self.nBits)
             r += struct.pack("<I", self.nNonce)
+            if self.nVersion >= 8:
+                r += ser_uint256(self.hashFinalSaplingRoot)
             self.sha256 = uint256_from_str(hash256(r))
             self.hash = encode(hash256(r)[::-1], 'hex_codec').decode('ascii')
 
@@ -619,6 +630,8 @@ class CBlock(CBlockHeader):
         data += struct.pack("<I", self.nTime)
         data += struct.pack("<I", self.nBits)
         data += struct.pack("<I", self.nNonce)
+        if self.nVersion >= 8:
+            data += ser_uint256(self.hashFinalSaplingRoot)
         sha256NoSig = hash256(data)
         self.vchBlockSig = key.sign(sha256NoSig, low_s=low_s)
         self.sig_key = key
@@ -1362,3 +1375,25 @@ class msg_witness_blocktxn(msg_blocktxn):
         r += self.block_transactions.serialize(with_witness=True)
         return r
 
+
+# JokeCoin Classes
+class Masternode(object):
+    def __init__(self, idx, owner_addr, operator_addr, voting_addr, ipport, payout_addr, operator_key):
+        self.idx = idx
+        self.owner = owner_addr
+        self.operator = operator_addr
+        self.voting = voting_addr
+        self.ipport = ipport
+        self.payee = payout_addr
+        self.operator_key = operator_key
+        self.proTx = None
+        self.collateral = None
+
+    def __repr__(self):
+        return "Masternode(idx=%d, owner=%s, operator=%s, voting=%s, ip=%s, payee=%s, opkey=%s, protx=%s, collateral=%s)" % (
+            self.idx, str(self.owner), str(self.operator), str(self.voting), str(self.ipport),
+            str(self.payee), str(self.operator_key), str(self.proTx), str(self.collateral)
+        )
+
+    def __str__(self):
+        return self.__repr__()

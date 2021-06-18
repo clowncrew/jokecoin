@@ -13,6 +13,7 @@ TxRow::TxRow(QWidget *parent) :
     ui(new Ui::TxRow)
 {
     ui->setupUi(this);
+    ui->lblAmountBottom->setVisible(false);
 }
 
 void TxRow::init(bool isLightTheme)
@@ -21,9 +22,15 @@ void TxRow::init(bool isLightTheme)
     updateStatus(isLightTheme, false, false);
 }
 
-void TxRow::setConfirmStatus(bool isConfirm)
-{
-    if (isConfirm) {
+void TxRow::showHideSecondAmount(bool show) {
+    if (show != isDoubleAmount) {
+        isDoubleAmount = show;
+        ui->lblAmountBottom->setVisible(show);
+    }
+}
+
+void TxRow::setConfirmStatus(bool isConfirm){
+    if(isConfirm){
         setCssProperty(ui->lblAddress, "text-list-body1");
         setCssProperty(ui->lblDate, "text-list-caption");
     } else {
@@ -50,15 +57,17 @@ void TxRow::setLabel(QString str)
     ui->lblAddress->setText(str);
 }
 
-void TxRow::setAmount(QString str)
+void TxRow::setAmount(QString top, QString bottom)
 {
-    ui->lblAmount->setText(str);
+    ui->lblAmountTop->setText(top);
+    ui->lblAmountBottom->setText(bottom);
 }
 
 void TxRow::setType(bool isLightTheme, int type, bool isConfirmed)
 {
     QString path;
     QString css;
+    QString cssAmountBottom;
     bool sameIcon = false;
     switch (type) {
         case TransactionRecord::ZerocoinMint:
@@ -75,18 +84,22 @@ void TxRow::setType(bool isLightTheme, int type, bool isConfirmed)
         case TransactionRecord::RecvWithAddress:
         case TransactionRecord::RecvFromOther:
         case TransactionRecord::RecvFromZerocoinSpend:
+        case TransactionRecord::RecvWithShieldedAddress:
             path = "://ic-transaction-received";
             css = "text-list-amount-receive";
             break;
         case TransactionRecord::SendToAddress:
         case TransactionRecord::SendToOther:
         case TransactionRecord::ZerocoinSpend:
-        case TransactionRecord::ZerocoinSpend_Change_zJoke:
+        case TransactionRecord::ZerocoinSpend_Change_zPiv:
         case TransactionRecord::ZerocoinSpend_FromMe:
+        case TransactionRecord::SendToShielded:
+        case TransactionRecord::SendToNobody:
             path = "://ic-transaction-sent";
             css = "text-list-amount-send";
             break;
         case TransactionRecord::SendToSelf:
+        case TransactionRecord::SendToSelfShieldToShieldChangeAddress:
             path = "://ic-transaction-mint";
             css = "text-list-amount-send";
             break;
@@ -112,6 +125,12 @@ void TxRow::setType(bool isLightTheme, int type, bool isConfirmed)
             path = "://ic-transaction-cs-contract";
             css = "text-list-amount-send";
             break;
+        case TransactionRecord::SendToSelfShieldedAddress:
+        case TransactionRecord::SendToSelfShieldToTransparent:
+            path = "://ic-transaction-mint";
+            css = "text-list-amount-unconfirmed";
+            cssAmountBottom = "text-list-amount-send-small";
+            break;
         default:
             path = "://ic-pending";
             sameIcon = true;
@@ -125,12 +144,14 @@ void TxRow::setType(bool isLightTheme, int type, bool isConfirmed)
 
     if (!isConfirmed){
         css = "text-list-amount-unconfirmed";
+        cssAmountBottom = "text-list-amount-unconfirmed";
         path += "-inactive";
         setConfirmStatus(false);
     } else {
         setConfirmStatus(true);
     }
-    setCssProperty(ui->lblAmount, css, true);
+    setCssProperty(ui->lblAmountTop, css, true);
+    if (isDoubleAmount) setCssProperty(ui->lblAmountBottom, cssAmountBottom, true);
     ui->icon->setIcon(QIcon(path));
 }
 

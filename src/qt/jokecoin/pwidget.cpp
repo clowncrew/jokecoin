@@ -108,6 +108,8 @@ bool PWidget::execute(int type, std::unique_ptr<WalletModel::UnlockContext> pctx
             WalletWorker* _worker = static_cast<WalletWorker*>(task->worker.data());
             _worker->setContext(std::move(pctx));
         }
+        // Update type
+        task->worker->setType(type);
     }
     QThreadPool::globalInstance()->start(task.data());
     return true;

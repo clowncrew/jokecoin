@@ -16,39 +16,60 @@ QWidget* TxViewHolder::createHolder(int pos)
     return txRow;
 }
 
-void TxViewHolder::init(QWidget* holder,const QModelIndex &index, bool isHovered, bool isSelected) const
+void TxViewHolder::init(QWidget* holder, const QModelIndex &index, bool isHovered, bool isSelected) const
 {
+    QModelIndex rIndex = (filter) ? filter->mapToSource(index) : index;
+    int type = rIndex.data(TransactionTableModel::TypeRole).toInt();
+
     TxRow *txRow = static_cast<TxRow*>(holder);
     txRow->updateStatus(isLightTheme, isHovered, isSelected);
 
-    QModelIndex rIndex = (filter) ? filter->mapToSource(index) : index;
     QDateTime date = rIndex.data(TransactionTableModel::DateRole).toDateTime();
-    qint64 amount = rIndex.data(TransactionTableModel::AmountRole).toLongLong();
-    QString amountText = BitcoinUnits::formatWithUnit(nDisplayUnit, amount, true, BitcoinUnits::separatorAlways);
     QModelIndex indexType = rIndex.sibling(rIndex.row(),TransactionTableModel::Type);
     QString label = indexType.data(Qt::DisplayRole).toString();
-    int type = rIndex.data(TransactionTableModel::TypeRole).toInt();
+
+    bool hasDoubleAmount = type == TransactionRecord::SendToSelfShieldedAddress || type == TransactionRecord::SendToSelfShieldToTransparent;
+    txRow->showHideSecondAmount(hasDoubleAmount);
 
     if (type != TransactionRecord::ZerocoinMint &&
-            type !=  TransactionRecord::ZerocoinSpend_Change_zJoke &&
+            type !=  TransactionRecord::ZerocoinSpend_Change_zPiv &&
             type !=  TransactionRecord::StakeZJOKE &&
             type != TransactionRecord::Other) {
+
         QString address = rIndex.data(Qt::DisplayRole).toString();
-        if (address.length() > 20) {
-            address = address.left(ADDRESS_SIZE) + "..." + address.right(ADDRESS_SIZE);
+        if (!address.isEmpty()) {
+            if (type == TransactionRecord::SendToNobody) {
+                // OP_RETURN record with a valid utf-8 string to show
+                label.clear();
+                label += address;
+            } else {
+                // Regular addresses
+                if (address.length() > 20) {
+                    address = address.left(ADDRESS_SIZE) + "..." + address.right(ADDRESS_SIZE);
+                }
+                label += " " + address;
+            }
         }
-        label += " " + address;
     } else if (type == TransactionRecord::Other) {
         label += rIndex.data(Qt::DisplayRole).toString();
     }
 
+    qint64 amountTop = rIndex.data(TransactionTableModel::AmountRole).toLongLong();
     int status = rIndex.data(TransactionTableModel::StatusRole).toInt();
     bool isUnconfirmed = (status == TransactionStatus::Unconfirmed) || (status == TransactionStatus::Immature)
                          || (status == TransactionStatus::Conflicted) || (status == TransactionStatus::NotAccepted);
 
     txRow->setDate(date);
     txRow->setLabel(label);
-    txRow->setAmount(amountText);
+    QString amountText = BitcoinUnits::formatWithUnit(nDisplayUnit, amountTop, true, BitcoinUnits::separatorAlways);
+    if (hasDoubleAmount) {
+        qint64 amountBottom = rIndex.data(TransactionTableModel::ShieldedCreditAmountRole).toLongLong();
+        QString amountBottomText = BitcoinUnits::formatWithUnit(nDisplayUnit, amountBottom, true, BitcoinUnits::separatorAlways);
+        txRow->setAmount(amountBottomText + (type == TransactionRecord::SendToSelfShieldedAddress ? " shielded" : ""),
+                         amountText + " fee");
+    } else {
+        txRow->setAmount(amountText, "");
+    }
     txRow->setType(isLightTheme, type, !isUnconfirmed);
 }
 

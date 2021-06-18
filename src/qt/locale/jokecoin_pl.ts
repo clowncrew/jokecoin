@@ -6,6 +6,10 @@
         <translation>Dialog</translation>
     </message>
     <message>
+        <source>New Address</source>
+        <translation>Nowy adres</translation>
+    </message>
+    <message>
         <source>Address</source>
         <translation>Adres</translation>
     </message>
@@ -39,6 +43,10 @@
     <message>
         <source>Set a label for the selected address</source>
         <translation>Ustaw etykietę dla wybranego adresu</translation>
+    </message>
+    <message>
+        <source>Enter a label for the address (e.g. Exchange)</source>
+        <translation>Wpisz etykietę adresu (np. Exchange)</translation>
     </message>
     <message>
         <source>SAVE</source>
@@ -219,6 +227,14 @@
         <translation>ZAPISZ</translation>
     </message>
     <message>
+        <source>Add new contact</source>
+        <translation>Dodaj nowy kontakt</translation>
+    </message>
+    <message>
+        <source>Generate a new address to receive tokens.</source>
+        <translation>Wygeneruj nowy adres, aby otrzymać tokeny.</translation>
+    </message>
+    <message>
         <source>Invalid Contact Address</source>
         <translation>Nieprawidłowy adres kontaktowy</translation>
     </message>
@@ -361,6 +377,18 @@ do stakingu</translation>
         <translation>Portfel zaszyfrowany</translation>
     </message>
     <message>
+        <source>WARNING:</source>
+        <translation>OSTRZEŻENIE:</translation>
+    </message>
+    <message>
+        <source>The caps lock key is on!</source>
+        <translation>Klawisz Caps Lock jest włączony!</translation>
+    </message>
+    <message>
+        <source>Passphrases do not match!</source>
+        <translation>Hasła nie pasują!</translation>
+    </message>
+    <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
         <translation>WAŻNE: Wszystkie poprzednie kopie zapasowe plików portfela należy zastąpić nowo wygenerowanym, zaszyfrowanym plikiem portfela. Ze względów bezpieczeństwa poprzednie kopie niezaszyfrowanego pliku portfela staną się bezużyteczne, gdy tylko zaczniesz korzystać z nowego, zaszyfrowanego portfela.</translation>
     </message>
@@ -381,6 +409,10 @@ do stakingu</translation>
         <translation>Podane hasła nie zgadzają się</translation>
     </message>
     <message>
+        <source>LOSE ALL OF YOUR COINS</source>
+        <translation>STRAĆ WSZYSTKIE MONETY</translation>
+    </message>
+    <message>
         <source>Wallet unlock failed</source>
         <translation>Odblokowanie portfela nieudane</translation>
     </message>
@@ -397,6 +429,13 @@ do stakingu</translation>
         <translation>Hasło do portfela zostało zmienione</translation>
     </message>
 </context>
+<context>
+    <name>BalanceBubble</name>
+    <message>
+        <source>Form</source>
+        <translation>Formularz</translation>
+    </message>
+    </context>
 <context>
     <name>BanTableModel</name>
     <message>
@@ -593,48 +632,8 @@ do stakingu</translation>
         <translation>Reszta Skopiowana</translation>
     </message>
     <message>
-        <source>highest</source>
-        <translation>najwyższy</translation>
-    </message>
-    <message>
-        <source>higher</source>
-        <translation>wyższy</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation>wysoki</translation>
-    </message>
-    <message>
-        <source>medium-high</source>
-        <translation>średnio-wysoki</translation>
-    </message>
-    <message>
-        <source>medium</source>
-        <translation>średni</translation>
-    </message>
-    <message>
-        <source>low-medium</source>
-        <translation>średnio-niski</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation>niski</translation>
-    </message>
-    <message>
-        <source>lower</source>
-        <translation>niższy</translation>
-    </message>
-    <message>
-        <source>lowest</source>
-        <translation>najniższy</translation>
-    </message>
-    <message>
         <source>(%1 locked)</source>
         <translation>(%1 zablokowany)</translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation>brak</translation>
     </message>
     <message>
         <source>yes</source>
@@ -665,24 +664,8 @@ do stakingu</translation>
         <translation>Zmienia się +/- 1 byte</translation>
     </message>
     <message>
-        <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Transakcje o wyższym priorytecie ma większe prawdopodobieństwo wdrożenia do bloku</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Ta zakładka staje się czerwona, jeżeli priorytet jest mniejszy niż "średni"</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Ta etykieta zmienia kolor na czerwony, jeśli odbiorca otrzymuje mniej niż %1.</translation>
-    </message>
-    <message>
         <source>(no label)</source>
         <translation>(brak etykiety)</translation>
-    </message>
-    <message>
-        <source>change from %1 (%2)</source>
-        <translation>Reszta z %1 (%2)</translation>
     </message>
     <message>
         <source>(change)</source>
@@ -778,6 +761,28 @@ stake w Twoim imieniu, podczas gdy klucze są bezpiecznie offline.</translation>
         <translation>Kontrola monet</translation>
     </message>
     <message>
+        <source>Select %1 outputs to delegate.</source>
+        <translation>Wybierz nominały %1 do delegowania.</translation>
+    </message>
+    <message>
+        <source>Create Cold Staking Address</source>
+        <translation>Utwórz adres do zimnego stakowania</translation>
+    </message>
+    <message>
+        <source>Creates an address to receive delegated coins
+and stake them on their owner's behalf.</source>
+        <translation>Tworzy adres do odbioru przekazanych monet
+i postawić je w imieniu ich właściciela.</translation>
+    </message>
+    <message>
+        <source>My Cold Staking Addresses</source>
+        <translation>Moje adresy Cold Staking</translation>
+    </message>
+    <message>
+        <source>List your own cold staking addresses.</source>
+        <translation>Wypisz swoje własne adresy do zimnego stakowania.</translation>
+    </message>
+    <message>
         <source>Invalid entry</source>
         <translation>Niewłaściwy wpis</translation>
     </message>
@@ -820,6 +825,10 @@ Czy chcesz kontynuować?</translation>
     <message>
         <source>Coins delegated</source>
         <translation>Monety przekazane</translation>
+    </message>
+    <message>
+        <source>You don't have any %1 to select.</source>
+        <translation>Nie masz żadnego %1 do wybrania.</translation>
     </message>
     <message>
         <source>Cannot perform operation, wallet locked</source>
@@ -924,6 +933,14 @@ adres</translation>
     <message>
         <source>Staking statistics</source>
         <translation>Staking statystyka</translation>
+    </message>
+    <message>
+        <source>View your account's history</source>
+        <translation>Wyświetl historię swojego konta</translation>
+    </message>
+    <message>
+        <source>How to get JOKE</source>
+        <translation>Jak zdobyć JOKE</translation>
     </message>
     <message>
         <source>Sort by</source>
@@ -1251,7 +1268,15 @@ Rozpocznie się automatycznie, gdy portfel będzie miał wystarczającą liczbę
         <source>Form</source>
         <translation>Formularz</translation>
     </message>
-    </context>
+    <message>
+        <source>Collateral tx not found</source>
+        <translation>Nie znaleziono Collateral tx</translation>
+    </message>
+    <message>
+        <source>Status: %1</source>
+        <translation>Stan: %1</translation>
+    </message>
+</context>
 <context>
     <name>MasterNodeWizardDialog</name>
     <message>
@@ -1339,6 +1364,10 @@ Rozpocznie się automatycznie, gdy portfel będzie miał wystarczającą liczbę
         <translation>Nieprawidłowy adres IP</translation>
     </message>
     <message>
+        <source>Unknown error</source>
+        <translation>Nieznany błąd</translation>
+    </message>
+    <message>
         <source>Prepare master node failed.
 
 %1
@@ -1363,6 +1392,10 @@ Rozpocznie się automatycznie, gdy portfel będzie miał wystarczającą liczbę
         <translation>Nie można wysłać transakcji zabezpieczającej.
 
 %1</translation>
+    </message>
+    <message>
+        <source>walletModel not set</source>
+        <translation>walletModel nie jest ustawiony</translation>
     </message>
     <message>
         <source>Invalid masternode.conf file</source>
@@ -1480,6 +1513,14 @@ i głosuj na system skarbu otrzymujący okresową nagrodę.</translation>
         <translation>Co to jest Masternode?</translation>
     </message>
     <message>
+        <source>FAQ explaining what Masternodes are</source>
+        <translation>FAQ wyjaśniające, czym są Masternody</translation>
+    </message>
+    <message>
+        <source>What is a Controller?</source>
+        <translation>Co to jest kontroler?</translation>
+    </message>
+    <message>
         <source>You are just about to export the required data to run a Masternode
 on a remote server to your clipboard.
 
@@ -1570,7 +1611,11 @@ Jesteś pewny?</translation>
         <source>Export data to run the Masternode on a remote server</source>
         <translation>Wyeksportuj dane, aby uruchomić Masternode na zdalnym serwerze</translation>
     </message>
-    </context>
+    <message>
+        <source>Collateral tx id copied</source>
+        <translation>Skopiowano Collateral tx</translation>
+    </message>
+</context>
 <context>
     <name>MyAddressRow</name>
     <message>
@@ -1583,6 +1628,36 @@ Jesteś pewny?</translation>
     <message>
         <source>Form</source>
         <translation>Formularz</translation>
+    </message>
+    <message>
+        <source>HOME
+</source>
+        <translation>DOM
+</translation>
+    </message>
+    <message>
+        <source>SEND
+</source>
+        <translation>WYSŁANIE
+</translation>
+    </message>
+    <message>
+        <source>RECEIVE
+</source>
+        <translation>OTRZYWANIE
+</translation>
+    </message>
+    <message>
+        <source>CONTACTS
+</source>
+        <translation>KONTAKTY
+</translation>
+    </message>
+    <message>
+        <source>SETTINGS
+</source>
+        <translation>USTAWIENIA
+</translation>
     </message>
     <message>
         <source>V 1.0.0</source>
@@ -2196,6 +2271,10 @@ Adres: %4
         <translation>Delegator</translation>
     </message>
     <message>
+        <source>Delegable</source>
+        <translation>Możliwość delegowania</translation>
+    </message>
+    <message>
         <source>Cold Staking</source>
         <translation>Cold Staking</translation>
     </message>
@@ -2291,7 +2370,11 @@ Adres: %4
         <source>by Date</source>
         <translation>według daty</translation>
     </message>
-    </context>
+    <message>
+        <source>Address with no label</source>
+        <translation>Adres bez etykiety</translation>
+    </message>
+</context>
 <context>
     <name>RPCConsole</name>
     <message>
@@ -2710,6 +2793,10 @@ Adres: %4
         <translation>Mój adres</translation>
     </message>
     <message>
+        <source>COPY</source>
+        <translation>KOPIUJ</translation>
+    </message>
+    <message>
         <source>CANCEL</source>
         <translation>ANULUJ</translation>
     </message>
@@ -2721,8 +2808,8 @@ Adres: %4
         <translation>Formularz</translation>
     </message>
     <message>
-        <source>No address</source>
-        <translation>Brak adresu</translation>
+        <source>Scan the QR code or copy the address to receive JOKE</source>
+        <translation>Zeskanuj kod QR lub skopiuj adres, aby otrzymać JOKE</translation>
     </message>
     <message>
         <source>Add Label</source>
@@ -2741,8 +2828,20 @@ Adres: %4
         <translation>Otrzymaj</translation>
     </message>
     <message>
-        <source>No available address, try unlocking the wallet</source>
-        <translation>Brak dostępnego adresu, spróbuj odblokować portfel</translation>
+        <source>My Addresses</source>
+        <translation>Moje adresy</translation>
+    </message>
+    <message>
+        <source>List your own addresses</source>
+        <translation>Podaj własne adresy</translation>
+    </message>
+    <message>
+        <source>Create Request</source>
+        <translation>Utwórz żądanie</translation>
+    </message>
+    <message>
+        <source>Request payment with a fixed amount</source>
+        <translation>Poproś o płatność ustaloną kwotą</translation>
     </message>
     <message>
         <source>Error generating address</source>
@@ -2895,10 +2994,22 @@ Adres: %4
         <translation>Kwota (opcjonalnie)</translation>
     </message>
     <message>
+        <source>Address label cannot be empty</source>
+        <translation>Etykieta adresu nie może być pusta</translation>
+    </message>
+    <message>
         <source>Invalid amount</source>
         <translation>nieprawidłowa kwota</translation>
     </message>
-    </context>
+    <message>
+        <source>Request for </source>
+        <translation>Wniosek o</translation>
+    </message>
+    <message>
+        <source>Cold Staking Address Generated</source>
+        <translation>Wygenerowano adres Cold Staking</translation>
+    </message>
+</context>
 <context>
     <name>SendChangeAddressDialog</name>
     <message>
@@ -2986,6 +3097,25 @@ Adres: %4
     </message>
 </context>
 <context>
+    <name>SendMemoDialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation>Dialog</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>ZAPISZ</translation>
+    </message>
+    <message>
+        <source>RESET</source>
+        <translation>RESET</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation>ANULUJ</translation>
+    </message>
+</context>
+<context>
     <name>SendMultiRow</name>
     <message>
         <source>Form</source>
@@ -2996,10 +3126,14 @@ Adres: %4
         <translation>Podaj adres</translation>
     </message>
     <message>
+        <source>Address label (optional)</source>
+        <translation>Etykieta adresowa (opcjonalnie)</translation>
+    </message>
+    <message>
         <source>Enter label</source>
         <translation>Wpisz etykietę</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SendWidget</name>
     <message>
@@ -3047,10 +3181,6 @@ Czy chcesz kontynuować?</translation>
         <translation>Nie można wysłać, portfel zablokowany</translation>
     </message>
     <message>
-        <source>Cannot create transaction.</source>
-        <translation>Nie można utworzyć transakcji.</translation>
-    </message>
-    <message>
         <source>WARNING:
 Transaction spends a cold-stake delegation, voiding it.
 These coins will no longer be cold-staked.</source>
@@ -3083,8 +3213,28 @@ Monety te nie będą już cold-staked.</translation>
         <translation>Kontrola monet</translation>
     </message>
     <message>
+        <source>Select the source of the coins</source>
+        <translation>Wybierz źródło monet</translation>
+    </message>
+    <message>
+        <source>Change Address</source>
+        <translation>Zmiana adresu</translation>
+    </message>
+    <message>
+        <source>Customize the change address</source>
+        <translation>Dostosuj adres reszty</translation>
+    </message>
+    <message>
         <source>Open URI</source>
         <translation>Otwórz URI</translation>
+    </message>
+    <message>
+        <source>Parse a payment request</source>
+        <translation>Przeanalizuj żądanie płatności</translation>
+    </message>
+    <message>
+        <source>You don't have any %1 to select.</source>
+        <translation>Nie masz żadnego %1 do wybrania.</translation>
     </message>
     <message>
         <source>No contacts available, you can go to the contacts screen and add some there!</source>
@@ -3237,6 +3387,10 @@ Monety te nie będą już cold-staked.</translation>
         <translation>WYCZYŚĆ WSZYSTKO</translation>
     </message>
     <message>
+        <source>Enter a passphrase</source>
+        <translation>Wpisz hasło</translation>
+    </message>
+    <message>
         <source>CLEAR</source>
         <translation>CZYŚĆ</translation>
     </message>
@@ -3326,6 +3480,10 @@ Monety te nie będą już cold-staked.</translation>
     <message>
         <source>Open Debug File</source>
         <translation>Otwórz plik debugowania</translation>
+    </message>
+    <message>
+        <source>Command Line Options</source>
+        <translation>Opcje wiersza poleceń</translation>
     </message>
     <message>
         <source>Clear history</source>
@@ -3531,6 +3689,10 @@ Wystąpił błąd podczas próby zapisania listy adresów w %1. Proszę spróbuj
         <translation>2) Dlaczego mojego JOKE nie można wydać?</translation>
     </message>
     <message>
+        <source>https://JokeCoin.org/</source>
+        <translation>https://JokeCoin.org/</translation>
+    </message>
+    <message>
         <source>1</source>
         <translation>1</translation>
     </message>
@@ -3549,6 +3711,10 @@ Wystąpił błąd podczas próby zapisania listy adresów w %1. Proszę spróbuj
     <message>
         <source>3</source>
         <translation>3</translation>
+    </message>
+    <message>
+        <source>How do I stake JOKE?</source>
+        <translation>Jak stake-ować JOKE?</translation>
     </message>
     <message>
         <source>4</source>
@@ -3581,10 +3747,6 @@ Wystąpił błąd podczas próby zapisania listy adresów w %1. Proszę spróbuj
     <message>
         <source>You can read more here</source>
         <translation>Możesz przeczytać więcej tutaj</translation>
-    </message>
-    <message>
-        <source>Exit</source>
-        <translation>Wyjście</translation>
     </message>
 </context>
 <context>
@@ -3697,7 +3859,7 @@ Wystąpił błąd podczas próby zapisania listy adresów w %1. Proszę spróbuj
         <source>Out:</source>
         <translation>Z</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsMainOptionsWidget</name>
     <message>
@@ -3727,6 +3889,10 @@ Wystąpił błąd podczas próby zapisania listy adresów w %1. Proszę spróbuj
     <message>
         <source>Main</source>
         <translation>Główny</translation>
+    </message>
+    <message>
+        <source>Customize the main application options</source>
+        <translation>Dostosuj główne opcje aplikacji</translation>
     </message>
     <message>
         <source>Size of database cache</source>
@@ -3940,6 +4106,10 @@ Zaznacz jedno lub oba pola wyboru, aby wysłać stake i / lub nagrode masternode
         <translation>Zweryfikuj</translation>
     </message>
     <message>
+        <source>Write message here...</source>
+        <translation>Napisz wiadomość tutaj ...</translation>
+    </message>
+    <message>
         <source>Select mode</source>
         <translation>Wybierz tryb</translation>
     </message>
@@ -4055,6 +4225,10 @@ Zaznacz jedno lub oba pola wyboru, aby wysłać stake i / lub nagrode masternode
         <translation>Dostosuj wewnętrzne opcje portfela</translation>
     </message>
     <message>
+        <source>Stake split threshold</source>
+        <translation>Próg podziału Stake</translation>
+    </message>
+    <message>
         <source>Spend unconfirmed change</source>
         <translation>Wydaj niepotwierdzoną resztę</translation>
     </message>
@@ -4065,6 +4239,10 @@ Zaznacz jedno lub oba pola wyboru, aby wysłać stake i / lub nagrode masternode
     <message>
         <source>Customize the node network options</source>
         <translation>Dostosuj opcje sieciowe węzła</translation>
+    </message>
+    <message>
+        <source>Connect through SOCKS5 proxy (default proxy)</source>
+        <translation>Połącz przez serwer proxy SOCKS5 (domyślny serwer proxy)</translation>
     </message>
     <message>
         <source>Enter port</source>
@@ -4132,6 +4310,10 @@ Zaznacz jedno lub oba pola wyboru, aby wysłać stake i / lub nagrode masternode
     <message>
         <source>Rebuild index</source>
         <translation>Przebuduj indeks</translation>
+    </message>
+    <message>
+        <source>Delete local blockchain</source>
+        <translation>Usuń lokalny łańcuch bloków</translation>
     </message>
     <message>
         <source>This will delete your local blockchain folders and the wallet will synchronize the complete Blockchain from scratch.&lt;br /&gt;&lt;br /&gt;</source>
@@ -4443,8 +4625,40 @@ kopia zapasowa zostanie utworzona.
         <translation>FAQ</translation>
     </message>
     <message>
+        <source>Upgrade to HD Wallet</source>
+        <translation>Uaktualnij do portfela HD</translation>
+    </message>
+    <message>
+        <source>No Connection</source>
+        <translation>Brak połączenia</translation>
+    </message>
+    <message>
+        <source>Staking Disabled</source>
+        <translation>Staking wyłączony</translation>
+    </message>
+    <message>
+        <source>Cold Staking Disabled</source>
+        <translation>Cold Staking wyłączony</translation>
+    </message>
+    <message>
+        <source> %54 Synchronizing..</source>
+        <translation>%54 Synchronizacja...</translation>
+    </message>
+    <message>
+        <source>Wallet Locked </source>
+        <translation>Portfel zablokowany</translation>
+    </message>
+    <message>
         <source>Wallet Locked</source>
         <translation>Portfel zablokowany</translation>
+    </message>
+    <message>
+        <source>Wallet Unlocked</source>
+        <translation>Portfel odblokowany</translation>
+    </message>
+    <message>
+        <source>Wallet Unencrypted</source>
+        <translation>Portfel niezaszyfrowany</translation>
     </message>
     <message>
         <source>Available (Locked included)</source>
@@ -4485,6 +4699,10 @@ kopia zapasowa zostanie utworzona.
     <message>
         <source>Wallet upgraded successfully, but no backup created.</source>
         <translation>Portfel został uaktualniony pomyślnie, ale nie utworzono kopii zapasowej.</translation>
+    </message>
+    <message>
+        <source>WARNING: remember to make a copy of your wallet file!</source>
+        <translation>UWAGA: pamiętaj o zrobieniu kopii pliku portfela!</translation>
     </message>
     <message>
         <source>Upgrade Wallet Error</source>
@@ -4571,6 +4789,10 @@ kopia zapasowa zostanie utworzona.
     <message>
         <source>Mined</source>
         <translation>wydobyty</translation>
+    </message>
+    <message>
+        <source>Converted z%1 to %1</source>
+        <translation>Przekonwertowano z %1 na %1</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -4708,6 +4930,10 @@ kopia zapasowa zostanie utworzona.
         <translation>ID skopiowane</translation>
     </message>
     <message>
+        <source>Delegating to</source>
+        <translation>Delegowanie do</translation>
+    </message>
+    <message>
         <source>Unknown</source>
         <translation>Nieznane</translation>
     </message>
@@ -4718,14 +4944,30 @@ kopia zapasowa zostanie utworzona.
         <source>Form</source>
         <translation>Formularz</translation>
     </message>
-</context>
+    <message>
+        <source>+0.000585 JOKE</source>
+        <translation>+0.000585 JOKE</translation>
+    </message>
+    </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
         <translation>Wyślij monety</translation>
     </message>
-    </context>
+    <message>
+        <source>Transaction creation failed!
+%1</source>
+        <translation>Tworzenie transakcji nie powiodło się!
+%1</translation>
+    </message>
+    <message>
+        <source>The size of the transaction is too big.
+Select fewer inputs with coin control.</source>
+        <translation>Wielkość transakcji jest zbyt duża.
+Wybierz mniej nominałów kontrolą monet.</translation>
+    </message>
+</context>
 <context>
     <name>WelcomeContentWidget</name>
     <message>
@@ -4794,10 +5036,6 @@ Portfel JokeCoin Core</translation>
 <context>
     <name>jokecoin-core</name>
     <message>
-        <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = zachowaj tx meta dane np. Właściciel konta i informacje o żądaniu płatności, 2 = porzuć tx meta dane)</translation>
-    </message>
-    <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
         <translation>Zezwalaj na połączenia JSON-RPC z określonego źródła. Ważny dla &lt;ip&gt; są pojedynczym IP (na przykład 1.2.3.4), siecią / maską sieci (np. 1.2.3.4/255.255.255.0) lub siecią / CIDR (na przykład 1.2.3.4/24). Ta opcja może być określona wiele razy</translation>
     </message>
@@ -4834,10 +5072,6 @@ Portfel JokeCoin Core</translation>
         <translation>Usuń wszystkie transakcje portfela i odzyskaj tylko część łańcucha blokowego -reskan przy uruchomieniu</translation>
     </message>
     <message>
-        <source>Delete all zerocoin spends and mints that have been recorded to the blockchain database and reindex them (0-1, default: %u)</source>
-        <translation>Usuń wszystkie wydane zerocoin i mint, które zostały zapisane w bazie danych blockchain i ponownie je zindeksuj (0-1, domyślnie: %u)</translation>
-    </message>
-    <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Dystrybuowane w ramach licencji oprogramowania MIT, patrz plik towarzyszący COPYING lub &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
@@ -4856,10 +5090,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
         <translation>Błąd: Odsłuchiwanie przychodzących połączeń nie powiodło się (zwrócony błąd %s)</translation>
-    </message>
-    <message>
-        <source>Error: The transaction is larger than the maximum allowed transaction size!</source>
-        <translation>Błąd: transakcja jest większa niż maksymalny dozwolony rozmiar transakcji!</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -4892,10 +5122,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
         <translation>W tym trybie -genproclimit kontroluje, ile bloków jest generowanych natychmiast.</translation>
-    </message>
-    <message>
-        <source>Insufficient or insufficient confirmed funds, you might need to wait a few minutes and try again.</source>
-        <translation>Niewystarczające lub niewystarczająco potwierdzone fundusze, może trzeba poczekać kilka minut i spróbować ponownie.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -4958,10 +5184,6 @@ Portfel JokeCoin Core</translation>
         <translation>Ustaw liczbę wątków do generowania monet, jeśli jest włączona (-1 = wszystkie rdzenie, domyślnie: %d)</translation>
     </message>
     <message>
-        <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Pokaż N potwierdzeń dla pomyślnie zablokowanej transakcji (0-9999, domyślnie: %u)</translation>
-    </message>
-    <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Obsługa filtrowania bloków i transakcji za pomocą filtrów bloom (domyślnie: %u)</translation>
     </message>
@@ -5012,10 +5234,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
         <translation>Peery na białej liście nie mogą być zbanowane przez DoS, a ich transakcje są zawsze przekazywane, nawet jeśli są już w pamięci, przydatne np. na gatewaya</translation>
-    </message>
-    <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Musisz określić masternodeprivkey w konfiguracji. Aby uzyskać pomoc, zapoznaj się z dokumentacją.</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -5110,24 +5328,12 @@ Portfel JokeCoin Core</translation>
         <translation>Ładowanie ukończone</translation>
     </message>
     <message>
-        <source>Enable publish hash transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Włącz transakcję mieszania (zablokowaną przez SwiftX) w &lt;address&gt;</translation>
-    </message>
-    <message>
-        <source>Enable publish raw transaction (locked via SwiftX) in &lt;address&gt;</source>
-        <translation>Włącz publikowanie surowej transakcji (zablokowanej przez SwiftX) w &lt;address&gt;</translation>
-    </message>
-    <message>
         <source>Enable the client to act as a masternode (0-1, default: %u)</source>
         <translation>Włącz klienta, aby działał jako masternode (0-1, domyślnie: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Błąd podczas inicjowania block database</translation>
-    </message>
-    <message>
-        <source>Error initializing wallet database environment %s!</source>
-        <translation>Błąd podczas inicjowania środowiska bazy danych portfela %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -5140,10 +5346,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Błąd odczytu z bazy danych, wyłączenie.</translation>
-    </message>
-    <message>
-        <source>Error writing zerocoinDB to disk</source>
-        <translation>Błąd podczas zapisywania zerocoinDB na dysku</translation>
     </message>
     <message>
         <source>Error</source>
@@ -5160,10 +5362,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
         <translation>Błąd: Nieobsługiwany argument -tor, użyj -onion.</translation>
-    </message>
-    <message>
-        <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Błąd: Portfel zablokowany, nie można utworzyć transakcji!</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -5214,10 +5412,6 @@ Portfel JokeCoin Core</translation>
         <translation>Sprawdzenie poprawności inicjalizacji nie powiodło się. JokeCoin Core zamyka się.</translation>
     </message>
     <message>
-        <source>Insufficient funds</source>
-        <translation>Niewystarczające środki</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Niewystarczające środki.</translation>
     </message>
@@ -5230,48 +5424,12 @@ Portfel JokeCoin Core</translation>
         <translation>Nieprawidłowa kwota dla -paytxfee= &lt;amount&gt; : '%s' (musi być przynajmniej %s)</translation>
     </message>
     <message>
-        <source>Invalid amount</source>
-        <translation>nieprawidłowa kwota</translation>
-    </message>
-    <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Nieprawidłowy masternodeprivkey. Zobacz dokumentację.</translation>
-    </message>
-    <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Nieprawidłowa netmask podana w -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Recalculating JOKE supply...</source>
-        <translation>Przeliczanie podaży JOKE ...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin database...</source>
-        <translation>Ponowne indeksowanie bazy danych zerocoin ...</translation>
-    </message>
-    <message>
-        <source>Reindexing zerocoin failed</source>
-        <translation>Ponowne indeksowanie zerocoin nie powiodło się</translation>
-    </message>
-    <message>
-        <source>Selected coins value is less than payment target</source>
-        <translation>Wybrana wartość monet jest mniejsza niż docelowa</translation>
-    </message>
-    <message>
-        <source>SwiftX options:</source>
-        <translation>Opcje SwiftX:</translation>
-    </message>
-    <message>
         <source>This is a pre-release test build - use at your own risk - do not use for staking or merchant applications!</source>
         <translation>Jest to wersja testowa pre-release - korzystaj z niej na własne ryzyko - nie używaj do staking lub prawdziwych transakcji!</translation>
-    </message>
-    <message>
-        <source>Disable all JokeCoin specific functionality (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, default: %u)</source>
-        <translation>Wyłącz wszystkie funkcje specyficzne dla JokeCoin (Masternodes, Zerocoin, SwiftX, Budgeting) (0-1, domyślnie: %u)</translation>
-    </message>
-    <message>
-        <source>Enable SwiftX, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Włącz SwiftX, pokaż potwierdzenia zablokowanych transakcji (bool, domyślnie: %s)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
@@ -5282,20 +5440,8 @@ Portfel JokeCoin Core</translation>
         <translation>Wykonaj polecenie, gdy najlepszy blok się zmieni, a jego rozmiar się skończy ( %s w cmd jest zastąpiony skrótem bloku, %d rozmiarem bloku)</translation>
     </message>
     <message>
-        <source>Failed to find coin set amongst held coins with less than maxNumber of Spends</source>
-        <translation>Nie udało się znaleźć zestawu monet i innych monet o wartości mniejszej niż maksymalna liczba wydatków</translation>
-    </message>
-    <message>
-        <source>In rare cases, a spend with 7 coins exceeds our maximum allowable transaction size, please retry spend using 6 or less coins</source>
-        <translation>W rzadkich przypadkach należy wydać 7 lub więcej monet z naszym maksymalnym dopuszczalnym rozmiarem transakcji, spróbuj ponownie wydać 6 lub mniej monet</translation>
-    </message>
-    <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
         <translation>Określ ścieżkę kopii zapasowej, aby dodać kopię zapasową portfela. Jeśli ustawione jako katalog, każda kopia zapasowa generuje plik ze znacznikiem czasu. Jeśli jest ustawiony jako plik, przepisuje do tego pliku każdą kopię zapasową.</translation>
-    </message>
-    <message>
-        <source>SwiftX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>SwiftX wymaga danych wejściowych z co najmniej 6 potwierdzeniami, być może trzeba będzie poczekać kilka minut i spróbować ponownie.</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -5304,10 +5450,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Attempt to force blockchain corruption recovery</source>
         <translation>Spróbuj wymusić blockchain corruption recovery</translation>
-    </message>
-    <message>
-        <source>Cannot create public spend input</source>
-        <translation>Nie można utworzyć publicznego wpisu wydatków</translation>
     </message>
     <message>
         <source>Display the stake modifier calculations in the debug.log file.</source>
@@ -5342,24 +5484,14 @@ Portfel JokeCoin Core</translation>
         <translation>Błąd: Wystąpił krytyczny błąd wewnętrzny, zobacz szczegóły w pliku debug.log</translation>
     </message>
     <message>
-        <source>Error: No valid utxo!</source>
-        <translation>Błąd: brak prawidłowego utxo!</translation>
+        <source>Error loading %s
+</source>
+        <translation>Błąd podczas ładowania %s
+</translation>
     </message>
     <message>
-        <source>Failed to parse public spend</source>
-        <translation>Nie udało się przeanalizować wydatków publicznych</translation>
-    </message>
-    <message>
-        <source>Failed to select a zerocoin</source>
-        <translation>Nie udało się wybrać zerocoin</translation>
-    </message>
-    <message>
-        <source>Failed to wipe zerocoinDB</source>
-        <translation>Nie można wyczyścić zerocoinDB</translation>
-    </message>
-    <message>
-        <source>Failed to write coin serial number into wallet</source>
-        <translation>Nie udało się zapisać numeru seryjnego monety w portfelu</translation>
+        <source>Error upgrading chainstate database</source>
+        <translation>Błąd podczas uaktualniania bazy danych stanu łańcucha</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -5446,8 +5578,12 @@ Portfel JokeCoin Core</translation>
         <translation>Maksymalny bufor wysyłania na połączenie, &lt;n&gt;* 1000 bajtów (domyślnie: %u)</translation>
     </message>
     <message>
-        <source>Mint did not make it into blockchain</source>
-        <translation>Mint nie przeszło do blockchain</translation>
+        <source>Mining/Staking options:</source>
+        <translation>Opcje wydobycia / stakingu:</translation>
+    </message>
+    <message>
+        <source>Specify zk params directory (default: %s)</source>
+        <translation>Określ ścieżke parametrów zk (domyślnie: %s)</translation>
     </message>
     <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
@@ -5490,16 +5626,12 @@ Portfel JokeCoin Core</translation>
         <translation>Peers są rozłączani z powodu różnic czasowych.</translation>
     </message>
     <message>
-        <source>Unable to find transaction containing mint %s</source>
-        <translation>Nie można znaleźć transakcji zawierającej mint %s</translation>
-    </message>
-    <message>
-        <source>Unable to find transaction containing mint, txHash: %s</source>
-        <translation>Nie można znaleźć transakcji zawierającej mint, txHash: %s</translation>
-    </message>
-    <message>
         <source>Use block spam filter (default: %u)</source>
         <translation>Użyj block spam filter (domyślnie: %u)</translation>
+    </message>
+    <message>
+        <source>Wallet debugging/testing options:</source>
+        <translation>Opcje debugowania / testowania portfela:</translation>
     </message>
     <message>
         <source>isValid(): Invalid -proxy address or hostname: '%s'</source>
@@ -5518,12 +5650,32 @@ Portfel JokeCoin Core</translation>
         <translation>Określ lokalizację pliku dziennika debugowania: może to być ścieżka bezwzględna lub ścieżka względem katalogu danych (domyślnie: %s)</translation>
     </message>
     <message>
+        <source>Active Masternode not initialized.</source>
+        <translation>Aktywny Masternode nie został zainicjowany.</translation>
+    </message>
+    <message>
+        <source>Can't generate a change-address key. Please call keypoolrefill first.</source>
+        <translation>Nie można wygenerować klucza adresu reszty. Najpierw zobacz do keypoolrefill.</translation>
+    </message>
+    <message>
         <source>Cannot resolve -%s address: '%s'</source>
         <translation>Nie można odwzorować adresu -%s: '%s'</translation>
     </message>
     <message>
-        <source>Need destination or change address because change is not exact</source>
-        <translation>Potrzebujesz miejsca docelowego lub adresu reszty, ponieważ reszta nie jest dokładna</translation>
+        <source>Change index out of range</source>
+        <translation>Zmień indeks poza zakres</translation>
+    </message>
+    <message>
+        <source>Invalid status error.</source>
+        <translation>Nieprawidłowy stan - błąd.</translation>
+    </message>
+    <message>
+        <source>No error</source>
+        <translation>Żaden błąd</translation>
+    </message>
+    <message>
+        <source>Number of automatic wallet backups (default: %d)</source>
+        <translation>Liczba automatycznych kopii zapasowych portfela (domyślnie: %d)</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
@@ -5532,10 +5684,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Print version and exit</source>
         <translation>Wydrukuj wersję i zakończ</translation>
-    </message>
-    <message>
-        <source>Pubcoin not found in mint tx</source>
-        <translation>Pubcoin nie znaleziono w mint tx</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -5576,10 +5724,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Uruchom w tle jako demon i przyjmuj polecenia</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Wysyłaj transakcje jako transakcje bez opłat, jeśli to możliwe (domyślnie: %u)</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
@@ -5626,6 +5770,10 @@ Portfel JokeCoin Core</translation>
         <translation>Zmniejsz plik debug.log podczas uruchamiania klienta (domyślnie: 1, gdy nie ma -debug)</translation>
     </message>
     <message>
+        <source>Shutdown requested over the txs scan. Exiting.</source>
+        <translation>Zażądano wyłączenia podczas skanowania txs. Wychodzę.</translation>
+    </message>
+    <message>
         <source>Signing transaction failed</source>
         <translation>Podpisanie transakcji nie powiodło się</translation>
     </message>
@@ -5656,10 +5804,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>Specify your own public address</source>
         <translation>Podaj swój własny adres publiczny</translation>
-    </message>
-    <message>
-        <source>Spend Valid</source>
-        <translation>Spend Valid</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
@@ -5694,10 +5838,6 @@ Portfel JokeCoin Core</translation>
         <translation>Synchronizowanie sporks...</translation>
     </message>
     <message>
-        <source>Syncing zJOKE wallet...</source>
-        <translation>Synchronizuję portfel zJOKE ...</translation>
-    </message>
-    <message>
         <source>This help message</source>
         <translation>Ten komunikat pomocy</translation>
     </message>
@@ -5710,12 +5850,16 @@ Portfel JokeCoin Core</translation>
         <translation>Jest to przeznaczone do testowania regresji i tworzenia aplikacji.</translation>
     </message>
     <message>
-        <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
-        <translation>Próg odłączania niepoprawnie działających urządzeń równorzędnych (domyślnie: %u)</translation>
+        <source>This is not a masternode. 'local' option disabled.</source>
+        <translation>To nie jest masternode. opcja „lokalna” wyłączona.</translation>
     </message>
     <message>
-        <source>Too many spends needed</source>
-        <translation>Zbyt wiele potrzebnych środków</translation>
+        <source>This is not a masternode.</source>
+        <translation>To nie jest masternode.</translation>
+    </message>
+    <message>
+        <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
+        <translation>Próg odłączania niepoprawnie działających urządzeń równorzędnych (domyślnie: %u)</translation>
     </message>
     <message>
         <source>Tor control port password (default: empty)</source>
@@ -5726,14 +5870,6 @@ Portfel JokeCoin Core</translation>
         <translation>Używany port kontrolny Tor, jeśli włączono nasłuch onion (domyślnie: %s)</translation>
     </message>
     <message>
-        <source>Transaction Created</source>
-        <translation>Utworzono transakcję</translation>
-    </message>
-    <message>
-        <source>Transaction Mint Started</source>
-        <translation>Rozpoczęto transakcję Mint</translation>
-    </message>
-    <message>
         <source>Transaction amount too small</source>
         <translation>Kwota transakcji jest za mała</translation>
     </message>
@@ -5742,16 +5878,16 @@ Portfel JokeCoin Core</translation>
         <translation>Kwoty transakcji muszą być dodatnie</translation>
     </message>
     <message>
+        <source>Transaction canceled.</source>
+        <translation>Transakcja anulowana.</translation>
+    </message>
+    <message>
         <source>Transaction too large for fee policy</source>
         <translation>Transakcja zbyt duża dla zasad płatności</translation>
     </message>
     <message>
         <source>Transaction too large</source>
         <translation>Transakcja zbyt duża</translation>
-    </message>
-    <message>
-        <source>Trying to spend an already spent serial #, try again.</source>
-        <translation>Próbuj wydać już wydaną serie # , spróbuj ponownie.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
@@ -5782,6 +5918,10 @@ Portfel JokeCoin Core</translation>
         <translation>Uaktualnij portfel do najnowszego formatu</translation>
     </message>
     <message>
+        <source>Upgrading coins database...</source>
+        <translation>Aktualizacja bazy danych monet ...</translation>
+    </message>
+    <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Użyj UPnP do mapowania portu nasłuchującego (domyślnie: %u)</translation>
     </message>
@@ -5798,20 +5938,12 @@ Portfel JokeCoin Core</translation>
         <translation>Nazwa użytkownika dla połączeń JSON-RPC</translation>
     </message>
     <message>
-        <source>Value is below the smallest available denomination (= 1) of zJOKE</source>
-        <translation>Wartość jest mniejsza od najmniejszej dostępnej (= 1) zJOKE</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Weryfikuję bloki ...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
         <translation>Weryfikuję portfel ...</translation>
-    </message>
-    <message>
-        <source>Wallet %s resides outside data directory %s</source>
-        <translation>Portfel %s znajduje się poza katalogiem danych %s</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart JokeCoin Core to complete</source>
@@ -5842,10 +5974,6 @@ Portfel JokeCoin Core</translation>
         <translation>Ostrzeżenie: Zignorowany nieobsługiwany argument -debugnet, użyj -debug=net.</translation>
     </message>
     <message>
-        <source>You don't have enough Zerocoins in your wallet</source>
-        <translation>Nie masz wystarczającej liczby Zerocoins w swoim portfelu</translation>
-    </message>
-    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>Musisz przebudować bazę danych za pomocą -reindex, aby zmienić -txindeks</translation>
     </message>
@@ -5856,14 +5984,6 @@ Portfel JokeCoin Core</translation>
     <message>
         <source>ZeroMQ notification options:</source>
         <translation>Opcje powiadomień ZeroMQ:</translation>
-    </message>
-    <message>
-        <source>Zerocoin minting available only on regtest</source>
-        <translation>Zerocoin minting dostępne tylko podczas testu regtest</translation>
-    </message>
-    <message>
-        <source>Zerocoin options:</source>
-        <translation>Opcje Zerocoin:</translation>
     </message>
     <message>
         <source>on startup</source>

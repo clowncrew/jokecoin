@@ -1,7 +1,7 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
 // Copyright (c) 2017-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
 #include "transactionfilterproxy.h"
 
@@ -34,39 +34,36 @@ bool TransactionFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex& 
 {
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 
-    int type = index.data(TransactionTableModel::TypeRole).toInt();
-    QDateTime datetime = index.data(TransactionTableModel::DateRole).toDateTime();
-    bool involvesWatchAddress = index.data(TransactionTableModel::WatchonlyRole).toBool();
-    QString address = index.data(TransactionTableModel::AddressRole).toString();
-    QString label = index.data(TransactionTableModel::LabelRole).toString();
-    qint64 amount = llabs(index.data(TransactionTableModel::AmountRole).toLongLong());
     int status = index.data(TransactionTableModel::StatusRole).toInt();
-
     if (!showInactive && status == TransactionStatus::Conflicted)
         return false;
-    if (fHideOrphans && isOrphan(status, type))
-        return false;
-    if (!(bool)(TYPE(type) & typeFilter))
-        return false;
+
+    int type = index.data(TransactionTableModel::TypeRole).toInt();
+    if (fHideOrphans && isOrphan(status, type)) return false;
+    if (!(bool)(TYPE(type) & typeFilter)) return false;
+    if (fOnlyZc && !isZcTx(type)) return false;
+    if (fOnlyStakes && !isStakeTx(type)) return false;
+    if (fOnlyColdStaking && !isColdStake(type)) return false;
+
+    bool involvesWatchAddress = index.data(TransactionTableModel::WatchonlyRole).toBool();
     if (involvesWatchAddress && watchOnlyFilter == WatchOnlyFilter_No)
         return false;
     if (!involvesWatchAddress && watchOnlyFilter == WatchOnlyFilter_Yes)
         return false;
+
+    QDateTime datetime = index.data(TransactionTableModel::DateRole).toDateTime();
     if (datetime < dateFrom || datetime > dateTo)
         return false;
+
+    QString address = index.data(TransactionTableModel::AddressRole).toString();
+    QString label = index.data(TransactionTableModel::LabelRole).toString();
     if (!addrPrefix.isEmpty()) {
         if (!address.contains(addrPrefix, Qt::CaseInsensitive) && !label.contains(addrPrefix, Qt::CaseInsensitive))
             return false;
     }
-    if (amount < minAmount)
-        return false;
-    if (fOnlyZc && !isZcTx(type)){
-        return false;
-    }
-    if (fOnlyStakes && !isStakeTx(type))
-        return false;
 
-    if (fOnlyColdStaking && !isColdStake(type))
+    qint64 amount = llabs(index.data(TransactionTableModel::AmountRole).toLongLong());
+    if (amount < minAmount)
         return false;
 
     return true;
@@ -89,6 +86,7 @@ void TransactionFilterProxy::setAddressPrefix(const QString& addrPrefix)
 
 void TransactionFilterProxy::setTypeFilter(quint32 modes)
 {
+    if (typeFilter == modes) return;
     this->typeFilter = modes;
     invalidateFilter();
 }
@@ -122,21 +120,9 @@ void TransactionFilterProxy::setHideOrphans(bool fHide)
     invalidateFilter();
 }
 
-void TransactionFilterProxy::setShowZcTxes(bool fOnlyZc)
-{
-    this->fOnlyZc = fOnlyZc;
-    invalidateFilter();
-}
-
 void TransactionFilterProxy::setOnlyStakes(bool fOnlyStakes)
 {
     this->fOnlyStakes = fOnlyStakes;
-    invalidateFilter();
-}
-
-void TransactionFilterProxy::setOnlyColdStakes(bool fOnlyColdStakes)
-{
-    this->fOnlyColdStaking = fOnlyColdStakes;
     invalidateFilter();
 }
 
@@ -157,7 +143,7 @@ bool TransactionFilterProxy::isOrphan(const int status, const int type)
 }
 
 bool TransactionFilterProxy::isZcTx(int type) const {
-    return (type == TransactionRecord::ZerocoinMint || type == TransactionRecord::ZerocoinSpend || type == TransactionRecord::ZerocoinSpend_Change_zJoke
+    return (type == TransactionRecord::ZerocoinMint || type == TransactionRecord::ZerocoinSpend || type == TransactionRecord::ZerocoinSpend_Change_zPiv
             || type == TransactionRecord::ZerocoinSpend_FromMe || type == TransactionRecord::RecvFromZerocoinSpend);
 }
 
@@ -168,9 +154,3 @@ bool TransactionFilterProxy::isStakeTx(int type) const {
 bool TransactionFilterProxy::isColdStake(int type) const {
     return type == TransactionRecord::P2CSDelegation || type == TransactionRecord::P2CSDelegationSent || type == TransactionRecord::P2CSDelegationSentOwner || type == TransactionRecord::StakeDelegated || type == TransactionRecord::StakeHot;
 }
-
-/*QVariant TransactionFilterProxy::dataFromSourcePos(int sourceRow, int role) const {
-    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    return index.data(index, role);
-}
- */

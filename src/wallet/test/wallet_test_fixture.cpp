@@ -1,43 +1,32 @@
-// Copyright (c) 2016 The Bitcoin Core developers
-// Copyright (c) 2020 The JokeCoin developers
+// Copyright (c) 2016-2021 The Bitcoin Core developers
+// Copyright (c) 2020-2021 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "wallet/test/wallet_test_fixture.h"
 
 #include "rpc/server.h"
-#include "sapling/util.h"
 #include "wallet/db.h"
-#include "wallet/wallet.h"
 #include "wallet/rpcwallet.h"
 
-#include <librustzcash.h>
-
-void clean()
+WalletTestingSetup::WalletTestingSetup(const std::string& chainName):
+        SaplingTestingSetup(chainName)
 {
-    delete pwalletMain;
-    pwalletMain = nullptr;
-
-    bitdb.Flush(true);
-    bitdb.Reset();
-}
-
-WalletTestingSetup::WalletTestingSetup(): TestingSetup()
-{
-    //initZKSNARKS(); // init zk-snarks lib
-
-    clean(); // todo: research why we have an initialized bitdb here.
     bitdb.MakeMock();
-    walletRegisterRPCCommands();
 
     bool fFirstRun;
-    pwalletMain = new CWallet("test_wallet.dat");
+    std::unique_ptr<CWalletDBWrapper> dbw(new CWalletDBWrapper(&bitdb, "wallet_test.dat"));
+    pwalletMain = MakeUnique<CWallet>(std::move(dbw));
     pwalletMain->LoadWallet(fFirstRun);
-    RegisterValidationInterface(pwalletMain);
+    RegisterValidationInterface(pwalletMain.get());
+
+    RegisterWalletRPCCommands(tableRPC);
 }
 
 WalletTestingSetup::~WalletTestingSetup()
 {
-    UnregisterValidationInterface(pwalletMain);
-    clean();
+    UnregisterValidationInterface(pwalletMain.get());
+
+    bitdb.Flush(true);
+    bitdb.Reset();
 }

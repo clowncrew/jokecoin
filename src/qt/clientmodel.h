@@ -12,13 +12,17 @@
 #include <QObject>
 #include <QDateTime>
 
+#include <memory>
+
 class AddressTableModel;
 class BanTableModel;
 class OptionsModel;
 class PeerTableModel;
 class TransactionTableModel;
 
-class CWallet;
+namespace interfaces {
+    class Handler;
+}
 
 QT_BEGIN_NAMESPACE
 class QDateTime;
@@ -60,7 +64,11 @@ public:
     int getNumBlocks();
     QDateTime getLastBlockDate() const;
     QString getLastBlockHash() const;
+    uint256 getLastBlockProcessed() const;
+    int getLastBlockProcessedHeight() const;
+    int64_t getLastBlockProcessedTime() const;
     double getVerificationProgress() const;
+    bool isTipCached() const;
 
     quint64 getTotalBytesRecv() const;
     quint64 getTotalBytesSent() const;
@@ -89,8 +97,18 @@ public:
     // Start/Stop the masternode polling timer
     void startMasternodesTimer();
     void stopMasternodesTimer();
+    // Force a MN count update calling mnmanager directly locking its internal mutex.
+    // Future todo: implement an event based update and remove the lock requirement.
+    QString getMasternodesCount();
 
 private:
+    // Listeners
+    std::unique_ptr<interfaces::Handler> m_handler_show_progress;
+    std::unique_ptr<interfaces::Handler> m_handler_notify_num_connections_changed;
+    std::unique_ptr<interfaces::Handler> m_handler_notify_alert_changed;
+    std::unique_ptr<interfaces::Handler> m_handler_banned_list_changed;
+    std::unique_ptr<interfaces::Handler> m_handler_notify_block_tip;
+
     QString getMasternodeCountString() const;
     OptionsModel* optionsModel;
     PeerTableModel* peerTableModel;
@@ -100,7 +118,7 @@ private:
     QString cachedMasternodeCountString;
     bool cachedReindexing;
     bool cachedImporting;
-    bool cachedInitialSync;
+    std::atomic<bool> cachedInitialSync{false};
 
     int numBlocksAtStartup;
 

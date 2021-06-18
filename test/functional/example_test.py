@@ -113,7 +113,7 @@ class ExampleTest(JokeCoinTestFramework):
         # sync_all() should not include node2, since we're not expecting it to
         # sync.
         connect_nodes(self.nodes[0], 1)
-        self.sync_all([self.nodes[0:1]])
+        self.sync_all(self.nodes[0:1])
 
     # Use setup_nodes() to customize the node start behaviour (for example if
     # you don't want to start all nodes at the start of the test).
@@ -143,7 +143,7 @@ class ExampleTest(JokeCoinTestFramework):
 
         # Generating a block on one of the nodes will get us out of IBD
         blocks = [int(self.nodes[0].generate(1)[0], 16)]
-        self.sync_all([self.nodes[0:1]])
+        self.sync_all(self.nodes[0:1])
 
         # Notice above how we called an RPC by calling a method with the same
         # name on the node object. Notice also how we used a keyword argument

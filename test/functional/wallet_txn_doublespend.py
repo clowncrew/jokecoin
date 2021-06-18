@@ -69,7 +69,7 @@ class TxnMallTest(JokeCoinTestFramework):
         # Have node0 mine a block:
         if (self.options.mine_block):
             self.nodes[0].generate(1)
-            sync_blocks(self.nodes[0:2])
+            self.sync_blocks(self.nodes[0:2])
 
         tx1 = self.nodes[0].gettransaction(txid1)
         tx2 = self.nodes[0].gettransaction(txid2)
@@ -83,13 +83,13 @@ class TxnMallTest(JokeCoinTestFramework):
         assert_equal(self.nodes[0].getbalance(), expected)
 
         if self.options.mine_block:
-            assert_equal(tx1["bcconfirmations"], 1)
-            assert_equal(tx2["bcconfirmations"], 1)
+            assert_equal(tx1["confirmations"], 1)
+            assert_equal(tx2["confirmations"], 1)
             # Node1's balance should be both transaction amounts:
             assert_equal(self.nodes[1].getbalance(), starting_balance - tx1["amount"] - tx2["amount"])
         else:
-            assert_equal(tx1["bcconfirmations"], 0)
-            assert_equal(tx2["bcconfirmations"], 0)
+            assert_equal(tx1["confirmations"], 0)
+            assert_equal(tx2["confirmations"], 0)
 
         # Now give doublespend and its parents to miner:
         self.nodes[2].sendrawtransaction(fund_foo_tx["hex"])
@@ -105,7 +105,7 @@ class TxnMallTest(JokeCoinTestFramework):
         connect_nodes(self.nodes[2], 0)
         connect_nodes(self.nodes[2], 1)
         self.nodes[2].generate(1)  # Mine another block to make sure we sync
-        sync_blocks(self.nodes)
+        self.sync_blocks()
         assert_equal(self.nodes[0].gettransaction(doublespend_txid)["confirmations"], 2)
 
         # Re-fetch transaction info:
@@ -113,8 +113,8 @@ class TxnMallTest(JokeCoinTestFramework):
         tx2 = self.nodes[0].gettransaction(txid2)
 
         # Both transactions should be conflicted
-        assert_equal(tx1["bcconfirmations"], -2)
-        assert_equal(tx2["bcconfirmations"], -2)
+        assert_equal(tx1["confirmations"], -2)
+        assert_equal(tx2["confirmations"], -2)
 
         # Node0's total balance should be starting balance, plus 100BTC for
         # two more matured blocks, minus 1240 for the double-spend, plus fees (which are

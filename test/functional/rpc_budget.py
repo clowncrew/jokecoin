@@ -36,6 +36,10 @@ class BudgetProposalTest(JokeCoinTestFramework):
         assert_raises_rpc_error(-8, "Invalid payment count, must be more than zero.", self.nodes[0].preparebudget,
                                 name, scheme + url, 0, nextsuperblock, address, cycleamount)
 
+        self.log.info("Test with invalid (21) cycles")
+        assert_raises_rpc_error(-8, "Invalid payment count, must be <= 20", self.nodes[0].preparebudget,
+                                name, scheme + url, 21, nextsuperblock, address, cycleamount)
+
         self.log.info("Test with invalid block start")
         assert_raises_rpc_error(-8, "Invalid block start", self.nodes[0].preparebudget,
                                 name, scheme + url, numcycles, nextsuperblock - 12, address, cycleamount)
@@ -47,12 +51,14 @@ class BudgetProposalTest(JokeCoinTestFramework):
                                 name, scheme + url, numcycles, nextsuperblock, "DBREvBPNQguwuC4YMoCG5FoH1sA2YntvZm", cycleamount)
 
         self.log.info("Test with too low amount")
-        assert_raises_rpc_error(-8, "Invalid amount - Payment of 9.00 is less than minimum 10 JOKE allowed", self.nodes[0].preparebudget,
-                                name, scheme + url, numcycles, nextsuperblock, address, 9)
+        invalid_amt = 9.99999999
+        assert_raises_rpc_error(-8, "Invalid amount - Payment of %.8f is less than minimum 10 JOKE allowed" % invalid_amt, self.nodes[0].preparebudget,
+                                name, scheme + url, numcycles, nextsuperblock, address, invalid_amt)
 
         self.log.info("Test with too high amount")
-        assert_raises_rpc_error(-8, "Invalid amount - Payment of 648001.00 more than max of 648000.00", self.nodes[0].preparebudget,
-                                name, scheme + url, numcycles, nextsuperblock, address, 648001)
+        invalid_amt = 50 * 144 + 0.00000001
+        assert_raises_rpc_error(-8, "Invalid amount - Payment of %.8f more than max of 7200.00" % invalid_amt, self.nodes[0].preparebudget,
+                                name, scheme + url, numcycles, nextsuperblock, address, invalid_amt)
 
 
         self.log.info("Test without URL scheme")

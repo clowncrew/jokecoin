@@ -5,6 +5,10 @@
 #ifndef GUIINTERFACEUTIL_H
 #define GUIINTERFACEUTIL_H
 
+#include "guiinterface.h"
+#include "tinyformat.h"
+#include "util/system.h"
+
 inline static bool UIError(const std::string &str)
 {
     uiInterface.ThreadSafeMessageBox(str, "Error", CClientUIInterface::MSG_ERROR);

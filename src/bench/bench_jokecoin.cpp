@@ -6,8 +6,7 @@
 #include "bench.h"
 
 #include "key.h"
-#include "main.h"
-#include "util.h"
+#include "util/system.h"
 
 int
 main(int argc, char** argv)
