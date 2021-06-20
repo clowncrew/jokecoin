@@ -1,0 +1,4 @@
+qt/libbitcoinqt_a-qrc_jokecoin.o: qt/qrc_jokecoin.cpp \
+ /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:
