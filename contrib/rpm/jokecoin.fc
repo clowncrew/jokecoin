@@ -1,0 +1,8 @@
+/usr/bin/jokecoin-cli		--	gen_context(system_u:object_r:jokecoin_exec_t,s0)
+/usr/sbin/jokecoind		--	gen_context(system_u:object_r:jokecoin_exec_t,s0)
+/usr/lib(64)?/jokecoin/jokecoind		--	gen_context(system_u:object_r:jokecoin_exec_t,s0)
+
+/etc/jokecoin(/.*)?		gen_context(system_u:object_r:jokecoin_conf_t,s0)
+/var/lib/jokecoin(/.*)?		gen_context(system_u:object_r:jokecoin_var_lib_t,s0)
+
+(/var)?/run/jokecoind(/.*)?   gen_context(system_u:object_r:jokecoin_var_run_t,s0)
