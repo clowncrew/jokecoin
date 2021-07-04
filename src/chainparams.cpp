@@ -72,8 +72,8 @@ public: CMainParams() {
         consensus.nTimeSlotLength = 15;
         consensus.nMaxProposalPayments = 6;
         // spork keys
-        consensus.strSporkPubKey = "042a90e857788567bb5178a9e6c4f4aed15757b8d686fe033866b294da2bdbfe64cee48faf90ec6b9f4f676f94d2abba6593aaf161c4b80e3ee49e901dc78b40e5";
-        consensus.strSporkPubKeyOld = "04B433E6598390C992F4F022F20D3B4CBBE691652EE7C48243B81701CBDB7CC7D7BF0EE09E154E6FCBF2043D65AF4E9E97B89B5DBAF830D83B9B7F469A6C45A717";
+        consensus.strSporkPubKey = "0420f7a0bbdd1edcccc71b9cc06ccc3099c9427fc7ef375f977d74243548d5d816ea33f8e7c091c5944180f684c2ebb7681248d77d78812defb56b255803d09519";
+        consensus.strSporkPubKeyOld = "042a90e857788567bb5178a9e6c4f4aed15757b8d686fe033866b294da2bdbfe64cee48faf90ec6b9f4f676f94d2abba6593aaf161c4b80e3ee49e901dc78b40e5";
         consensus.nTime_EnforceNewSporkKey = 1614602714;    //!> December 21, 2020 01:00:00 AM GMT
         consensus.nTime_RejectOldSporkKey = 1527811200;     //!> March 1, 2021 01:00:00 AM GMT
         // height-based activations
@@ -172,8 +172,8 @@ public: CTestNetParams() {
         consensus.nTimeSlotLength = 15;
         consensus.nMaxProposalPayments = 20;
         // spork keys
-        consensus.strSporkPubKey = "040329f801481d1f3665a776bf085bd05768ab1321a830e40dbcc1b60cb7004633a1db2cb0fe611db5c18655389af36583ad3b5f4186277689fa45dc0e488a9d02";
-        consensus.strSporkPubKeyOld = "04348C2F50F90267E64FACC65BFDC9D0EB147D090872FB97ABAE92E9A36E6CA60983E28E741F8E7277B11A7479B626AC115BA31463AC48178A5075C5A9319D4A38";
+        consensus.strSporkPubKey = "04019a8940636e61b444142fc827c8fab51af4571ad9b235ae61b71795da2b2340c795e6637f8f229f2c1407d422340c615e00461693c55d8d9f4e6ed0d319e317";
+        consensus.strSporkPubKeyOld = "040329f801481d1f3665a776bf085bd05768ab1321a830e40dbcc1b60cb7004633a1db2cb0fe611db5c18655389af36583ad3b5f4186277689fa45dc0e488a9d02";
         consensus.nTime_EnforceNewSporkKey = 1614602714;    //!> December 21, 2020 01:00:00 AM GMT
         consensus.nTime_RejectOldSporkKey = 1522454400;     //!> March 1, 2021 01:00:00 AM GMT
         // height based activations
@@ -269,8 +269,8 @@ public: CRegTestParams() {
         private key hex: bd4960dcbd9e7f2223f24e7164ecb6f1fe96fc3a416f5d3a830ba5720c84b8ca
         Address: yCvUVd72w7xpimf981m114FSFbmAmne7j9
         */
-        consensus.strSporkPubKey = "04f64424cb7a30a32f524a0010fe9291391cb17076fdb96422b9f5c30b65dd8acc52cf7f13370abeee899cbada3ddb47883876e28e941f2dd94f1b1c5fad104666";
-        consensus.strSporkPubKeyOld = "";
+        consensus.strSporkPubKey = "04e0d06a69061c598354c606c29232b9b7179165d3cedaa6870f362a740dbc27232fc347a0d6ed2f1934c114e425907bec41c47843ca8943efb1da8dd2cfcb7844";
+        consensus.strSporkPubKeyOld = "04f64424cb7a30a32f524a0010fe9291391cb17076fdb96422b9f5c30b65dd8acc52cf7f13370abeee899cbada3ddb47883876e28e941f2dd94f1b1c5fad104666";
         consensus.nTime_EnforceNewSporkKey = 0;
         consensus.nTime_RejectOldSporkKey = 0;
         // height based activations
