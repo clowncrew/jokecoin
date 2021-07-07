@@ -82,8 +82,8 @@ public: CMainParams() {
         consensus.height_last_ZC_WrappedSerials = 0;
         consensus.height_ZC_RecalcAccumulators = 999999999;
         // validation by-pass
-        /*consensus.nPivxBadBlockTime = 1471401614;    // Skip nBit validation of Block 259201 per PR #915 */
-        /* consensus.nPivxBadBlockBits = 0x1c056dac;    // Skip nBit validation of Block 259201 per PR #915 */
+        consensus.nJokeCoinBadBlockTime = 1621503368;    // Skip nBit validation of Block 10001 per PR #915 */
+        consensus.nJokeCoinBadBlockBits = 1c2469ac;    // Skip nBit validation of Block 10001 per PR #915 */
         // Zerocoin-related params
         consensus.ZC_Modulus = "25195908475657893494027183240048398571429282126204032027777137836043662020707595556264018525880784"
                 "4069182906412495150821892985591491761845028084891200728449926873928072877767359714183472702618963750149718246911"
