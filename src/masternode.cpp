@@ -11,15 +11,15 @@
 #include "masternodeman.h"
 #include "netbase.h"
 #include "sync.h"
-#include "util/system.h"
+#include "util.h"
 #include "wallet/wallet.h"
 
 #define MASTERNODE_MIN_CONFIRMATIONS_REGTEST 1
 #define MASTERNODE_MIN_MNP_SECONDS_REGTEST 90
 #define MASTERNODE_MIN_MNB_SECONDS_REGTEST 25
 #define MASTERNODE_PING_SECONDS_REGTEST 25
-#define MASTERNODE_EXPIRATION_SECONDS_REGTEST 12 * 60
-#define MASTERNODE_REMOVAL_SECONDS_REGTEST 13 * 60
+#define MASTERNODE_EXPIRATION_SECONDS_REGTEST 180
+#define MASTERNODE_REMOVAL_SECONDS_REGTEST 200
 
 #define MASTERNODE_MIN_CONFIRMATIONS 15
 #define MASTERNODE_MIN_MNP_SECONDS (10 * 60)
@@ -77,7 +77,6 @@ CMasternode::CMasternode() :
     protocolVersion = PROTOCOL_VERSION;
     nScanningErrorCount = 0;
     nLastScanningErrorBlockHeight = 0;
-    mnPayeeScript.clear();
 }
 
 CMasternode::CMasternode(const CMasternode& other) :
@@ -93,23 +92,6 @@ CMasternode::CMasternode(const CMasternode& other) :
     protocolVersion = other.protocolVersion;
     nScanningErrorCount = other.nScanningErrorCount;
     nLastScanningErrorBlockHeight = other.nLastScanningErrorBlockHeight;
-    mnPayeeScript = other.mnPayeeScript;
-}
-
-CMasternode::CMasternode(const CDeterministicMNCPtr& dmn, int64_t registeredTime, const uint256& registeredHash) :
-        CSignedMessage()
-{
-    LOCK(cs);
-    vin = CTxIn(dmn->collateralOutpoint);
-    addr = dmn->pdmnState->addr;
-    pubKeyCollateralAddress = CPubKey();
-    pubKeyMasternode = CPubKey();
-    sigTime = registeredTime;
-    lastPing = CMasternodePing(vin, registeredHash, registeredTime);
-    protocolVersion = PROTOCOL_VERSION;
-    nScanningErrorCount = 0;
-    nLastScanningErrorBlockHeight = 0;
-    mnPayeeScript = dmn->pdmnState->scriptPayout;
 }
 
 uint256 CMasternode::GetSignatureHash() const
@@ -162,17 +144,17 @@ bool CMasternode::UpdateFromNewBroadcast(CMasternodeBroadcast& mnb)
 // the proof of work for that block. The further away they are the better, the furthest will win the election
 // and get paid this block
 //
-arith_uint256 CMasternode::CalculateScore(const uint256& hash) const
+uint256 CMasternode::CalculateScore(const uint256& hash) const
 {
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     ss << hash;
-    const arith_uint256& hash2 = UintToArith256(ss.GetHash());
+    const uint256& hash2 = ss.GetHash();
 
     CHashWriter ss2(SER_GETHASH, PROTOCOL_VERSION);
     ss2 << hash;
-    const arith_uint256& aux = UintToArith256(vin.prevout.hash) + vin.prevout.n;
+    const uint256& aux = vin.prevout.hash + vin.prevout.n;
     ss2 << aux;
-    const arith_uint256& hash3 = UintToArith256(ss2.GetHash());
+    const uint256& hash3 = ss2.GetHash();
 
     return (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
 }
@@ -212,9 +194,7 @@ bool CMasternode::IsInputAssociatedWithPubkey() const
     uint256 hash;
     if(GetTransaction(vin.prevout.hash, txVin, hash, true)) {
         for (const CTxOut& out : txVin->vout) {
-            if (out.nValue == Params().GetConsensus().nMNCollateralAmt &&
-                out.scriptPubKey == payee)
-                return true;
+            if (out.nValue == MN_COLL_AMT && out.scriptPubKey == payee) return true;
         }
     }
 
@@ -269,8 +249,7 @@ bool CMasternodeBroadcast::Create(const std::string& strService,
     }
 
     std::string strError;
-    // Use wallet-0 here. Legacy mnb creation can be removed after transition to DMN
-    if (vpwallets.empty() || !vpwallets[0]->GetMasternodeVinAndKeys(txin, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex, strError)) {
+    if (!pwalletMain->GetMasternodeVinAndKeys(txin, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex, strError)) {
         strErrorRet = strError; // GetMasternodeVinAndKeys logs this error. Only returned for GUI error notification.
         LogPrint(BCLog::MASTERNODE,"CMasternodeBroadcast::Create -- %s\n", strprintf("Could not allocate txin %s:%s for masternode %s", strTxHash, strOutputIndex, strService));
         return false;
@@ -677,12 +656,4 @@ void CMasternodePing::Relay()
 {
     CInv inv(MSG_MASTERNODE_PING, GetHash());
     g_connman->RelayInv(inv);
-}
-
-MasternodeRef MakeMasternodeRefForDMN(const CDeterministicMNCPtr& dmn)
-{
-    // create legacy masternode for DMN
-    int refHeight = std::max(dmn->pdmnState->nRegisteredHeight, dmn->pdmnState->nPoSeRevivedHeight);
-    const CBlockIndex* pindex = WITH_LOCK(cs_main, return mapBlockIndex.at(chainActive[refHeight]->GetBlockHash()); );
-    return std::make_shared<CMasternode>(CMasternode(dmn, pindex->GetBlockTime(), pindex->GetBlockHash()));
 }

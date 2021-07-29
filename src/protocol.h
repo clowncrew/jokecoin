@@ -48,10 +48,10 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(pchMessageStart);
-        READWRITE(pchCommand);
+        READWRITE(FLATDATA(pchMessageStart));
+        READWRITE(FLATDATA(pchCommand));
         READWRITE(nMessageSize);
-        READWRITE(pchChecksum);
+        READWRITE(FLATDATA(pchChecksum));
     }
 
     // TODO: make private (improves encapsulation)
@@ -335,7 +335,7 @@ public:
         uint64_t nServicesInt = nServices;
         READWRITE(nServicesInt);
         nServices = static_cast<ServiceFlags>(nServicesInt);
-        READWRITEAS(CService, *this);
+        READWRITE(*static_cast<CService*>(this));
     }
 
     // TODO: make private (improves encapsulation)

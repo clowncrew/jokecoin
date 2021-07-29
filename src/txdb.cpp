@@ -9,7 +9,7 @@
 #include "random.h"
 #include "pow.h"
 #include "uint256.h"
-#include "util/system.h"
+#include "util.h"
 #include "zjoke/zerocoin.h"
 
 #include <stdint.h>
@@ -352,8 +352,44 @@ bool CBlockTreeDB::LoadBlockIndexGuts(std::function<CBlockIndex*(const uint256&)
     return true;
 }
 
+bool CBlockTreeDB::ReadLegacyBlockIndex(const uint256& blockHash, CLegacyBlockIndex& biRet)
+{
+    return Read(std::make_pair(DB_BLOCK_INDEX, blockHash), biRet);
+}
+
 CZerocoinDB::CZerocoinDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "zerocoin", nCacheSize, fMemory, fWipe)
 {
+}
+
+bool CZerocoinDB::WriteCoinMintBatch(const std::vector<std::pair<libzerocoin::PublicCoin, uint256> >& mintInfo)
+{
+    CDBBatch batch;
+    size_t count = 0;
+    for (std::vector<std::pair<libzerocoin::PublicCoin, uint256> >::const_iterator it=mintInfo.begin(); it != mintInfo.end(); it++) {
+        libzerocoin::PublicCoin pubCoin = it->first;
+        uint256 hash = GetPubCoinHash(pubCoin.getValue());
+        batch.Write(std::make_pair('m', hash), it->second);
+        ++count;
+    }
+
+    LogPrint(BCLog::COINDB, "Writing %u coin mints to db.\n", (unsigned int)count);
+    return WriteBatch(batch, true);
+}
+
+bool CZerocoinDB::ReadCoinMint(const CBigNum& bnPubcoin, uint256& hashTx)
+{
+    return ReadCoinMint(GetPubCoinHash(bnPubcoin), hashTx);
+}
+
+bool CZerocoinDB::ReadCoinMint(const uint256& hashPubcoin, uint256& hashTx)
+{
+    return Read(std::make_pair('m', hashPubcoin), hashTx);
+}
+
+bool CZerocoinDB::EraseCoinMint(const CBigNum& bnPubcoin)
+{
+    uint256 hash = GetPubCoinHash(bnPubcoin);
+    return Erase(std::make_pair('m', hash));
 }
 
 bool CZerocoinDB::WriteCoinSpendBatch(const std::vector<std::pair<libzerocoin::CoinSpend, uint256> >& spendInfo)
@@ -382,6 +418,11 @@ bool CZerocoinDB::ReadCoinSpend(const CBigNum& bnSerial, uint256& txHash)
     return Read(std::make_pair('s', hash), txHash);
 }
 
+bool CZerocoinDB::ReadCoinSpend(const uint256& hashSerial, uint256 &txHash)
+{
+    return Read(std::make_pair('s', hashSerial), txHash);
+}
+
 bool CZerocoinDB::EraseCoinSpend(const CBigNum& bnSerial)
 {
     CDataStream ss(SER_GETHASH, 0);
@@ -391,9 +432,55 @@ bool CZerocoinDB::EraseCoinSpend(const CBigNum& bnSerial)
     return Erase(std::make_pair('s', hash));
 }
 
+bool CZerocoinDB::WipeCoins(std::string strType)
+{
+    if (strType != "spends" && strType != "mints")
+        return error("%s: did not recognize type %s", __func__, strType);
+
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    char type = (strType == "spends" ? 's' : 'm');
+    pcursor->Seek(std::make_pair(type, UINT256_ZERO));
+    // Load mapBlockIndex
+    std::set<uint256> setDelete;
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, uint256> key;
+        if (pcursor->GetKey(key) && key.first == type) {
+            uint256 hash;
+            if (pcursor->GetValue(hash)) {
+                setDelete.insert(hash);
+                pcursor->Next();
+            } else {
+                return error("%s : failed to read value", __func__);
+            }
+        } else {
+            break;
+        }
+    }
+
+    for (auto& hash : setDelete) {
+        if (!Erase(std::make_pair(type, hash)))
+            LogPrintf("%s: error failed to delete %s\n", __func__, hash.GetHex());
+    }
+
+    return true;
+}
+
+
 // Legacy Zerocoin Database
 static const char LZC_ACCUMCS = 'A';
-//static const char LZC_MAPSUPPLY = 'M'; // TODO: add removal for LZC_MAPSUPPLY key-value if is found in db
+static const char LZC_MAPSUPPLY = 'M';
+
+bool CZerocoinDB::WriteZCSupply(const std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS)
+{
+    return Write(LZC_MAPSUPPLY, mapZCS);
+}
+
+bool CZerocoinDB::ReadZCSupply(std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS) const
+{
+    return Read(LZC_MAPSUPPLY, mapZCS);
+}
 
 bool CZerocoinDB::WriteAccChecksum(const uint32_t& nChecksum, const libzerocoin::CoinDenomination denom, const int nHeight)
 {
@@ -461,7 +548,7 @@ public:
     {
         unsigned int nCode = 0;
         // version
-        unsigned int nVersionDummy;
+        int nVersionDummy;
         ::Unserialize(s, VARINT(nVersionDummy));
         // header code
         ::Unserialize(s, VARINT(nCode));
@@ -486,10 +573,10 @@ public:
         vout.assign(vAvail.size(), CTxOut());
         for (unsigned int i = 0; i < vAvail.size(); i++) {
             if (vAvail[i])
-                ::Unserialize(s, CTxOutCompressor(vout[i]));
+                ::Unserialize(s, REF(CTxOutCompressor(vout[i])));
         }
         // coinbase height
-        ::Unserialize(s, VARINT(nHeight, VarIntMode::NONNEGATIVE_SIGNED));
+        ::Unserialize(s, VARINT(nHeight));
     }
 };
 

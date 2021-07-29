@@ -1,5 +1,5 @@
 ---
-name: "jokecoin-linux-6.0"
+name: "jokecoin-linux-5.2"
 enable_cache: true
 distro: "ubuntu"
 suites:

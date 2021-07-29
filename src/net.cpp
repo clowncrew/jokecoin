@@ -21,7 +21,6 @@
 #include "netbase.h"
 #include "netmessagemaker.h"
 #include "primitives/transaction.h"
-#include "random.h"
 #include "scheduler.h"
 #include "validation.h"
 
@@ -31,17 +30,10 @@
 #include <fcntl.h>
 #endif
 
-#if HAVE_DECL_GETIFADDRS && HAVE_DECL_FREEIFADDRS
-#include <ifaddrs.h>
-#endif
-
 #ifdef USE_UPNP
 #include <miniupnpc/miniupnpc.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
-// The minimum supported miniUPnPc API version is set to 10. This keeps compatibility
-// with Ubuntu 16.04 LTS and Debian 8 libminiupnpc-dev packages.
-static_assert(MINIUPNPC_API_VERSION >= 10, "miniUPnPc API version >= 10 assumed");
 #endif
 
 
@@ -133,12 +125,11 @@ static std::vector<CAddress> convertSeed6(const std::vector<SeedSpec6>& vSeedsIn
     const int64_t nOneWeek = 7 * 24 * 60 * 60;
     std::vector<CAddress> vSeedsOut;
     vSeedsOut.reserve(vSeedsIn.size());
-    FastRandomContext rng;
     for (std::vector<SeedSpec6>::const_iterator i(vSeedsIn.begin()); i != vSeedsIn.end(); ++i) {
         struct in6_addr ip;
         memcpy(&ip, i->addr, sizeof(ip));
         CAddress addr(CService(ip, i->port), NODE_NETWORK);
-        addr.nTime = GetTime() - rng.randrange(nOneWeek) - nOneWeek;
+        addr.nTime = GetTime() - GetRand(nOneWeek) - nOneWeek;
         vSeedsOut.push_back(addr);
     }
     return vSeedsOut;
@@ -150,7 +141,7 @@ static std::vector<CAddress> convertSeed6(const std::vector<SeedSpec6>& vSeedsIn
 // one by discovery.
 CAddress GetLocalAddress(const CNetAddr* paddrPeer, ServiceFlags nLocalServices)
 {
-    CAddress ret(CService(CNetAddr(), GetListenPort()), nLocalServices);
+    CAddress ret(CService(CNetAddr(), GetListenPort()), NODE_NONE);
     CService addr;
     if (GetLocal(addr, paddrPeer)) {
         ret = CAddress(addr, nLocalServices);
@@ -183,14 +174,14 @@ void AdvertiseLocal(CNode* pnode)
         // If discovery is enabled, sometimes give our peer the address it
         // tells us that it sees us as in case it has a better idea of our
         // address than we do.
-        FastRandomContext rng;
         if (IsPeerAddrLocalGood(pnode) && (!addrLocal.IsRoutable() ||
-             rng.randbits((GetnScore(addrLocal) > LOCAL_MANUAL) ? 3 : 1) == 0)) {
+                                              GetRand((GetnScore(addrLocal) > LOCAL_MANUAL) ? 8 : 2) == 0)) {
             addrLocal.SetIP(pnode->GetAddrLocal());
         }
         if (addrLocal.IsRoutable()) {
             LogPrintf("%s: advertising address %s\n", __func__, addrLocal.ToString());
-            pnode->PushAddress(addrLocal, rng);
+            FastRandomContext insecure_rand;
+            pnode->PushAddress(addrLocal, insecure_rand);
         }
     }
 }
@@ -238,7 +229,7 @@ bool RemoveLocal(const CService& addr)
 /** Make a particular network entirely off-limits (no automatic connects to it) */
 void SetLimited(enum Network net, bool fLimited)
 {
-    if (net == NET_UNROUTABLE || net == NET_INTERNAL)
+    if (net == NET_UNROUTABLE)
         return;
     LOCK(cs_mapLocalHost);
     vfLimited[net] = fLimited;
@@ -387,9 +378,6 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char* pszDest, bool fCo
         pnode->nServicesExpected = ServiceFlags(addrConnect.nServices & nRelevantServices);
         pnode->AddRef();
 
-        // We're making a new connection, harvest entropy from the time (and our peer count)
-        RandAddEvent((uint32_t)id);
-
         return pnode;
     } else if (!proxyConnectionFailed) {
         // If connecting to the node failed, and failure is not caused by a problem connecting to
@@ -456,30 +444,34 @@ void CConnman::ClearBanned()
 
 bool CConnman::IsBanned(CNetAddr ip)
 {
-    LOCK(cs_setBanned);
-    for (banmap_t::iterator it = setBanned.begin(); it != setBanned.end(); it++)
+    bool fResult = false;
     {
-        CSubNet subNet = (*it).first;
-        CBanEntry banEntry = (*it).second;
+        LOCK(cs_setBanned);
+        for (banmap_t::iterator it = setBanned.begin(); it != setBanned.end(); it++)
+        {
+            CSubNet subNet = (*it).first;
+            CBanEntry banEntry = (*it).second;
 
-        if (subNet.Match(ip) && GetTime() < banEntry.nBanUntil) {
-            return true;
+            if(subNet.Match(ip) && GetTime() < banEntry.nBanUntil)
+                fResult = true;
         }
     }
-    return false;
+    return fResult;
 }
 
 bool CConnman::IsBanned(CSubNet subnet)
 {
-    LOCK(cs_setBanned);
-    banmap_t::iterator i = setBanned.find(subnet);
-    if (i != setBanned.end()) {
-        CBanEntry banEntry = (*i).second;
-        if (GetTime() < banEntry.nBanUntil) {
-            return true;
+    bool fResult = false;
+    {
+        LOCK(cs_setBanned);
+        banmap_t::iterator i = setBanned.find(subnet);
+        if (i != setBanned.end()) {
+            CBanEntry banEntry = (*i).second;
+            if (GetTime() < banEntry.nBanUntil)
+                fResult = true;
         }
     }
-    return false;
+    return fResult;
 }
 
 void CConnman::Ban(const CNetAddr& addr, const BanReason &banReason, int64_t bantimeoffset, bool sinceUnixEpoch)
@@ -831,7 +823,7 @@ size_t CConnman::SocketSendData(CNode* pnode)
             nBytes = send(pnode->hSocket, reinterpret_cast<const char*>(data.data()) + pnode->nSendOffset, data.size() - pnode->nSendOffset, MSG_NOSIGNAL | MSG_DONTWAIT);
         }
         if (nBytes > 0) {
-            pnode->nLastSend = GetSystemTimeInSeconds();
+            pnode->nLastSend = GetTime();
             pnode->nSendBytes += nBytes;
             pnode->nSendOffset += nBytes;
             nSentSize += nBytes;
@@ -1074,9 +1066,6 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
         LOCK(cs_vNodes);
         vNodes.push_back(pnode);
     }
-
-    // We received a new connection, harvest entropy from the time (and our peer count)
-    RandAddEvent((uint32_t)id);
 }
 
 void CConnman::ThreadSocketHandler()
@@ -1322,7 +1311,7 @@ void CConnman::ThreadSocketHandler()
             //
             // Inactivity checking
             //
-            int64_t nTime = GetSystemTimeInSeconds();
+            int64_t nTime = GetTime();
             if (nTime - pnode->nTimeConnected > 60) {
                 if (pnode->nLastRecv == 0 || pnode->nLastSend == 0) {
                     LogPrint(BCLog::NET, "socket no message in first 60 seconds, %d %d from %d\n", pnode->nLastRecv != 0, pnode->nLastSend != 0, pnode->id);
@@ -1368,10 +1357,16 @@ void ThreadMapPort()
     struct UPNPDev* devlist = 0;
     char lanaddr[64];
 
+#ifndef UPNPDISCOVER_SUCCESS
+    /* miniupnpc 1.5 */
+    devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0);
+#elif MINIUPNPC_API_VERSION < 14
+    /* miniupnpc 1.6 */
     int error = 0;
-#if MINIUPNPC_API_VERSION < 14
     devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0, 0, &error);
 #else
+    /* miniupnpc 1.9.20150730 */
+    int error = 0;
     devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0, 0, 2, &error);
 #endif
 
@@ -1384,32 +1379,40 @@ void ThreadMapPort()
         if (fDiscover) {
             char externalIPAddress[40];
             r = UPNP_GetExternalIPAddress(urls.controlURL, data.first.servicetype, externalIPAddress);
-            if (r != UPNPCOMMAND_SUCCESS) {
+            if (r != UPNPCOMMAND_SUCCESS)
                 LogPrintf("UPnP: GetExternalIPAddress() returned %d\n", r);
-            } else {
+            else {
                 if (externalIPAddress[0]) {
                     CNetAddr resolved;
                     if (LookupHost(externalIPAddress, resolved, false)) {
                         LogPrintf("UPnP: ExternalIPAddress = %s\n", resolved.ToString().c_str());
                         AddLocal(resolved, LOCAL_UPNP);
                     }
-                } else {
+                } else
                     LogPrintf("UPnP: GetExternalIPAddress failed.\n");
-                }
             }
         }
 
-        std::string strDesc = PACKAGE_NAME " " + FormatFullVersion();
+        std::string strDesc = "JokeCoin " + FormatFullVersion();
 
         do {
-            r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype, port.c_str(), port.c_str(), lanaddr, strDesc.c_str(), "TCP", 0, "0");
+#ifndef UPNPDISCOVER_SUCCESS
+            /* miniupnpc 1.5 */
+            r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
+                port.c_str(), port.c_str(), lanaddr, strDesc.c_str(), "TCP", 0);
+#else
+            /* miniupnpc 1.6 */
+            r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
+                port.c_str(), port.c_str(), lanaddr, strDesc.c_str(), "TCP", 0, "0");
+#endif
 
-            if (r != UPNPCOMMAND_SUCCESS) {
-                LogPrintf("AddPortMapping(%s, %s, %s) failed with code %d (%s)\n", port, port, lanaddr, r, strupnperror(r));
-            } else {
+            if (r!=UPNPCOMMAND_SUCCESS)
+                LogPrintf("AddPortMapping(%s, %s, %s) failed with code %d (%s)\n",
+                          port, port, lanaddr, r, strupnperror(r));
+            else
                 LogPrintf("UPnP Port Mapping successful.\n");
-            }
-        } while(g_upnp_interrupt.sleep_for(std::chrono::minutes(20)));
+        }
+        while(g_upnp_interrupt.sleep_for(std::chrono::minutes(20)));
 
         r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype, port.c_str(), "TCP", 0);
         LogPrintf("UPNP_DeletePortMapping() returned: %d\n", r);
@@ -1504,20 +1507,26 @@ void CConnman::ThreadDNSAddressSeed()
             std::vector<CNetAddr> vIPs;
             std::vector<CAddress> vAdd;
             ServiceFlags requiredServiceBits = nRelevantServices;
-            std::string host = GetDNSHost(seed, &requiredServiceBits);
-            CNetAddr resolveSource;
-            if (!resolveSource.SetInternal(host)) {
-                continue;
-            }
-            if (LookupHost(host.c_str(), vIPs, 0, true)) {
+            if (LookupHost(GetDNSHost(seed, &requiredServiceBits).c_str(), vIPs, 0, true)) {
                 for (CNetAddr& ip : vIPs) {
-                    int nOneDay = 24*3600;
+                    int nOneDay = 24 * 3600;
                     CAddress addr = CAddress(CService(ip, Params().GetDefaultPort()), requiredServiceBits);
                     addr.nTime = GetTime() - 3 * nOneDay - GetRand(4 * nOneDay); // use a random age between 3 and 7 days old
                     vAdd.push_back(addr);
                     found++;
                 }
-                addrman.Add(vAdd, resolveSource);
+            }
+            if (interruptNet) {
+                return;
+            }
+            // TODO: The seed name resolve may fail, yielding an IP of [::], which results in
+            // addrman assigning the same source to results from different seeds.
+            // This should switch to a hard-coded stable dummy IP for each seed name, so that the
+            // resolve is not required at all.
+            if (!vIPs.empty()) {
+                CService seedSource;
+                Lookup(seed.name.c_str(), seedSource, 0, true);
+                addrman.Add(vAdd, seedSource);
             }
         }
     }
@@ -1611,7 +1620,7 @@ void CConnman::ThreadOpenConnections()
             if (!done) {
                 LogPrintf("Adding fixed seed nodes as DNS doesn't seem to be available.\n");
                 CNetAddr local;
-                local.SetInternal("fixedseeds");
+                LookupHost("127.0.0.1", local, false);
                 addrman.Add(convertSeed6(Params().FixedSeeds()), local);
                 done = true;
             }
@@ -1671,15 +1680,9 @@ void CConnman::ThreadOpenConnections()
                 addr = addrman.Select(fFeeler);
             }
 
-            // Require outbound connections, other than feelers, to be to distinct network groups
-            if (!fFeeler && setConnected.count(addr.GetGroup())) {
+            // if we selected an invalid address, restart
+            if (!addr.IsValid() || setConnected.count(addr.GetGroup()) || IsLocal(addr))
                 break;
-            }
-
-            // if we selected an invalid or local address, restart
-            if (!addr.IsValid() || IsLocal(addr)) {
-                break;
-            }
 
             // If we didn't find an appropriate destination after trying 100 addresses fetched from addrman,
             // stop this loop, and let the outer loop run again (which sleeps, adds seed nodes, recalculates
@@ -1990,7 +1993,7 @@ void Discover()
             }
         }
     }
-#elif (HAVE_DECL_GETIFADDRS && HAVE_DECL_FREEIFADDRS)
+#else
     // Get local host ip
     struct ifaddrs* myaddrs;
     if (getifaddrs(&myaddrs) == 0) {
@@ -2398,7 +2401,7 @@ unsigned int CConnman::GetReceiveFloodSize() const { return nReceiveFloodSize; }
 unsigned int CConnman::GetSendBufferSize() const{ return nSendBufferMaxSize; }
 
 CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress& addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const std::string& addrNameIn, bool fInboundIn) :
-    nTimeConnected(GetSystemTimeInSeconds()),
+    nTimeConnected(GetTime()),
     addr(addrIn),
     fInbound(fInboundIn),
     id(idIn),
@@ -2466,17 +2469,14 @@ CNode::~CNode()
 {
     CloseSocket(hSocket);
 
-    delete pfilter;
+    if (pfilter)
+        delete pfilter;
 }
 
 void CNode::AskFor(const CInv& inv)
 {
-    if (mapAskFor.size() > MAPASKFOR_MAX_SZ || setAskFor.size() > SETASKFOR_MAX_SZ)
+    if (mapAskFor.size() > MAPASKFOR_MAX_SZ)
         return;
-    // a peer may not have multiple non-responded queue positions for a single inv item
-    if (!setAskFor.insert(inv.hash).second)
-        return;
-
     // We're using mapAskFor as a priority queue,
     // the key is the earliest time the request can be sent
     int64_t nRequestTime;
@@ -2485,7 +2485,7 @@ void CNode::AskFor(const CInv& inv)
         nRequestTime = it->second;
     else
         nRequestTime = 0;
-    LogPrint(BCLog::NET, "askfor %s  %d (%s) peer=%d\n", inv.ToString(), nRequestTime, FormatISO8601Time(nRequestTime / 1000000), id);
+    LogPrint(BCLog::NET, "askfor %s  %d (%s) peer=%d\n", inv.ToString(), nRequestTime, DateTimeStrFormat("%H:%M:%S", nRequestTime / 1000000), id);
 
     // Make sure not to reuse time indexes to keep things in the same order
     int64_t nNow = GetTimeMicros() - 1000000;
@@ -2592,6 +2592,6 @@ uint64_t CConnman::CalculateKeyedNetGroup(const CAddress& ad)
 {
     std::vector<unsigned char> vchNetGroup(ad.GetGroup());
 
-    return GetDeterministicRandomizer(RANDOMIZER_ID_NETGROUP).Write(vchNetGroup.data(), vchNetGroup.size()).Finalize();
+    return GetDeterministicRandomizer(RANDOMIZER_ID_NETGROUP).Write(&vchNetGroup[0], vchNetGroup.size()).Finalize();
 }
 

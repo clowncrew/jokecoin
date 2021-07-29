@@ -6,10 +6,10 @@
 #ifndef BITCOIN_CRYPTER_H
 #define BITCOIN_CRYPTER_H
 
+#include "allocators.h"
 #include "keystore.h"
 #include "serialize.h"
 #include "streams.h"
-#include "support/allocators/zeroafterfree.h"
 
 class uint256;
 

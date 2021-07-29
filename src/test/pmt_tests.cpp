@@ -23,7 +23,8 @@ public:
     void Damage() {
         unsigned int n = InsecureRandRange(vHash.size());
         int bit = InsecureRandBits(8);
-        *(vHash[n].begin() + (bit>>3)) ^= 1<<(bit&7);
+        uint256 &hash = vHash[n];
+        hash ^= ((uint256)1 << bit);
     }
 };
 

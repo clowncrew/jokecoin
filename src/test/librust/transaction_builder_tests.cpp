@@ -13,11 +13,11 @@
 #include <univalue.h>
 #include <boost/test/unit_test.hpp>
 
-BOOST_FIXTURE_TEST_SUITE(sapling_transaction_builder_tests, SaplingRegTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(sapling_transaction_builder_tests, SaplingTestingSetup)
 
 BOOST_AUTO_TEST_CASE(TransparentToSapling)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     CBasicKeyStore keystore;
     CKey tsk = AddTestCKeyToKeyStore(keystore);
@@ -49,11 +49,13 @@ BOOST_AUTO_TEST_CASE(TransparentToSapling)
     CValidationState state;
     BOOST_CHECK(SaplingValidation::ContextualCheckTransaction(tx, state, Params(), 2, true, false));
     BOOST_CHECK_EQUAL(state.GetRejectReason(), "");
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
-BOOST_AUTO_TEST_CASE(SaplingToSapling)
-{
-    auto consensusParams = Params().GetConsensus();
+BOOST_AUTO_TEST_CASE(SaplingToSapling) {
+    auto consensusParams = RegtestActivateSapling();
 
     auto sk = libzcash::SaplingSpendingKey::random();
     auto expsk = sk.expanded_spending_key();
@@ -99,33 +101,45 @@ BOOST_AUTO_TEST_CASE(SaplingToSapling)
     BOOST_CHECK_EQUAL(tx2.sapData->valueBalance, 10000000);
     BOOST_CHECK(SaplingValidation::ContextualCheckTransaction(tx2, state, Params(), 3, true, false));
     BOOST_CHECK_EQUAL(state.GetRejectReason(), "");
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 BOOST_AUTO_TEST_CASE(ThrowsOnTransparentInputWithoutKeyStore)
 {
-    auto builder = TransactionBuilder(Params().GetConsensus(), 1);
+    SelectParams(CBaseChainParams::REGTEST);
+    auto consensusParams = Params().GetConsensus();
+
+    auto builder = TransactionBuilder(consensusParams, 1);
     BOOST_CHECK_THROW(builder.AddTransparentInput(COutPoint(), CScript(), 1), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(RejectsInvalidTransparentOutput)
 {
+    SelectParams(CBaseChainParams::REGTEST);
+    auto consensusParams = Params().GetConsensus();
+
     // Default CTxDestination type is an invalid address
     CTxDestination taddr;
-    auto builder = TransactionBuilder(Params().GetConsensus(), 1);
+    auto builder = TransactionBuilder(consensusParams, 1);
     BOOST_CHECK_THROW(builder.AddTransparentOutput(taddr, 50), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(RejectsInvalidTransparentChangeAddress)
 {
+    SelectParams(CBaseChainParams::REGTEST);
+    auto consensusParams = Params().GetConsensus();
+
     // Default CTxDestination type is an invalid address
     CTxDestination taddr;
-    auto builder = TransactionBuilder(Params().GetConsensus(), 1);
+    auto builder = TransactionBuilder(consensusParams, 1);
     BOOST_CHECK_THROW(builder.SendChangeTo(taddr), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(FailsWithNegativeChange)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Generate dummy Sapling address
     auto sk = libzcash::SaplingSpendingKey::random();
@@ -165,11 +179,14 @@ BOOST_AUTO_TEST_CASE(FailsWithNegativeChange)
     // Succeeds if there is sufficient input
     builder.AddTransparentInput(COutPoint(), scriptPubKey, 10000);
     BOOST_CHECK(builder.Build().IsTx());
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 BOOST_AUTO_TEST_CASE(ChangeOutput)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Generate dummy Sapling address
     auto sk = libzcash::SaplingSpendingKey::random();
@@ -243,11 +260,14 @@ BOOST_AUTO_TEST_CASE(ChangeOutput)
         BOOST_CHECK_EQUAL(tx.sapData->valueBalance, 0);
         BOOST_CHECK_EQUAL(tx.vout[0].nValue, 15000000);
     }
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 BOOST_AUTO_TEST_CASE(SetFee)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Generate dummy Sapling address
     auto sk = libzcash::SaplingSpendingKey::random();
@@ -272,10 +292,14 @@ BOOST_AUTO_TEST_CASE(SetFee)
         BOOST_CHECK_EQUAL(tx.sapData->vShieldedOutput.size(), 2);
         BOOST_CHECK_EQUAL(tx.sapData->valueBalance, COIN);
     }
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 BOOST_AUTO_TEST_CASE(CheckSaplingTxVersion)
 {
+    SelectParams(CBaseChainParams::REGTEST);
     auto consensusParams = Params().GetConsensus();
 
     auto sk = libzcash::SaplingSpendingKey::random();

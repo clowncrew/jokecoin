@@ -19,9 +19,9 @@
 #include <vector>
 
 struct CDNSSeedData {
-    std::string host;
+    std::string name, host;
     bool supportsServiceBitsFiltering;
-    CDNSSeedData(const std::string& strHost, bool supportsServiceBitsFilteringIn = false) : host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
+    CDNSSeedData(const std::string& strName, const std::string& strHost, bool supportsServiceBitsFilteringIn = false) : name(strName), host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
 };
 
 struct SeedSpec6 {
@@ -67,10 +67,7 @@ public:
     int GetDefaultPort() const { return nDefaultPort; }
 
     const CBlock& GenesisBlock() const { return genesis; }
-    /** Policy: Filter transactions that do not match well-defined patterns */
-    bool RequireStandard() const { return fRequireStandard; }
-    /** If this chain is exclusively used for testing */
-    bool IsTestChain() const { return IsTestnet() || IsRegTestNet(); }
+
     /** Make miner wait to have peers to avoid wasting work */
     bool MiningRequiresPeers() const { return !IsRegTestNet(); }
     /** Headers first syncing is disabled */
@@ -78,7 +75,7 @@ public:
     /** Default value for -checkmempool and -checkblockindex argument */
     bool DefaultConsistencyChecks() const { return IsRegTestNet(); }
 
-    /** Return the network string */
+    /** Return the BIP70 network string (main, test or regtest) */
     std::string NetworkIDString() const { return strNetworkID; }
     const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
     const std::vector<unsigned char>& Base58Prefix(Base58Type type) const { return base58Prefixes[type]; }
@@ -102,7 +99,6 @@ protected:
     std::vector<unsigned char> base58Prefixes[MAX_BASE58_TYPES];
     std::string bech32HRPs[MAX_BECH32_TYPES];
     std::vector<SeedSpec6> vFixedSeeds;
-    bool fRequireStandard;
 };
 
 /**
@@ -119,7 +115,7 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
 const CChainParams& Params();
 
 /**
- * Sets the params returned by Params() to those for the given chain name.
+ * Sets the params returned by Params() to those for the given BIP70 chain name.
  * @throws std::runtime_error when the chain is not supported.
  */
 void SelectParams(const std::string& chain);

@@ -78,7 +78,7 @@ public:
         s >> VARINT(nSize);
         if (nSize < nSpecialScripts) {
             std::vector<unsigned char> vch(GetSpecialSize(nSize), 0x00);
-            s >> CFlatData(vch);
+            s >> REF(CFlatData(vch));
             Decompress(nSize, vch);
             return;
         }
@@ -89,7 +89,7 @@ public:
             s.ignore(nSize);
         } else {
             script.resize(nSize);
-            s >> CFlatData(script);
+            s >> REF(CFlatData(script));
         }
     }
 };

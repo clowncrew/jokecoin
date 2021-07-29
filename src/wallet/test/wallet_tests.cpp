@@ -6,7 +6,6 @@
 #include "wallet/test/wallet_test_fixture.h"
 
 #include "consensus/merkle.h"
-#include "rpc/server.h"
 #include "txmempool.h"
 #include "validation.h"
 #include "wallet/wallet.h"
@@ -16,11 +15,6 @@
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
-#include <univalue.h>
-
-extern UniValue importmulti(const JSONRPCRequest& request);
-extern UniValue dumpwallet(const JSONRPCRequest& request);
-extern UniValue importwallet(const JSONRPCRequest& request);
 
 // how many times to run all the tests to have a chance to catch errors that only show up with particular random shuffles
 #define RUN_TESTS 100
@@ -37,7 +31,7 @@ BOOST_FIXTURE_TEST_SUITE(wallet_tests, WalletTestingSetup)
 
 static std::vector<COutput> vCoins;
 
-static void add_coin(std::unique_ptr<CWallet>& pwallet, const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = false, int nInput=0)
+static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = false, int nInput=0)
 {
     static int nextLockTime = 0;
     CMutableTransaction tx;
@@ -49,11 +43,11 @@ static void add_coin(std::unique_ptr<CWallet>& pwallet, const CAmount& nValue, i
         // so stop vin being empty, and cache a non-zero Debit to fake out IsFromMe()
         tx.vin.resize(1);
     }
-    std::unique_ptr<CWalletTx> wtx(new CWalletTx(pwallet.get(), MakeTransactionRef(std::move(tx))));
+    std::unique_ptr<CWalletTx> wtx(new CWalletTx(pwalletMain, MakeTransactionRef(std::move(tx))));
     if (fIsFromMe) {
         wtx->m_amounts[CWalletTx::DEBIT].Set(ISMINE_SPENDABLE, 1);
     }
-    COutput output(wtx.get(), nInput, nAge, true /* spendable */, true /* solvable */, true /* safe */);
+    COutput output(wtx.get(), nInput, nAge, true, true);
     vCoins.push_back(output);
     wtxn.emplace_back(std::move(wtx));
 }
@@ -85,7 +79,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         // with an empty wallet we can't even pay one cent
         BOOST_CHECK(!pwalletMain->SelectCoinsMinConf( 1 * CENT, 1, 6, vCoins, setCoinsRet, nValueRet));
 
-        add_coin(pwalletMain, 1*CENT, 4);        // add a new 1 cent coin
+        add_coin(1*CENT, 4);        // add a new 1 cent coin
 
         // with a new 1 cent coin, we still can't find a mature 1 cent
         BOOST_CHECK(!pwalletMain->SelectCoinsMinConf( 1 * CENT, 1, 6, vCoins, setCoinsRet, nValueRet));
@@ -94,7 +88,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf( 1 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 1 * CENT);
 
-        add_coin(pwalletMain, 2*CENT);           // add a mature 2 cent coin
+        add_coin(2*CENT);           // add a mature 2 cent coin
 
         // we can't make 3 cents of mature coins
         BOOST_CHECK(!pwalletMain->SelectCoinsMinConf( 3 * CENT, 1, 6, vCoins, setCoinsRet, nValueRet));
@@ -103,9 +97,9 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf( 3 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 3 * CENT);
 
-        add_coin(pwalletMain, 5*CENT);           // add a mature 5 cent coin,
-        add_coin(pwalletMain, 10*CENT, 3, true); // a new 10 cent coin sent from one of our own addresses
-        add_coin(pwalletMain, 20*CENT);          // and a mature 20 cent coin
+        add_coin(5*CENT);           // add a mature 5 cent coin,
+        add_coin(10*CENT, 3, true); // a new 10 cent coin sent from one of our own addresses
+        add_coin(20*CENT);          // and a mature 20 cent coin
 
         // now we have new: 1+10=11 (of which 10 was self-sent), and mature: 2+5+20=27.  total = 38
 
@@ -143,11 +137,11 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         // now clear out the wallet and start again to test choosing between subsets of smaller coins and the next biggest coin
         empty_wallet();
 
-        add_coin(pwalletMain,  6*CENT);
-        add_coin(pwalletMain,  7*CENT);
-        add_coin(pwalletMain,  8*CENT);
-        add_coin(pwalletMain, 20*CENT);
-        add_coin(pwalletMain, 30*CENT); // now we have 6+7+8+20+30 = 71 cents total
+        add_coin( 6*CENT);
+        add_coin( 7*CENT);
+        add_coin( 8*CENT);
+        add_coin(20*CENT);
+        add_coin(30*CENT); // now we have 6+7+8+20+30 = 71 cents total
 
         // check that we have 71 and not 72
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(71 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
@@ -158,14 +152,14 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         BOOST_CHECK_EQUAL(nValueRet, 20 * CENT); // we should get 20 in one coin
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 1U);
 
-        add_coin(pwalletMain,  5*CENT); // now we have 5+6+7+8+20+30 = 75 cents total
+        add_coin( 5*CENT); // now we have 5+6+7+8+20+30 = 75 cents total
 
         // now if we try making 16 cents again, the smaller coins can make 5+6+7 = 18 cents, better than the next biggest coin, 20
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(16 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 18 * CENT); // we should get 18 in 3 coins
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 3U);
 
-        add_coin(pwalletMain,  18*CENT); // now we have 5+6+7+8+18+20+30
+        add_coin( 18*CENT); // now we have 5+6+7+8+18+20+30
 
         // and now if we try making 16 cents again, the smaller coins can make 5+6+7 = 18 cents, the same as the next biggest coin, 18
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(16 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
@@ -178,10 +172,10 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 2U);
 
         // check that the smallest bigger coin is used
-        add_coin(pwalletMain,  1*COIN);
-        add_coin(pwalletMain,  2*COIN);
-        add_coin(pwalletMain,  3*COIN);
-        add_coin(pwalletMain,  4*COIN); // now we have 5+6+7+8+18+20+30+100+200+300+400 = 1094 cents
+        add_coin( 1*COIN);
+        add_coin( 2*COIN);
+        add_coin( 3*COIN);
+        add_coin( 4*COIN); // now we have 5+6+7+8+18+20+30+100+200+300+400 = 1094 cents
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(95 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 1 * COIN);  // we should get 1 BTC in 1 coin
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 1U);
@@ -192,11 +186,11 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
 
         // empty the wallet and start again, now with fractions of a cent, to test sub-cent change avoidance
         empty_wallet();
-        add_coin(pwalletMain, 0.1*CENT);
-        add_coin(pwalletMain, 0.2*CENT);
-        add_coin(pwalletMain, 0.3*CENT);
-        add_coin(pwalletMain, 0.4*CENT);
-        add_coin(pwalletMain, 0.5*CENT);
+        add_coin(0.1*CENT);
+        add_coin(0.2*CENT);
+        add_coin(0.3*CENT);
+        add_coin(0.4*CENT);
+        add_coin(0.5*CENT);
 
         // try making 1 cent from 0.1 + 0.2 + 0.3 + 0.4 + 0.5 = 1.5 cents
         // we'll get sub-cent change whatever happens, so can expect 1.0 exactly
@@ -204,15 +198,15 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         BOOST_CHECK_EQUAL(nValueRet, 1 * CENT);
 
         // but if we add a bigger coin, making it possible to avoid sub-cent change, things change:
-        add_coin(pwalletMain, 1111*CENT);
+        add_coin(1111*CENT);
 
         // try making 1 cent from 0.1 + 0.2 + 0.3 + 0.4 + 0.5 + 1111 = 1112.5 cents
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(1 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 1 * CENT); // we should get the exact amount
 
         // if we add more sub-cent coins:
-        add_coin(pwalletMain, 0.6*CENT);
-        add_coin(pwalletMain, 0.7*CENT);
+        add_coin(0.6*CENT);
+        add_coin(0.7*CENT);
 
         // and try again to make 1.0 cents, we can still make 1.0 cents
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(1 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
@@ -222,7 +216,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         // they tried to consolidate 10 50k coins into one 500k coin, and ended up with 50k in change
         empty_wallet();
         for (int j = 0; j < 20; j++)
-            add_coin(pwalletMain, 50000 * COIN);
+            add_coin(50000 * COIN);
 
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(500000 * COIN, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 500000 * COIN); // we should get the exact amount
@@ -233,29 +227,29 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
 
         // sometimes it will fail, and so we use the next biggest coin:
         empty_wallet();
-        add_coin(pwalletMain, 0.5 * CENT);
-        add_coin(pwalletMain, 0.6 * CENT);
-        add_coin(pwalletMain, 0.7 * CENT);
-        add_coin(pwalletMain, 1111 * CENT);
+        add_coin(0.5 * CENT);
+        add_coin(0.6 * CENT);
+        add_coin(0.7 * CENT);
+        add_coin(1111 * CENT);
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(1 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 1111 * CENT); // we get the bigger coin
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 1U);
 
         // but sometimes it's possible, and we use an exact subset (0.4 + 0.6 = 1.0)
         empty_wallet();
-        add_coin(pwalletMain, 0.4 * CENT);
-        add_coin(pwalletMain, 0.6 * CENT);
-        add_coin(pwalletMain, 0.8 * CENT);
-        add_coin(pwalletMain, 1111 * CENT);
+        add_coin(0.4 * CENT);
+        add_coin(0.6 * CENT);
+        add_coin(0.8 * CENT);
+        add_coin(1111 * CENT);
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(1 * CENT, 1, 1, vCoins, setCoinsRet, nValueRet));
         BOOST_CHECK_EQUAL(nValueRet, 1 * CENT);   // we should get the exact amount
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 2U); // in two coins 0.4+0.6
 
         // test avoiding sub-cent change
         empty_wallet();
-        add_coin(pwalletMain, 0.0005 * COIN);
-        add_coin(pwalletMain, 0.01 * COIN);
-        add_coin(pwalletMain, 1 * COIN);
+        add_coin(0.0005 * COIN);
+        add_coin(0.01 * COIN);
+        add_coin(1 * COIN);
 
         // trying to make 1.0001 from these three coins
         BOOST_CHECK(pwalletMain->SelectCoinsMinConf(1.0001 * COIN, 1, 1, vCoins, setCoinsRet, nValueRet));
@@ -271,7 +265,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         {
             empty_wallet();
             for (int i2 = 0; i2 < 100; i2++)
-                add_coin(pwalletMain, COIN);
+                add_coin(COIN);
 
             // picking 50 from 100 coins doesn't depend on the shuffle,
             // but does depend on randomness in the stochastic approximation code
@@ -294,11 +288,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
             // add 75 cents in small change.  not enough to make 90 cents,
             // then try making 90 cents.  there are multiple competing "smallest bigger" coins,
             // one of which should be picked at random
-            add_coin(pwalletMain,  5*CENT);
-            add_coin(pwalletMain, 10*CENT);
-            add_coin(pwalletMain, 15*CENT);
-            add_coin(pwalletMain, 20*CENT);
-            add_coin(pwalletMain, 25*CENT);
+            add_coin( 5*CENT); add_coin(10*CENT); add_coin(15*CENT); add_coin(20*CENT); add_coin(25*CENT);
 
             fails = 0;
             for (int j = 0; j < RANDOM_REPEATS; j++)
@@ -314,146 +304,6 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
         }
     }
     empty_wallet();
-}
-
-static void AddKey(CWallet& wallet, const CKey& key)
-{
-    LOCK(wallet.cs_wallet);
-    wallet.AddKeyPubKey(key, key.GetPubKey());
-}
-
-BOOST_FIXTURE_TEST_CASE(rescan, TestChain100Setup)
-{
-    // Cap last block file size, and mine new block in a new block file.
-    CBlockIndex* const nullBlock = nullptr;
-    CBlockIndex* oldTip = chainActive.Tip();
-    GetBlockFileInfo(oldTip->GetBlockPos().nFile)->nSize = MAX_BLOCKFILE_SIZE;
-    CreateAndProcessBlock({}, GetScriptForRawPubKey(coinbaseKey.GetPubKey()));
-    CBlockIndex* newTip = chainActive.Tip();
-
-    LOCK(cs_main);
-
-    // Verify ScanForWalletTransactions picks up transactions in both the old
-    // and new block files.
-    {
-        CWallet wallet;
-        WITH_LOCK(wallet.cs_wallet, wallet.SetLastBlockProcessed(newTip); );
-        AddKey(wallet, coinbaseKey);
-        WalletRescanReserver reserver(&wallet);
-        reserver.reserve();
-        BOOST_CHECK_EQUAL(nullBlock, wallet.ScanForWalletTransactions(oldTip, nullptr, reserver));
-        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 500 * COIN);
-    }
-
-    // !TODO: Prune the older block file.
-    /*
-    PruneOneBlockFile(oldTip->GetBlockPos().nFile);
-    UnlinkPrunedFiles({oldTip->GetBlockPos().nFile});
-
-    // Verify ScanForWalletTransactions only picks transactions in the new block
-    // file.
-    {
-        CWallet wallet;
-        AddKey(wallet, coinbaseKey);
-        WalletRescanReserver reserver(&wallet);
-        reserver.reserve();
-        BOOST_CHECK_EQUAL(oldTip, wallet.ScanForWalletTransactions(oldTip, nullptr, reserver));;
-        BOOST_CHECK_EQUAL(wallet.GetImmatureBalance(), 250 * COIN);
-    }
-    */
-
-    // Verify importmulti RPC returns failure for a key whose creation time is
-    // before the missing block, and success for a key whose creation time is
-    // after.
-    {
-        CWallet wallet;
-        WITH_LOCK(wallet.cs_wallet, wallet.SetLastBlockProcessed(newTip); );
-        vpwallets.insert(vpwallets.begin(), &wallet);
-        UniValue keys;
-        keys.setArray();
-        UniValue key;
-        key.setObject();
-        key.pushKV("scriptPubKey", HexStr(GetScriptForRawPubKey(coinbaseKey.GetPubKey())));
-        key.pushKV("timestamp", 0);
-        key.pushKV("internal", UniValue(true));
-        keys.push_back(key);
-        key.clear();
-        key.setObject();
-        CKey futureKey;
-        futureKey.MakeNewKey(true);
-        key.pushKV("scriptPubKey", HexStr(GetScriptForRawPubKey(futureKey.GetPubKey())));
-        key.pushKV("timestamp", newTip->GetBlockTimeMax() + TIMESTAMP_WINDOW + 1);
-        key.pushKV("internal", UniValue(true));
-        keys.push_back(key);
-        JSONRPCRequest request;
-        request.params.setArray();
-        request.params.push_back(keys);
-
-        UniValue response = importmulti(request);
-        // !TODO: after pruning, check that the rescan for the first key fails.
-        BOOST_CHECK_EQUAL(response.write(), "[{\"success\":true},{\"success\":true}]");
-        vpwallets.erase(vpwallets.begin());
-    }
-}
-
-// Verify importwallet RPC starts rescan at earliest block with timestamp
-// greater or equal than key birthday. Previously there was a bug where
-// importwallet RPC would start the scan at the latest block with timestamp less
-// than or equal to key birthday.
-BOOST_FIXTURE_TEST_CASE(importwallet_rescan, TestChain100Setup)
-{
-    // Create one block
-    const int64_t BLOCK_TIME = chainActive.Tip()->GetBlockTimeMax() + 15;
-    SetMockTime(BLOCK_TIME);
-    coinbaseTxns.emplace_back(*CreateAndProcessBlock({}, GetScriptForRawPubKey(coinbaseKey.GetPubKey())).vtx[0]);
-
-    // Set key birthday to block time increased by the timestamp window, so
-    // rescan will start at the block time.
-    const int64_t KEY_TIME = BLOCK_TIME + TIMESTAMP_WINDOW;
-    SetMockTime(KEY_TIME);
-    coinbaseTxns.emplace_back(*CreateAndProcessBlock({}, GetScriptForRawPubKey(coinbaseKey.GetPubKey())).vtx[0]);
-
-    std::string backup_file = (SetDataDir("importwallet_rescan") / "wallet.backup").string();
-
-    // Import key into wallet and call dumpwallet to create backup file.
-    {
-        CWallet wallet;
-        {
-            LOCK(wallet.cs_wallet);
-            wallet.mapKeyMetadata[coinbaseKey.GetPubKey().GetID()].nCreateTime = KEY_TIME;
-            wallet.AddKeyPubKey(coinbaseKey, coinbaseKey.GetPubKey());
-        }
-
-        JSONRPCRequest request;
-        request.params.setArray();
-        request.params.push_back(backup_file);
-        vpwallets.insert(vpwallets.begin(), &wallet);
-        ::dumpwallet(request);
-    }
-
-    // Call importwallet RPC and verify all blocks with timestamps >= BLOCK_TIME
-    // were scanned, and no prior blocks were scanned.
-    {
-        CWallet wallet;
-
-        JSONRPCRequest request;
-        request.params.setArray();
-        request.params.push_back(backup_file);
-        vpwallets[0] = &wallet;
-        ::importwallet(request);
-
-        LOCK(wallet.cs_wallet);
-        BOOST_CHECK_EQUAL(wallet.mapWallet.size(), 2);
-        BOOST_CHECK_EQUAL(coinbaseTxns.size(), 102);
-        for (size_t i = 0; i < coinbaseTxns.size(); ++i) {
-            bool found = wallet.GetWalletTx(coinbaseTxns[i].GetHash());
-            bool expected = i >= 100;
-            BOOST_CHECK_EQUAL(found, expected);
-        }
-    }
-
-    SetMockTime(0);
-    vpwallets.erase(vpwallets.begin());
 }
 
 void removeTxFromMempool(CWalletTx& wtx)

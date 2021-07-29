@@ -13,7 +13,7 @@
 #include "masternode.h"
 #include "net.h"
 #include "sync.h"
-#include "util/system.h"
+#include "util.h"
 
 #define MASTERNODES_DUMP_SECONDS (15 * 60)
 #define MASTERNODES_DSEG_SECONDS (3 * 60 * 60)
@@ -53,6 +53,8 @@ public:
     ReadResult Read(CMasternodeMan& mnodemanToLoad);
 };
 
+//
+typedef std::shared_ptr<CMasternode> MasternodeRef;
 
 class CMasternodeMan
 {
@@ -142,17 +144,17 @@ public:
     void CheckSpentCollaterals(const std::vector<CTransactionRef>& vtx);
 
     /// Find an entry in the masternode list that is next to be paid
-    MasternodeRef GetNextMasternodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount, const CBlockIndex* pChainTip = nullptr) const;
+    const CMasternode* GetNextMasternodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount, const CBlockIndex* pChainTip = nullptr) const;
 
-    /// Get the winner for this block hash
-    MasternodeRef GetCurrentMasterNode(const uint256& hash) const;
+    /// Get the current winner for this block
+    const CMasternode* GetCurrentMasterNode(int mod = 1, int64_t nBlockHeight = 0, int minProtocol = 0) const;
 
     /// vector of pairs <masternode winner, height>
     std::vector<std::pair<MasternodeRef, int>> GetMnScores(int nLast) const;
 
     // Retrieve the known masternodes ordered by scoring without checking them. (Only used for listmasternodes RPC call)
     std::vector<std::pair<int64_t, MasternodeRef>> GetMasternodeRanks(int nBlockHeight) const;
-    int GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight) const;
+    int GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, int minProtocol = 0, bool fOnlyActive = true) const;
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 

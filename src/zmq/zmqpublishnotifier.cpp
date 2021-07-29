@@ -5,7 +5,7 @@
 #include "zmqpublishnotifier.h"
 
 #include "chainparams.h"
-#include "util/system.h"
+#include "util.h"
 #include "crypto/common.h"
 #include "validation.h"     // cs_main
 

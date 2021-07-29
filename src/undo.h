@@ -25,8 +25,9 @@ class TxInUndoSerializer
 
 public:
     template <typename Stream>
-    void Serialize(Stream& s) const {
-        ::Serialize(s, VARINT(txout->nHeight * 4 + (txout->fCoinBase ? 2u : 0u) + (txout->fCoinStake ? 1u : 0u)));
+    void Serialize(Stream& s) const
+    {
+        ::Serialize(s, VARINT(txout->nHeight * 4 + (txout->fCoinBase ? 2 : 0) + (txout->fCoinStake ? 1 : 0)));
         if (txout->nHeight > 0) {
             // Required to maintain compatibility with older undo format.
             ::Serialize(s, (unsigned char)0);
@@ -54,10 +55,10 @@ public:
             // Old versions stored the version number for the last spend of
             // a transaction's outputs. Non-final spends were indicated with
             // height = 0.
-            unsigned int nVersionDummy;
+            int nVersionDummy;
             ::Unserialize(s, VARINT(nVersionDummy));
         }
-        ::Unserialize(s, CTxOutCompressor(REF(txout->out)));
+        ::Unserialize(s, REF(CTxOutCompressor(REF(txout->out))));
     }
 
     TxInUndoDeserializer(Coin* coin) : txout(coin) {}
@@ -79,7 +80,7 @@ public:
         uint64_t count = vprevout.size();
         ::Serialize(s, COMPACTSIZE(REF(count)));
         for (const auto& prevout : vprevout) {
-            ::Serialize(s, TxInUndoSerializer(&prevout));
+            ::Serialize(s, REF(TxInUndoSerializer(&prevout)));
         }
     }
 
@@ -94,7 +95,7 @@ public:
         }
         vprevout.resize(count);
         for (auto& prevout : vprevout) {
-            ::Unserialize(s, TxInUndoDeserializer(&prevout));
+            ::Unserialize(s, REF(TxInUndoDeserializer(&prevout)));
         }
     }
 };

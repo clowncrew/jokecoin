@@ -12,7 +12,7 @@
 #include "primitives/transaction.h"
 #include "script/standard.h"
 #include "uint256.h"
-#include "util/system.h"
+#include "util.h"
 
 typedef std::vector<unsigned char> valtype;
 

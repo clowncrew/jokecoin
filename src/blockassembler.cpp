@@ -21,7 +21,7 @@
 #include "spork.h"
 #include "timedata.h"
 #include "txmempool.h"
-#include "util/system.h"
+#include "util.h"
 #include "validation.h"
 #include "validationinterface.h"
 
@@ -66,22 +66,9 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
     return nNewTime - nOldTime;
 }
 
-static CMutableTransaction NewCoinbase(const int nHeight, const CScript* pScriptPubKey = nullptr)
-{
-    CMutableTransaction txCoinbase;
-    txCoinbase.vout.emplace_back();
-    txCoinbase.vout[0].SetEmpty();
-    if (pScriptPubKey) txCoinbase.vout[0].scriptPubKey = *pScriptPubKey;
-    txCoinbase.vin.emplace_back();
-    txCoinbase.vin[0].scriptSig = CScript() << nHeight << OP_0;
-    return txCoinbase;
-}
-
 bool SolveProofOfStake(CBlock* pblock, CBlockIndex* pindexPrev, CWallet* pwallet, std::vector<CStakeableOutput>* availableCoins)
 {
     boost::this_thread::interruption_point();
-
-    assert(pindexPrev);
     pblock->nBits = GetNextWorkRequired(pindexPrev, pblock);
 
     // Sync wallet before create coinstake
@@ -89,51 +76,49 @@ bool SolveProofOfStake(CBlock* pblock, CBlockIndex* pindexPrev, CWallet* pwallet
 
     CMutableTransaction txCoinStake;
     int64_t nTxNewTime = 0;
-    if (!pwallet->CreateCoinStake(pindexPrev, pblock->nBits, txCoinStake, nTxNewTime, availableCoins)) {
+    if (!pwallet->CreateCoinStake(*pwallet, pindexPrev, pblock->nBits, txCoinStake, nTxNewTime, availableCoins)) {
         LogPrint(BCLog::STAKING, "%s : stake not found\n", __func__);
         return false;
     }
     // Stake found
-
-    // Create coinbase tx and add masternode/budget payments
-    CMutableTransaction txCoinbase = NewCoinbase(pindexPrev->nHeight + 1);
-    FillBlockPayee(txCoinbase, txCoinStake, pindexPrev, true);
-
-    // Sign coinstake
-    if (!pwallet->SignCoinStake(txCoinStake)) {
-        const COutPoint& stakeIn = txCoinStake.vin[0].prevout;
-        return error("Unable to sign coinstake with input %s-%d", stakeIn.hash.ToString(), stakeIn.n);
-    }
-
-    pblock->vtx.emplace_back(MakeTransactionRef(txCoinbase));
-    pblock->vtx.emplace_back(MakeTransactionRef(txCoinStake));
     pblock->nTime = nTxNewTime;
+
+    CMutableTransaction emptyTx;
+    emptyTx.vout.emplace_back();
+    emptyTx.vout[0].SetEmpty();
+    emptyTx.vin.emplace_back();
+    emptyTx.vin[0].scriptSig = CScript() << pindexPrev->nHeight + 1 << OP_0;
+    pblock->vtx.emplace_back(
+            std::make_shared<const CTransaction>(emptyTx));
+    // stake
+    pblock->vtx.emplace_back(
+            std::make_shared<const CTransaction>(txCoinStake));
     return true;
 }
 
-CMutableTransaction CreateCoinbaseTx(const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev)
+bool CreateCoinbaseTx(CBlock* pblock, const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev)
 {
     assert(pindexPrev);
     const int nHeight = pindexPrev->nHeight + 1;
 
     // Create coinbase tx
-    CMutableTransaction txCoinbase = NewCoinbase(nHeight, &scriptPubKeyIn);
+    CMutableTransaction txNew;
+    txNew.vin.resize(1);
+    txNew.vin[0].prevout.SetNull();
+    txNew.vout.resize(1);
+    txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 
     //Masternode and general budget payments
-    CMutableTransaction txDummy;    // POW blocks have no coinstake
-    FillBlockPayee(txCoinbase, txDummy, pindexPrev, false);
+    FillBlockPayee(txNew, nHeight, false);
 
+    txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
     // If no payee was detected, then the whole block value goes to the first output.
-    if (txCoinbase.vout.size() == 1) {
-        txCoinbase.vout[0].nValue = GetBlockValue(nHeight);
+    if (txNew.vout.size() == 1) {
+        txNew.vout[0].nValue = GetBlockValue(nHeight);
     }
 
-    return txCoinbase;
-}
-
-bool CreateCoinbaseTx(CBlock* pblock, const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev)
-{
-    pblock->vtx.emplace_back(MakeTransactionRef(CreateCoinbaseTx(scriptPubKeyIn, pindexPrev)));
+    pblock->vtx.emplace_back(
+            std::make_shared<const CTransaction>(CTransaction(txNew)));
     return true;
 }
 
@@ -170,8 +155,7 @@ void BlockAssembler::resetBlock()
 std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn,
                                                CWallet* pwallet,
                                                bool fProofOfStake,
-                                               std::vector<CStakeableOutput>* availableCoins,
-                                               bool fNoMempoolTx)
+                                               std::vector<CStakeableOutput>* availableCoins)
 {
     resetBlock();
 
@@ -200,7 +184,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         return nullptr;
     }
 
-    if (!fNoMempoolTx) {
+    {
         // Add transactions from mempool
         LOCK2(cs_main,mempool.cs);
         addPriorityTxs();
@@ -489,18 +473,7 @@ uint256 CalculateSaplingTreeRoot(CBlock* pblock, int nHeight, const CChainParams
     return UINT256_ZERO;
 }
 
-bool SolveBlock(std::shared_ptr<CBlock>& pblock, int nHeight)
-{
-    unsigned int extraNonce = 0;
-    IncrementExtraNonce(pblock, nHeight, extraNonce);
-    while (pblock->nNonce < std::numeric_limits<uint32_t>::max() &&
-           !CheckProofOfWork(pblock->GetHash(), pblock->nBits)) {
-        ++pblock->nNonce;
-    }
-    return pblock->nNonce != std::numeric_limits<uint32_t>::max();
-}
-
-void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, int nHeight, unsigned int& nExtraNonce)
+void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
 {
     // Update nExtraNonce
     static uint256 hashPrevBlock;
@@ -509,6 +482,7 @@ void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, int nHeight, unsigned 
         hashPrevBlock = pblock->hashPrevBlock;
     }
     ++nExtraNonce;
+    unsigned int nHeight = pindexPrev->nHeight + 1; // Height first in coinbase required for block.version=2
     CMutableTransaction txCoinbase(*pblock->vtx[0]);
     txCoinbase.vin[0].scriptSig = (CScript() << nHeight << CScriptNum(nExtraNonce)) + COINBASE_FLAGS;
     assert(txCoinbase.vin[0].scriptSig.size() <= 100);
@@ -519,10 +493,8 @@ void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, int nHeight, unsigned 
 
 int32_t ComputeBlockVersion(const Consensus::Params& consensus, int nHeight)
 {
-    if (NetworkUpgradeActive(nHeight, consensus, Consensus::UPGRADE_V6_0)) {
-        return CBlockHeader::CURRENT_VERSION;    // v10
-    } else if (NetworkUpgradeActive(nHeight, consensus, Consensus::UPGRADE_V5_0)) {
-        return 9;
+    if (NetworkUpgradeActive(nHeight, consensus, Consensus::UPGRADE_V5_0)) {
+        return CBlockHeader::CURRENT_VERSION;       // v10 (since 5.1.99)
     } else if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_V4_0)) {
         return 7;
     } else if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_V3_4)) {

@@ -9,7 +9,7 @@
 
 #include "random.h"
 #include "tinyformat.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
 #include "version.h"
@@ -78,10 +78,9 @@ fs::path GetAuthCookieFile()
 
 bool GenerateAuthCookie(std::string *cookie_out)
 {
-    const size_t COOKIE_SIZE = 32;
-    unsigned char rand_pwd[COOKIE_SIZE];
-    GetRandBytes(rand_pwd, COOKIE_SIZE);
-    std::string cookie = COOKIEAUTH_USER + ":" + HexStr(rand_pwd, rand_pwd+COOKIE_SIZE);
+    unsigned char rand_pwd[32];
+    GetRandBytes(rand_pwd, 32);
+    std::string cookie = COOKIEAUTH_USER + ":" + EncodeBase64(&rand_pwd[0],32);
 
     /** the umask determines what permissions are used to create this file -
      * these are set to 077 in init.cpp unless overridden with -sysperms.

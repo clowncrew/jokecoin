@@ -98,7 +98,7 @@ private:
 
     struct SimpleOutpointHash {
         size_t operator() (const OutPointWrapper& obj) const {
-            return (UintToArith256(obj.outPoint.hash) + obj.outPoint.n).GetLow64();
+            return (UintToArith256(obj.outPoint.hash) + obj.outPoint.n).GetCheapHash();
         }
     };
 

@@ -24,7 +24,6 @@ import struct
 from .bignum import bn2vch
 
 MAX_SCRIPT_ELEMENT_SIZE = 520
-MAX_PUBKEYS_PER_MULTISIG = 20
 
 OPCODE_NAMES = {}
 
@@ -569,7 +568,7 @@ class CScript(bytes):
                 if fAccurate and (OP_1 <= lastOpcode <= OP_16):
                     n += opcode.decode_op_n()
                 else:
-                    n += MAX_PUBKEYS_PER_MULTISIG
+                    n += 20
             lastOpcode = opcode
         return n
 

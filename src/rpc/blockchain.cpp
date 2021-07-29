@@ -18,13 +18,12 @@
 #include "rpc/server.h"
 #include "sync.h"
 #include "txdb.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "hash.h"
 #include "validationinterface.h"
 #include "wallet/wallet.h"
-#include "warnings.h"
 
 #include <stdint.h>
 #include <univalue.h>
@@ -43,7 +42,7 @@ static std::mutex cs_blockchange;
 static std::condition_variable cond_blockchange;
 static CUpdatedBlock latestblock;
 
-extern void TxToJSON(CWallet* const pwallet, const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
 
 UniValue syncwithvalidationinterfacequeue(const JSONRPCRequest& request)
 {
@@ -148,7 +147,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
         const CTransaction& tx = *txIn;
         if (txDetails) {
             UniValue objTx(UniValue::VOBJ);
-            TxToJSON(nullptr, tx, UINT256_ZERO, objTx);
+            TxToJSON(tx, UINT256_ZERO, objTx);
             txs.push_back(objTx);
         } else
             txs.push_back(tx.GetHash().GetHex());
@@ -448,7 +447,7 @@ UniValue getrawmempool(const JSONRPCRequest& request)
             "\nReturns all transaction ids in memory pool as a json array of string transaction ids.\n"
 
             "\nArguments:\n"
-            "1. verbose           (boolean, optional, default=false) True for a json object, false for array of transaction ids\n"
+            "1. verbose           (boolean, optional, default=false) true for a json object, false for array of transaction ids\n"
 
             "\nResult: (for verbose = false):\n"
             "[                     (json array of string)\n"
@@ -491,11 +490,11 @@ UniValue getblockhash(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "getblockhash height\n"
-            "\nReturns hash of block in best-block-chain at height provided.\n"
+            "getblockhash index\n"
+            "\nReturns hash of block in best-block-chain at index provided.\n"
 
             "\nArguments:\n"
-            "1. height        (numeric, required) The height index\n"
+            "1. index         (numeric, required) The block index\n"
 
             "\nResult:\n"
             "\"hash\"         (string) The block hash\n"
@@ -517,13 +516,13 @@ UniValue getblock(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
         throw std::runtime_error(
-            "getblock \"blockhash\" ( verbose )\n"
+            "getblock \"hash\" ( verbose )\n"
             "\nIf verbose is false, returns a string that is serialized, hex-encoded data for block 'hash'.\n"
             "If verbose is true, returns an Object with information about block <hash>.\n"
 
             "\nArguments:\n"
-            "1. \"blockhash\"     (string, required) The block hash\n"
-            "2. verbose           (boolean, optional, default=true) True for a json object, false for the hex encoded data\n"
+            "1. \"hash\"          (string, required) The block hash\n"
+            "2. verbose           (boolean, optional, default=true) true for a json object, false for the hex encoded data\n"
 
             "\nResult (for verbose = true):\n"
             "{\n"
@@ -589,13 +588,13 @@ UniValue getblockheader(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
         throw std::runtime_error(
-            "getblockheader \"blockhash\" ( verbose )\n"
+            "getblockheader \"hash\" ( verbose )\n"
             "\nIf verbose is false, returns a string that is serialized, hex-encoded data for block 'hash' header.\n"
             "If verbose is true, returns an Object with information about block <hash> header.\n"
 
             "\nArguments:\n"
-            "1. \"blockhash\"     (string, required) The block hash\n"
-            "2. verbose           (boolean, optional, default=true) True for a json object, false for the hex encoded data\n"
+            "1. \"hash\"          (string, required) The block hash\n"
+            "2. verbose           (boolean, optional, default=true) true for a json object, false for the hex encoded data\n"
 
             "\nResult (for verbose = true):\n"
             "{\n"
@@ -647,16 +646,16 @@ UniValue getsupplyinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
-            "getsupplyinfo ( force_update )\n"
-            "\nIf force_update=false (default if no argument is given): return the last cached money supply"
+            "getsupplyinfo ( forceupdate )\n"
+            "\nIf forceupdate=false (default if no argument is given): return the last cached money supply"
             "\n(sum of spendable transaction outputs) and the height of the chain when it was last updated"
             "\n(it is updated periodically, whenever the chainstate is flushed)."
             "\n"
-            "\nIf force_update=true: Flush the chainstate to disk and return the money supply updated to"
+            "\nIf forceupdate=true: Flush the chainstate to disk and return the money supply updated to"
             "\nthe current chain height.\n"
 
             "\nArguments:\n"
-            "1. force_update       (boolean, optional, default=false) flush chainstate to disk and update cache\n"
+            "1. forceupdate       (boolean, optional, default=false) flush chainstate to disk and update cache\n"
 
             "\nResult:\n"
             "{\n"
@@ -705,16 +704,16 @@ static void ApplyStats(CCoinsStats &stats, CHashWriter& ss, const uint256& hash,
     assert(!outputs.empty());
     ss << hash;
     const Coin& coin = outputs.begin()->second;
-    ss << VARINT(coin.nHeight * 4 + (coin.fCoinBase ? 2u : 0u) + (coin.fCoinStake ? 1u : 0u));
+    ss << VARINT(coin.nHeight * 4 + (coin.fCoinBase ? 2 : 0) + (coin.fCoinStake ? 1 : 0));
     stats.nTransactions++;
     for (const auto& output : outputs) {
         ss << VARINT(output.first + 1);
         ss << output.second.out.scriptPubKey;
-        ss << VARINT(output.second.out.nValue, VarIntMode::NONNEGATIVE_SIGNED);
+        ss << VARINT(output.second.out.nValue);
         stats.nTransactionOutputs++;
         stats.nTotalAmount += output.second.out.nValue;
     }
-    ss << VARINT(0u);
+    ss << VARINT(0);
 }
 
 //! Calculate statistics about the unspent transaction output set
@@ -797,13 +796,13 @@ UniValue gettxout(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "gettxout \"txid\" n ( include_mempool )\n"
+            "gettxout \"txid\" n ( includemempool )\n"
             "\nReturns details about an unspent transaction output.\n"
 
             "\nArguments:\n"
             "1. \"txid\"       (string, required) The transaction id\n"
             "2. n              (numeric, required) vout value\n"
-            "3. include_mempool  (boolean, optional) Whether to included the mem pool\n"
+            "3. includemempool  (boolean, optional) Whether to included the mem pool\n"
 
             "\nResult:\n"
             "{\n"
@@ -877,11 +876,11 @@ UniValue verifychain(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
-            "verifychain ( nblocks )\n"
+            "verifychain ( numblocks )\n"
             "\nVerifies blockchain database.\n"
 
             "\nArguments:\n"
-            "1. nblocks    (numeric, optional, default=288, 0=all) The number of blocks to check.\n"
+            "1. numblocks    (numeric, optional, default=288, 0=all) The number of blocks to check.\n"
 
             "\nResult:\n"
             "true|false       (boolean) Verified or not\n"
@@ -930,7 +929,7 @@ static UniValue SoftForkMajorityDesc(int version, const CBlockIndex* pindex, con
         rv.pushKV("status", false);
         return rv;
     }
-    rv.pushKV("status", pindex && consensusParams.NetworkUpgradeActive(pindex->nHeight, idx));
+    rv.pushKV("status", consensusParams.NetworkUpgradeActive(pindex->nHeight, idx));
     return rv;
 }
 
@@ -983,7 +982,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
 
             "\nResult:\n"
             "{\n"
-            "  \"chain\": \"xxxx\",        (string) current network name (main, test, regtest)\n"
+            "  \"chain\": \"xxxx\",        (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"blocks\": xxxxxx,         (numeric) the current number of blocks processed in the server\n"
             "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
             "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
@@ -1011,7 +1010,6 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
             "        \"info\": \"xxxx\",        (string) additional information about upgrade\n"
             "     }, ...\n"
             "}\n"
-            "  \"warnings\" : \"...\",         (string) any network and blockchain warnings.\n"
 
             "\nExamples:\n" +
             HelpExampleCli("getblockchaininfo", "") + HelpExampleRpc("getblockchaininfo", ""));
@@ -1041,7 +1039,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
         NetworkUpgradeDescPushBack(upgrades, consensusParams, Consensus::UpgradeIndex(i), nTipHeight);
     }
     obj.pushKV("upgrades", upgrades);
-    obj.pushKV("warnings", GetWarnings("statusbar"));
+
     return obj;
 }
 
@@ -1191,11 +1189,11 @@ UniValue invalidateblock(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "invalidateblock \"blockhash\"\n"
+            "invalidateblock \"hash\"\n"
             "\nPermanently marks a block as invalid, as if it violated a consensus rule.\n"
 
             "\nArguments:\n"
-            "1. blockhash   (string, required) the hash of the block to mark as invalid\n"
+            "1. hash   (string, required) the hash of the block to mark as invalid\n"
 
             "\nExamples:\n" +
             HelpExampleCli("invalidateblock", "\"blockhash\"") + HelpExampleRpc("invalidateblock", "\"blockhash\""));
@@ -1231,12 +1229,12 @@ UniValue reconsiderblock(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "reconsiderblock \"blockhash\"\n"
+            "reconsiderblock \"hash\"\n"
             "\nRemoves invalidity status of a block and its descendants, reconsider them for activation.\n"
             "This can be used to undo the effects of invalidateblock.\n"
 
             "\nArguments:\n"
-            "1. blockhash   (string, required) the hash of the block to reconsider\n"
+            "1. hash   (string, required) the hash of the block to reconsider\n"
 
             "\nExamples:\n" +
             HelpExampleCli("reconsiderblock", "\"blockhash\"") + HelpExampleRpc("reconsiderblock", "\"blockhash\""));
@@ -1302,7 +1300,7 @@ void validaterange(const UniValue& params, int& heightStart, int& heightEnd, int
 }
 
 UniValue getblockindexstats(const JSONRPCRequest& request) {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
                 "getblockindexstats height range\n"
                 "\nReturns aggregated BlockIndex data for blocks "
@@ -1443,33 +1441,33 @@ UniValue getfeeinfo(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafe argNames
-  //  --------------------- ------------------------  -----------------------  ------ --------
-    { "blockchain",         "getbestblockhash",       &getbestblockhash,       true,  {} },
-    { "blockchain",         "getbestsaplinganchor",   &getbestsaplinganchor,   true,  {} },
-    { "blockchain",         "getblock",               &getblock,               true,  {"blockhash","verbose"} },
-    { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      true,  {} },
-    { "blockchain",         "getblockcount",          &getblockcount,          true,  {} },
-    { "blockchain",         "getblockhash",           &getblockhash,           true,  {"height"} },
-    { "blockchain",         "getblockheader",         &getblockheader,         false, {"blockhash","verbose"} },
-    { "blockchain",         "getblockindexstats",     &getblockindexstats,     true,  {"height","range"} },
-    { "blockchain",         "getchaintips",           &getchaintips,           true,  {} },
-    { "blockchain",         "getdifficulty",          &getdifficulty,          true,  {} },
-    { "blockchain",         "getfeeinfo",             &getfeeinfo,             true,  {"blocks"} },
-    { "blockchain",         "getmempoolinfo",         &getmempoolinfo,         true,  {} },
-    { "blockchain",         "getrawmempool",          &getrawmempool,          true,  {"verbose"} },
-    { "blockchain",         "getsupplyinfo",          &getsupplyinfo,          true,  {"force_update"} },
-    { "blockchain",         "gettxout",               &gettxout,               true,  {"txid","n","include_mempool"} },
-    { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        true,  {} },
-    { "blockchain",         "verifychain",            &verifychain,            true,  {"nblocks"} },
+{ //  category              name                      actor (function)         okSafeMode
+  //  --------------------- ------------------------  -----------------------  ----------
+    { "blockchain",         "getblockindexstats",     &getblockindexstats,     true  },
+    { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      true  },
+    { "blockchain",         "getbestblockhash",       &getbestblockhash,       true  },
+    { "blockchain",         "getbestsaplinganchor",   &getbestsaplinganchor,   true  },
+    { "blockchain",         "getblockcount",          &getblockcount,          true  },
+    { "blockchain",         "getblock",               &getblock,               true  },
+    { "blockchain",         "getblockhash",           &getblockhash,           true  },
+    { "blockchain",         "getblockheader",         &getblockheader,         false },
+    { "blockchain",         "getchaintips",           &getchaintips,           true  },
+    { "blockchain",         "getdifficulty",          &getdifficulty,          true  },
+    { "blockchain",         "getfeeinfo",             &getfeeinfo,             true  },
+    { "blockchain",         "getmempoolinfo",         &getmempoolinfo,         true  },
+    { "blockchain",         "getsupplyinfo",          &getsupplyinfo,          true  },
+    { "blockchain",         "getrawmempool",          &getrawmempool,          true  },
+    { "blockchain",         "gettxout",               &gettxout,               true  },
+    { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        true  },
+    { "blockchain",         "verifychain",            &verifychain,            true  },
 
     /* Not shown in help */
-    { "hidden",             "invalidateblock",        &invalidateblock,        true,  {"blockhash"} },
-    { "hidden",             "reconsiderblock",        &reconsiderblock,        true,  {"blockhash"} },
-    { "hidden",             "waitforblock",           &waitforblock,           true,  {"blockhash","timeout"} },
-    { "hidden",             "waitforblockheight",     &waitforblockheight,     true,  {"height","timeout"} },
-    { "hidden",             "waitfornewblock",        &waitfornewblock,        true,  {"timeout"} },
-    { "hidden",             "syncwithvalidationinterfacequeue", &syncwithvalidationinterfacequeue, true,  {} },
+    { "hidden",             "invalidateblock",        &invalidateblock,        true  },
+    { "hidden",             "reconsiderblock",        &reconsiderblock,        true  },
+    { "hidden",             "waitfornewblock",        &waitfornewblock,        true  },
+    { "hidden",             "waitforblock",           &waitforblock,           true  },
+    { "hidden",             "waitforblockheight",     &waitforblockheight,     true  },
+    { "hidden",             "syncwithvalidationinterfacequeue", &syncwithvalidationinterfacequeue, true },
 
 
 };

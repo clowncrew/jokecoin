@@ -6,7 +6,7 @@
 
 #include "policy/feerate.h"
 #include "txmempool.h"
-#include "util/system.h"
+#include "util.h"
 
 #include <boost/test/unit_test.hpp>
 

@@ -6,7 +6,6 @@
 #define TOPBAR_H
 
 #include <QWidget>
-#include "qt/askpassphrasedialog.h"
 #include "qt/jokecoin/pwidget.h"
 #include "qt/jokecoin/lockunlock.h"
 #include "amount.h"

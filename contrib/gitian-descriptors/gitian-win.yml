@@ -1,5 +1,5 @@
 ---
-name: "jokecoin-win-6.0"
+name: "jokecoin-win-5.2"
 enable_cache: true
 distro: "ubuntu"
 suites:

@@ -33,7 +33,7 @@
 #include "init.h"
 #include "rpc/server.h"
 #include "guiinterface.h"
-#include "util/system.h"
+#include "util.h"
 #include "warnings.h"
 
 #ifdef ENABLE_WALLET
@@ -480,6 +480,7 @@ void BitcoinApplication::initializeResult(int retval)
     returnValue = retval ? 0 : 1;
     if (retval) {
 #ifdef ENABLE_WALLET
+        PaymentServer::LoadRootCAs();
         paymentServer->setOptionsModel(optionsModel);
 #endif
 
@@ -487,13 +488,15 @@ void BitcoinApplication::initializeResult(int retval)
         window->setClientModel(clientModel);
 
 #ifdef ENABLE_WALLET
-        // TODO: Expose secondary wallets
-        if (!vpwallets.empty()) {
-            walletModel = new WalletModel(vpwallets[0], optionsModel);
+        if (pwalletMain) {
+            walletModel = new WalletModel(pwalletMain, optionsModel);
             walletModel->setClientModel(clientModel);
 
             window->addWallet(JokeCoinGUI::DEFAULT_WALLET, walletModel);
             window->setCurrentWallet(JokeCoinGUI::DEFAULT_WALLET);
+
+            connect(walletModel, &WalletModel::coinsSent,
+                    paymentServer, &PaymentServer::fetchPaymentACK);
         }
 #endif
 
@@ -601,7 +604,7 @@ int main(int argc, char* argv[])
     if (!Intro::pickDataDirectory())
         return 0;
 
-    /// 6. Determine availability of data and blocks directory and parse jokecoin.conf
+    /// 6. Determine availability of data directory and parse jokecoin.conf
     /// - Do not call GetDataDir(true) before this step finishes
     if (!fs::is_directory(GetDataDir(false))) {
         QMessageBox::critical(0, QObject::tr("JokeCoin Core"),
@@ -609,7 +612,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     try {
-        gArgs.ReadConfigFile(gArgs.GetArg("-conf", JokeCoin_CONF_FILENAME));
+        gArgs.ReadConfigFile();
     } catch (const std::exception& e) {
         QMessageBox::critical(0, QObject::tr("JokeCoin Core"),
             QObject::tr("Error: Cannot parse configuration file: %1. Only use key=value syntax.").arg(e.what()));
@@ -624,7 +627,7 @@ int main(int argc, char* argv[])
 
     // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
     try {
-        SelectParams(gArgs.GetChainName());
+        SelectParams(ChainNameFromCommandLine());
     } catch(const std::exception& e) {
         QMessageBox::critical(0, QObject::tr("JokeCoin Core"), QObject::tr("Error: %1").arg(e.what()));
         return 1;

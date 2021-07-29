@@ -67,11 +67,33 @@ inline T* NCONST_PTR(const T* val)
     return const_cast<T*>(val);
 }
 
-//! Safely convert odd char pointer types to standard ones.
-inline char* CharCast(char* c) { return c; }
-inline char* CharCast(unsigned char* c) { return (char*)c; }
-inline const char* CharCast(const char* c) { return c; }
-inline const char* CharCast(const unsigned char* c) { return (const char*)c; }
+/**
+ * Important: Do not use the following functions in new code, but use v.data()
+ * and v.data() + v.size() respectively directly. They were once introduced to
+ * have a compatible, safe way to get the begin and end pointer of a vector.
+ * However with C++11 the language has built-in functionality for this and it's
+ * more readable to just use that.
+ */
+template <typename V>
+inline typename V::value_type* begin_ptr(V& v)
+{
+    return v.data();
+}
+template <typename V>
+inline const typename V::value_type* begin_ptr(const V& v)
+{
+    return v.data();
+}
+template <typename V>
+inline typename V::value_type* end_ptr(V& v)
+{
+    return v.data() + v.size();
+}
+template <typename V>
+inline const typename V::value_type* end_ptr(const V& v)
+{
+    return v.data() + v.size();
+}
 
 /*
  * Lowest-level serialization and conversion.
@@ -161,12 +183,8 @@ enum {
     SER_GETHASH = (1 << 2),
 };
 
-//! Convert the reference base type to X, without changing constness or reference type.
-template<typename X> X& ReadWriteAsHelper(X& x) { return x; }
-template<typename X> const X& ReadWriteAsHelper(const X& x) { return x; }
-
-#define READWRITE(...) (::SerReadWriteMany(s, ser_action, __VA_ARGS__))
-#define READWRITEAS(type, obj) (::SerReadWriteMany(s, ser_action, ReadWriteAsHelper<type>(obj)))
+#define READWRITE(obj) (::SerReadWrite(s, (obj), ser_action))
+#define READWRITEMANY(...)      (::SerReadWriteMany(s, ser_action, __VA_ARGS__))
 
 /**
  * Implement three methods for serializable objects. These are actually wrappers over
@@ -201,8 +219,6 @@ template<typename Stream> inline void Serialize(Stream& s, int64_t a ) { ser_wri
 template<typename Stream> inline void Serialize(Stream& s, uint64_t a) { ser_writedata64(s, a); }
 template<typename Stream> inline void Serialize(Stream& s, float a   ) { ser_writedata32(s, ser_float_to_uint32(a)); }
 template<typename Stream> inline void Serialize(Stream& s, double a  ) { ser_writedata64(s, ser_double_to_uint64(a)); }
-template<typename Stream, int N> inline void Serialize(Stream& s, const char (&a)[N]) { s.write(a, N); }
-template<typename Stream, int N> inline void Serialize(Stream& s, const unsigned char (&a)[N]) { s.write(CharCast(a), N); }
 
 template<typename Stream> inline void Unserialize(Stream& s, char& a    ) { a = ser_readdata8(s); } // TODO Get rid of bare char
 template<typename Stream> inline void Unserialize(Stream& s, int8_t& a  ) { a = ser_readdata8(s); }
@@ -215,8 +231,6 @@ template<typename Stream> inline void Unserialize(Stream& s, int64_t& a ) { a = 
 template<typename Stream> inline void Unserialize(Stream& s, uint64_t& a) { a = ser_readdata64(s); }
 template<typename Stream> inline void Unserialize(Stream& s, float& a   ) { a = ser_uint32_to_float(ser_readdata32(s)); }
 template<typename Stream> inline void Unserialize(Stream& s, double& a  ) { a = ser_uint64_to_double(ser_readdata64(s)); }
-template<typename Stream, int N> inline void Unserialize(Stream& s, char (&a)[N]) { s.read(a, N); }
-template<typename Stream, int N> inline void Unserialize(Stream& s, unsigned char (&a)[N]) { s.read(CharCast(a), N); }
 
 template<typename Stream> inline void Serialize(Stream& s, bool a)    { char f=a; ser_writedata8(s, f); }
 template<typename Stream> inline void Unserialize(Stream& s, bool& a) { char f=ser_readdata8(s); a=f; }
@@ -355,31 +369,9 @@ uint64_t ReadCompactSize(Stream& is)
  * 2^32:           [0x8E 0xFE 0xFE 0xFF 0x00]
  */
 
-/**
- * Mode for encoding VarInts.
- *
- * Currently there is no support for signed encodings. The default mode will not
- * compile with signed values, and the legacy "nonnegative signed" mode will
- * accept signed values, but improperly encode and decode them if they are
- * negative. In the future, the DEFAULT mode could be extended to support
- * negative numbers in a backwards compatible way, and additional modes could be
- * added to support different varint formats (e.g. zigzag encoding).
- */
-enum class VarIntMode { DEFAULT, NONNEGATIVE_SIGNED };
-
-template <VarIntMode Mode, typename I>
-struct CheckVarIntMode {
-    constexpr CheckVarIntMode()
-    {
-        static_assert(Mode != VarIntMode::DEFAULT || std::is_unsigned<I>::value, "Unsigned type required with mode DEFAULT.");
-        static_assert(Mode != VarIntMode::NONNEGATIVE_SIGNED || std::is_signed<I>::value, "Signed type required with mode NONNEGATIVE_SIGNED.");
-    }
-};
-
-template<VarIntMode Mode, typename I>
+template <typename I>
 inline unsigned int GetSizeOfVarInt(I n)
 {
-    CheckVarIntMode<Mode, I>();
     int nRet = 0;
     while (true) {
         nRet++;
@@ -393,13 +385,12 @@ inline unsigned int GetSizeOfVarInt(I n)
 template<typename I>
 inline void WriteVarInt(CSizeComputer& os, I n);
 
-template<typename Stream, VarIntMode Mode, typename I>
+template <typename Stream, typename I>
 void WriteVarInt(Stream& os, I n)
 {
-    CheckVarIntMode<Mode, I>();
-    unsigned char tmp[(sizeof(n)*8+6)/7];
-    int len=0;
-    while(true) {
+    unsigned char tmp[(sizeof(n) * 8 + 6) / 7];
+    int len = 0;
+    while (true) {
         tmp[len] = (n & 0x7F) | (len ? 0x80 : 0x00);
         if (n <= 0x7F)
             break;
@@ -411,32 +402,24 @@ void WriteVarInt(Stream& os, I n)
     } while (len--);
 }
 
-template<typename Stream, VarIntMode Mode, typename I>
+template <typename Stream, typename I>
 I ReadVarInt(Stream& is)
 {
-    CheckVarIntMode<Mode, I>();
     I n = 0;
     while (true) {
         unsigned char chData = ser_readdata8(is);
-        if (n > (std::numeric_limits<I>::max() >> 7)) {
-           throw std::ios_base::failure("ReadVarInt(): size too large");
-        }
         n = (n << 7) | (chData & 0x7F);
-        if (chData & 0x80) {
-            if (n == std::numeric_limits<I>::max()) {
-                throw std::ios_base::failure("ReadVarInt(): size too large");
-            }
+        if (chData & 0x80)
             n++;
-        } else {
+        else
             return n;
-        }
     }
 }
 
-#define FLATDATA(obj) CFlatData((char*)&(obj), (char*)&(obj) + sizeof(obj))
-#define VARINT(obj, ...) WrapVarInt<__VA_ARGS__>(REF(obj))
-#define COMPACTSIZE(obj) CCompactSize(REF(obj))
-#define LIMITED_STRING(obj,n) LimitedString< n >(REF(obj))
+#define FLATDATA(obj) REF(CFlatData((char*)&(obj), (char*)&(obj) + sizeof(obj)))
+#define VARINT(obj) REF(WrapVarInt(REF(obj)))
+#define COMPACTSIZE(obj) REF(CCompactSize(REF(obj)))
+#define LIMITED_STRING(obj, n) REF(LimitedString<n>(REF(obj)))
 
 /**
  * Wrapper for serializing arrays and POD.
@@ -458,8 +441,8 @@ public:
     template <unsigned int N, typename T, typename S, typename D>
     explicit CFlatData(prevector<N, T, S, D> &v)
     {
-        pbegin = (char*)v.data();
-        pend = (char*)(v.data() + v.size());
+        pbegin = (char*)begin_ptr(v);
+        pend = (char*)end_ptr(v);
     }
     char* begin() { return pbegin; }
     const char* begin() const { return pbegin; }
@@ -479,7 +462,7 @@ public:
     }
 };
 
-template<VarIntMode Mode, typename I>
+template <typename I>
 class CVarInt
 {
 protected:
@@ -488,14 +471,16 @@ protected:
 public:
     CVarInt(I& nIn) : n(nIn) {}
 
-    template<typename Stream>
-    void Serialize(Stream& s) const {
-        WriteVarInt<Stream,Mode,I>(s, n);
+    template <typename Stream>
+    void Serialize(Stream& s) const
+    {
+        WriteVarInt<Stream, I>(s, n);
     }
 
-    template<typename Stream>
-    void Unserialize(Stream& s) {
-        n = ReadVarInt<Stream,Mode,I>(s);
+    template <typename Stream>
+    void Unserialize(Stream& s)
+    {
+        n = ReadVarInt<Stream, I>(s);
     }
 };
 
@@ -535,7 +520,7 @@ public:
         }
         string.resize(size);
         if (size != 0)
-            s.read((char*)string.data(), size);
+            s.read((char*)&string[0], size);
     }
 
     template <typename Stream>
@@ -543,12 +528,15 @@ public:
     {
         WriteCompactSize(s, string.size());
         if (!string.empty())
-            s.write((char*)string.data(), string.size());
+            s.write((char*)&string[0], string.size());
     }
 };
 
-template<VarIntMode Mode=VarIntMode::DEFAULT, typename I>
-CVarInt<Mode, I> WrapVarInt(I& n) { return CVarInt<Mode, I>{n}; }
+template <typename I>
+CVarInt<I> WrapVarInt(I& n)
+{
+    return CVarInt<I>(n);
+}
 
 /**
  * Forward declarations
@@ -593,7 +581,6 @@ template<typename Stream, typename T, std::size_t N> void Unserialize(Stream& is
  * optional
  */
 template<typename T> unsigned int GetSerializeSize(const Optional<T> &item);
-template<typename T> unsigned int GetSerializeSizeNetwork(const Optional<T> &item);
 template<typename Stream, typename T> void Serialize(Stream& os, const Optional<T>& item);
 template<typename Stream, typename T> void Unserialize(Stream& is, Optional<T>& item);
 
@@ -618,16 +605,6 @@ unsigned int GetSerializeSize(const Optional<T> &item)
 {
     if (item) {
         return 1 + GetSerializeSize(*item);
-    } else {
-        return 1;
-    }
-}
-
-template<typename T>
-unsigned int GetSerializeSizeNetwork(const Optional<T> &item)
-{
-    if (item) {
-        return 1 + GetSerializeSize(*item, SER_NETWORK, 0);
     } else {
         return 1;
     }
@@ -725,8 +702,8 @@ inline void Serialize(Stream& os, const T& a)
     a.Serialize(os);
 }
 
-template<typename Stream, typename T>
-inline void Unserialize(Stream& is, T&& a)
+template <typename Stream, typename T>
+inline void Unserialize(Stream& is, T& a)
 {
     a.Unserialize(is);
 }
@@ -740,7 +717,7 @@ void Serialize(Stream& os, const std::basic_string<C>& str)
 {
     WriteCompactSize(os, str.size());
     if (!str.empty())
-        os.write((char*)str.data(), str.size() * sizeof(C));
+        os.write((char*)&str[0], str.size() * sizeof(str[0]));
 }
 
 template <typename Stream, typename C>
@@ -749,7 +726,7 @@ void Unserialize(Stream& is, std::basic_string<C>& str)
     unsigned int nSize = ReadCompactSize(is);
     str.resize(nSize);
     if (nSize != 0)
-        is.read((char*)str.data(), nSize * sizeof(C));
+        is.read((char*)&str[0], nSize * sizeof(str[0]));
 }
 
 /**
@@ -798,7 +775,7 @@ void Serialize_impl(Stream& os, const prevector<N, T>& v, const unsigned char&)
 {
     WriteCompactSize(os, v.size());
     if (!v.empty())
-        os.write((char*)v.data(), v.size() * sizeof(T));
+        os.write((char*)&v[0], v.size() * sizeof(T));
 }
 
 template<typename Stream, unsigned int N, typename T, typename V>
@@ -866,7 +843,7 @@ void Serialize_impl(Stream& os, const std::vector<T, A>& v, const unsigned char&
 {
     WriteCompactSize(os, v.size());
     if (!v.empty())
-        os.write((char*)v.data(), v.size() * sizeof(T));
+        os.write((char*)&v[0], v.size() * sizeof(T));
 }
 
 template <typename Stream, typename T, typename A, typename V>
@@ -1047,6 +1024,19 @@ struct CSerActionUnserialize {
     constexpr bool ForRead() const { return true; }
 };
 
+template <typename Stream, typename T>
+inline void SerReadWrite(Stream& s, const T& obj, CSerActionSerialize ser_action)
+{
+    ::Serialize(s, obj);
+}
+
+template <typename Stream, typename T>
+inline void SerReadWrite(Stream& s, T& obj, CSerActionUnserialize ser_action)
+{
+    ::Unserialize(s, obj);
+}
+
+
 
 /* ::GetSerializeSize implementations
  *
@@ -1102,11 +1092,17 @@ void SerializeMany(Stream& s)
 {
 }
 
-template<typename Stream, typename Arg, typename... Args>
-void SerializeMany(Stream& s, const Arg& arg, const Args&... args)
+template<typename Stream, typename Arg>
+void SerializeMany(Stream& s, Arg&& arg)
 {
-    ::Serialize(s, arg);
-    ::SerializeMany(s, args...);
+    ::Serialize(s, std::forward<Arg>(arg));
+}
+
+template<typename Stream, typename Arg, typename... Args>
+void SerializeMany(Stream& s, Arg&& arg, Args&&... args)
+{
+    ::Serialize(s, std::forward<Arg>(arg));
+    ::SerializeMany(s, std::forward<Args>(args)...);
 }
 
 template<typename Stream>
@@ -1114,21 +1110,27 @@ inline void UnserializeMany(Stream& s)
 {
 }
 
+template<typename Stream, typename Arg>
+inline void UnserializeMany(Stream& s, Arg& arg)
+{
+    ::Unserialize(s, arg);
+}
+
 template<typename Stream, typename Arg, typename... Args>
-inline void UnserializeMany(Stream& s, Arg&& arg, Args&&... args)
+inline void UnserializeMany(Stream& s, Arg& arg, Args&... args)
 {
     ::Unserialize(s, arg);
     ::UnserializeMany(s, args...);
 }
 
 template<typename Stream, typename... Args>
-inline void SerReadWriteMany(Stream& s, CSerActionSerialize ser_action, const Args&... args)
+inline void SerReadWriteMany(Stream& s, CSerActionSerialize ser_action, Args&&... args)
 {
-    ::SerializeMany(s, args...);
+    ::SerializeMany(s, std::forward<Args>(args)...);
 }
 
 template<typename Stream, typename... Args>
-inline void SerReadWriteMany(Stream& s, CSerActionUnserialize ser_action, Args&&... args)
+inline void SerReadWriteMany(Stream& s, CSerActionUnserialize ser_action, Args&... args)
 {
     ::UnserializeMany(s, args...);
 }

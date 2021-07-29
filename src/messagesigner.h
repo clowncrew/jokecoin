@@ -23,7 +23,6 @@ class CMessageSigner
 public:
     /// Set the private/public key values, returns true if successful
     static bool GetKeysFromSecret(const std::string& strSecret, CKey& keyRet, CPubKey& pubkeyRet);
-    static bool GetKeysFromSecret(const std::string& strSecret, CKey& keyRet, CKeyID& keyIDRet);
     /// Get the hash based on the input message
     static uint256 GetMessageHash(const std::string& strMessage);
     /// Sign the message, returns true if successful

@@ -896,10 +896,6 @@ address</source>
         <translation>过滤</translation>
     </message>
     <message>
-        <source>Amount of JOKE and zJOKE staked.</source>
-        <translation>已加注的JOKE 和 zJOKE 金额</translation>
-    </message>
-    <message>
         <source>Please wait until the wallet is fully synced to see your correct balance</source>
         <translation>请等到钱包完全同步后再查看您的正确余额</translation>
     </message>
@@ -2127,16 +2123,8 @@ Address: %4
         <translation>错误:无法解析配置文件:%1。只使用key=value语法。</translation>
     </message>
     <message>
-        <source>Error: Invalid combination of -regtest and -testnet.</source>
-        <translation>错误:-regtest和-testnet的组合无效。</translation>
-    </message>
-    <message>
         <source>Error reading masternode configuration file: %1</source>
         <translation>读取主节点配置文件出错:%1</translation>
-    </message>
-    <message>
-        <source>JokeCoin Core didn't yet exit safely...</source>
-        <translation>JokeCoin核心尚未安全退出……</translation>
     </message>
     <message>
         <source>Contact</source>
@@ -3501,26 +3489,6 @@ There was an error trying to save the address list to %1. Please try again.</sou
         <translation>我的JOKE为什么不能用？</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           Newly received JokeCoin requires 6 confirmations on the network
-                           to become eligible for spending which can take ~6 minutes.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           Your JokeCoin wallet also needs to be completely synchronized
-                           to see and spend balances on the network.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-接收到的JokeCoin需要网络上的6个确认
-才能成为有资格的花费，可以花~6分钟。
-&lt;/p&gt;&lt;p align="justify"&gt;
-您的JokeCoin钱包也需要完全同步
-查看网络收支余额。
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-</translation>
-    </message>
-    <message>
         <source>3</source>
         <translation>3</translation>
     </message>
@@ -3549,97 +3517,6 @@ There was an error trying to save the address list to %1. Please try again.</sou
         <translation>什么是主节点控制器？</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;A Masternode Controller wallet is where the 10,000 JOKE collateral can reside during a Controller-Remote masternode setup. It is a wallet that can activate the remote masternode wallet(s) and allows you to keep your collateral coins offline while the remote masternode remains online. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;主节点控制器钱包是控制器-远程主节点建立期间10,000 JOKE抵押可以驻留的地方。这是一个可以激活远程主节点钱包(s)的钱包，可以让你的抵押币离线但远程主节点保持在线。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           A masternode is a computer running a full node JokeCoin core wallet with a
-                           requirement of 10,000 JOKE secured collateral to provide extra services
-                           to the network and in return, receive a portion of the block reward
-                           regularly.  These services include:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           &lt;ul&gt;
-                           &lt;li&gt;Instant transactions (SwiftX)&lt;/li&gt;
-                           &lt;li&gt;A decentralized governance (Proposal Voting)&lt;/li&gt;
-                           &lt;li&gt;A decentralized budgeting system (Treasury)&lt;/li&gt;
-                           &lt;li&gt;Validation of transactions within each block&lt;/li&gt;
-                           &lt;li&gt;Act as an additional full node in the network&lt;/li&gt;
-                           &lt;/ul&gt;
-
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           For providing such services, masternodes are also paid a certain portion
-                           of reward for each block. This can serve as a passive income to the
-                           masternode owners minus their running cost.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           Masternode Perks:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           &lt;ul&gt;
-                           &lt;li&gt;Participate in JokeCoin Governance&lt;/li&gt;
-                           &lt;li&gt;Earn Masternode Rewards&lt;/li&gt;
-                           &lt;li&gt;Commodity option for future sale&lt;/li&gt;
-                           &lt;li&gt;Help secure the JokeCoin network&lt;/li&gt;
-                           &lt;/ul&gt;
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           Requirements:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           &lt;ul&gt;
-                           &lt;li&gt;10,000 JOKE per single Masternode instance&lt;/li&gt;
-                           &lt;li&gt;Must be stored in a core wallet&lt;/li&gt;
-                           &lt;li&gt;Need dedicated IP address&lt;/li&gt;
-                           &lt;li&gt;Masternode wallet to remain online&lt;/li&gt;
-                           &lt;/ul&gt;
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-主节点是运行完整节点JokeCoin核心钱包的计算机
-需要10,000个JOKE作抵押以提供额外服务
-到网络，会收到一部分的区块奖励作为定期
-回报
-这些服务包括:
-&lt;/p&gt;&lt;p align="justify"&gt;
-
-&lt;ul&gt;
-&lt;li&gt;即时交易(SwiftX)&lt;/li&gt;
-&lt;li&gt;去中心化治理(提案投票)&lt;/li&gt;
-&lt;li&gt;去中心化预算系统(国库)&lt;/li&gt;
-&lt;li&gt;验证每个区块交易&lt;/li&gt;
-&lt;li&gt;充当网络中的另一个完整节点&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;/p&gt;&lt;p align="justify"&gt;
-为了提供这样的服务，主节点也会为每一个区块
-支付一定的报酬。
-这可以作为主节点所有者减去其运行成本的被动收入。
-&lt;/p&gt;&lt;p align="justify"&gt;
-主节点福利：
-&lt;/p&gt;&lt;p align="justify"&gt;
-&lt;ul&gt;
-&lt;li&gt;参与JokeCoin治理&lt;/li&gt;
-&lt;li&gt;赢取主节点奖励&lt;/li&gt;
-&lt;li&gt;商品期货期权&lt;/li&gt;
-&lt;li&gt;帮助保护JokeCoin网络&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/p&gt;&lt;p align="justify"&gt;
-
-要求：
-&lt;/p&gt;&lt;p align="justify"&gt;
-&lt;ul&gt;
-&lt;li&gt;每个主节点实例有10,000 JOKE&lt;/li&gt;
-&lt;li&gt;必须存储在核心钱包&lt;/li&gt;
-&lt;li&gt;需要专用IP地址&lt;/li&gt;
-主节点钱包保持在线&lt;li&gt;
-&lt;/ul&gt;
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-
-</translation>
-    </message>
-    <message>
         <source>Frequently Asked Questions</source>
         <translation>常见问题</translation>
     </message>
@@ -3647,7 +3524,7 @@ There was an error trying to save the address list to %1. Please try again.</sou
         <source>You can read more here</source>
         <translation>查看这里了解更多内容</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsInformationWidget</name>
     <message>
@@ -4875,10 +4752,6 @@ JokeCoin核心钱包</translation>
         <translation>绑定到给定地址监听JSON-RPC连接。使用[主机]: IPv6的端口符号。可以多次指定此选项(默认:绑定到所有接口)</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. JokeCoin Core is probably already running.</source>
-        <translation>无法获取数据目录%s锁。JokeCoin核心可能已经在运行了。</translation>
-    </message>
-    <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
         <translation>改变自动完成的预算投票行为。模式=自动:只对与生成的预算完全匹配的最终预算进行投票。(字符串,默认:汽车)</translation>
     </message>
@@ -4905,10 +4778,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Enable spork administration functionality with the appropriate private key.</source>
         <translation>使用适当的私钥启用spork管理功能。</translation>
-    </message>
-    <message>
-        <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
-        <translation>进入回归测试模式，该模式使用一个特殊的链，其中区块可以立即被解决。</translation>
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
@@ -4941,10 +4810,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks (default: %u)</source>
         <translation>如果未设置支付tx费用，则包含足够的费用，以便在n个区块内平均开始确认交易(默认值:%u)</translation>
-    </message>
-    <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>在这种模式下，genproclimit控制立即生成的区块的数量。</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5231,10 +5096,6 @@ JokeCoin核心钱包</translation>
         <translation>信息</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. JokeCoin Core is shutting down.</source>
-        <translation>初始化完整性检查失败。JokeCoin核心快要关闭了。</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>资金不足</translation>
     </message>
@@ -5257,10 +5118,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
         <translation>错误:不支持参数-找到checklevel。Checklevel必须是第4级。</translation>
-    </message>
-    <message>
-        <source>Execute command when the best block changes and its size is over (%s in cmd is replaced by block hash, %d with the block size)</source>
-        <translation>当最佳区块发生变化且大小超过时执行命令(cmd中的%s被替换为区块散列，%d是区块大小)</translation>
     </message>
     <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
@@ -5619,10 +5476,6 @@ JokeCoin核心钱包</translation>
         <translation>这是一个实验软件。</translation>
     </message>
     <message>
-        <source>This is intended for regression testing tools and app development.</source>
-        <translation>用于回归测试工具和应用程序开发。</translation>
-    </message>
-    <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
         <translation>断开错误的端口的阈值(默认值:%u)</translation>
     </message>
@@ -5681,10 +5534,6 @@ JokeCoin核心钱包</translation>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>使用UPnP映射监听端口(默认:%u)</translation>
-    </message>
-    <message>
-        <source>Use the test network</source>
-        <translation>使用测试网络</translation>
     </message>
     <message>
         <source>User Agent comment (%s) contains unsafe characters.</source>

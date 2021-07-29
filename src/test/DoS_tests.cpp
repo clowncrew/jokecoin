@@ -9,15 +9,13 @@
 
 #include "test/test_jokecoin.h"
 
-#include "arith_uint256.h"
 #include "keystore.h"
 #include "net_processing.h"
 #include "net.h"
-#include "pubkey.h"
 #include "pow.h"
 #include "script/sign.h"
 #include "serialize.h"
-#include "util/system.h"
+#include "util.h"
 #include "validation.h"
 
 #include <stdint.h>
@@ -31,10 +29,9 @@ extern unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans);
 struct COrphanTx {
     CTransactionRef tx;
     NodeId fromPeer;
-    int64_t nTimeExpire;
 };
-extern RecursiveMutex g_cs_orphans;
-extern std::map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(g_cs_orphans);
+extern std::map<uint256, COrphanTx> mapOrphanTransactions;
+extern std::map<uint256, std::set<uint256> > mapOrphanTransactionsByPrev;
 
 CService ip(uint32_t i)
 {
@@ -136,33 +133,16 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
 CTransactionRef RandomOrphan()
 {
     std::map<uint256, COrphanTx>::iterator it;
-    LOCK2(cs_main, g_cs_orphans);
     it = mapOrphanTransactions.lower_bound(InsecureRand256());
     if (it == mapOrphanTransactions.end())
         it = mapOrphanTransactions.begin();
     return it->second.tx;
 }
 
-static void MakeNewKeyWithFastRandomContext(CKey& key)
-{
-    std::vector<unsigned char> keydata;
-    keydata = insecure_rand_ctx.randbytes(32);
-    key.Set(keydata.data(), keydata.data() + keydata.size(), /*fCompressedIn*/ true);
-    assert(key.IsValid());
-}
-
 BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
 {
-    // This test had non-deterministic coverage due to
-    // randomly selected seeds.
-    // This seed is chosen so that all branches of the function
-    // ecdsa_signature_parse_der_lax are executed during this test.
-    // Specifically branches that run only when an ECDSA
-    // signature's R and S values have leading zeros.
-    insecure_rand_ctx = FastRandomContext(ArithToUint256(arith_uint256(33)));
-
     CKey key;
-    MakeNewKeyWithFastRandomContext(key);
+    key.MakeNewKey(true);
     CBasicKeyStore keystore;
     keystore.AddKey(key);
 
@@ -207,7 +187,7 @@ BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
         tx.vout.resize(1);
         tx.vout[0].nValue = 1*CENT;
         tx.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
-        tx.vin.resize(2777);
+        tx.vin.resize(500);
         for (unsigned int j = 0; j < tx.vin.size(); j++)
         {
             tx.vin[j].prevout.n = j;
@@ -222,7 +202,6 @@ BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
         BOOST_CHECK(!AddOrphanTx(MakeTransactionRef(tx), i));
     }
 
-    LOCK2(cs_main, g_cs_orphans);
     // Test EraseOrphansFor:
     for (NodeId i = 0; i < 3; i++)
     {
@@ -238,6 +217,7 @@ BOOST_AUTO_TEST_CASE(DoS_mapOrphans)
     BOOST_CHECK(mapOrphanTransactions.size() <= 10);
     LimitOrphanTxSize(0);
     BOOST_CHECK(mapOrphanTransactions.empty());
+    BOOST_CHECK(mapOrphanTransactionsByPrev.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

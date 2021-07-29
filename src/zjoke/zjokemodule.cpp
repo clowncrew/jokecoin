@@ -22,7 +22,7 @@ PublicCoinSpend::PublicCoinSpend(libzerocoin::ZerocoinParams* params, Stream& st
     } else {
         // from v4 spends, serialNumber is not serialized for v2 coins anymore.
         // in this case, we extract it from the coin public key
-        if (this->coinVersion >= libzerocoin::PUBKEY_VERSION)
+        if (this->coinVersion >= libzerocoin::PrivateCoin::PUBKEY_VERSION)
             this->coinSerialNumber = libzerocoin::ExtractSerialFromPubKey(this->pubkey);
 
     }
@@ -30,7 +30,7 @@ PublicCoinSpend::PublicCoinSpend(libzerocoin::ZerocoinParams* params, Stream& st
 }
 
 bool PublicCoinSpend::Verify() const {
-    bool fUseV1Params = getCoinVersion() < libzerocoin::PUBKEY_VERSION;
+    bool fUseV1Params = getCoinVersion() < libzerocoin::PrivateCoin::PUBKEY_VERSION;
     if (version < PUBSPEND_SCHNORR) {
         // spend contains the randomness of the coin
         if (fUseV1Params) {
@@ -49,7 +49,7 @@ bool PublicCoinSpend::Verify() const {
 
     } else {
         // for v1 coins, double check that the serialized coin serial is indeed a v1 serial
-        if (coinVersion < libzerocoin::PUBKEY_VERSION &&
+        if (coinVersion < libzerocoin::PrivateCoin::PUBKEY_VERSION &&
                 libzerocoin::ExtractVersionFromSerial(this->coinSerialNumber) != coinVersion) {
             return error("%s: invalid coin version", __func__);
         }
@@ -72,7 +72,7 @@ bool PublicCoinSpend::Verify() const {
 
 bool PublicCoinSpend::HasValidSignature() const
 {
-    if (coinVersion < libzerocoin::PUBKEY_VERSION)
+    if (coinVersion < libzerocoin::PrivateCoin::PUBKEY_VERSION)
         return true;
 
     // for spend version 3 we must check that the provided pubkey and serial number match

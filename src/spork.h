@@ -13,7 +13,7 @@
 #include "net.h"
 #include "sporkid.h"
 #include "sync.h"
-#include "util/system.h"
+#include "util.h"
 
 #include "protocol.h"
 
@@ -108,10 +108,8 @@ public:
 
     void ProcessSpork(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     int64_t GetSporkValue(SporkId nSporkID);
-    // Create/Sign/Relay the spork message, and update the maps
+    void ExecuteSpork(SporkId nSporkID, int nValue);
     bool UpdateSpork(SporkId nSporkID, int64_t nValue);
-    // Add spork message to mapSporks and mapSporksActive
-    void AddOrUpdateSporkMessage(const CSporkMessage& spork);
 
     bool IsSporkActive(SporkId nSporkID);
     std::string GetSporkNameByID(SporkId id);

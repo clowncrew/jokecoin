@@ -5,12 +5,12 @@
 #ifndef JokeCoin_ZIP32_H
 #define JokeCoin_ZIP32_H
 
-#include "uint256.h"
-#include "key.h"
-#include "sapling/address.h"
 #include "serialize.h"
-#include "support/allocators/zeroafterfree.h"
+#include "allocators.h"
+#include "blob_uint256.h"
+#include "key.h"
 #include "uint256.h"
+#include "sapling/address.h"
 
 #include <boost/optional.hpp>
 

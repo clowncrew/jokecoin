@@ -132,7 +132,7 @@ static QString translateTypeToString(AddressTableEntry::Type type)
 class AddressTablePriv
 {
 public:
-    CWallet* wallet{nullptr};
+    CWallet* wallet;
     QList<AddressTableEntry> cachedAddressTable;
     int sendNum = 0;
     int recvNum = 0;

@@ -115,7 +115,7 @@ public:
         READWRITE(nBlockStart);
         READWRITE(nBlockEnd);
         READWRITE(nAmount);
-        READWRITE(address);
+        READWRITE(*(CScriptBase*)(&address));
         READWRITE(nFeeTXHash);
         READWRITE(nTime);
         READWRITE(mapVotes);
@@ -127,17 +127,13 @@ public:
     void Relay();
 
     // compare proposals by proposal hash
-    inline bool operator>(const CBudgetProposal& other) const
-    {
-        return UintToArith256(GetHash()) > UintToArith256(other.GetHash());
-    }
-    //
+    inline bool operator>(const CBudgetProposal& other) const { return GetHash() > other.GetHash(); }
     // compare proposals pointers by net yes count (solve tie with feeHash)
     static inline bool PtrHigherYes(CBudgetProposal* a, CBudgetProposal* b)
     {
         const int netYes_a = a->GetYeas() - a->GetNays();
         const int netYes_b = b->GetYeas() - b->GetNays();
-        if (netYes_a == netYes_b) return UintToArith256(a->GetFeeTXHash()) > UintToArith256(b->GetFeeTXHash());
+        if (netYes_a == netYes_b) return a->GetFeeTXHash() > b->GetFeeTXHash();
         return netYes_a > netYes_b;
     }
 

@@ -8,7 +8,7 @@
 
 #include "base58.h"
 #include "netbase.h"
-#include "util/system.h"
+#include "util.h"
 
 #include "test/test_jokecoin.h"
 

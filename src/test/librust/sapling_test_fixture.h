@@ -10,18 +10,9 @@
 /**
  * Testing setup that configures a complete environment for Sapling testing.
  */
-struct SaplingTestingSetup : public TestingSetup
-{
-    SaplingTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
+struct SaplingTestingSetup : public TestingSetup {
+    SaplingTestingSetup();
     ~SaplingTestingSetup();
-};
-
-/**
- * Regtest setup with sapling always active
- */
-struct SaplingRegTestingSetup : public SaplingTestingSetup
-{
-    SaplingRegTestingSetup();
 };
 
 

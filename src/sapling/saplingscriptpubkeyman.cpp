@@ -511,20 +511,6 @@ void SaplingScriptPubKeyMan::GetFilteredNotes(
     }
 }
 
-/* Return list of available notes grouped by sapling address. */
-std::map<libzcash::SaplingPaymentAddress, std::vector<SaplingNoteEntry>> SaplingScriptPubKeyMan::ListNotes() const
-{
-    std::vector<SaplingNoteEntry> notes;
-    Optional<libzcash::SaplingPaymentAddress> dummy = nullopt;
-    GetFilteredNotes(notes, dummy);
-
-    std::map<libzcash::SaplingPaymentAddress, std::vector<SaplingNoteEntry>> result;
-    for (const auto& note : notes) {
-        result[note.address].emplace_back(std::move(note));
-    }
-    return result;
-}
-
 Optional<libzcash::SaplingPaymentAddress>
 SaplingScriptPubKeyMan::GetAddressFromInputIfPossible(const uint256& txHash, int index) const
 {

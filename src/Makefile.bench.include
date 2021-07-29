@@ -11,17 +11,14 @@ bench_bench_jokecoin_SOURCES = \
   bench/bench_jokecoin.cpp \
   bench/bench.cpp \
   bench/bench.h \
+  bench/checkblock.cpp \
   bench/Examples.cpp \
   bench/base58.cpp \
-  bench/checkblock.cpp \
   bench/checkqueue.cpp \
-  bench/chacha20.cpp \
   bench/crypto_hash.cpp \
-  bench/lockedpool.cpp \
   bench/perf.cpp \
   bench/perf.h \
-  bench/prevector.cpp \
-  bench/util_time.cpp
+  bench/prevector.cpp
 
 nodist_bench_bench_jokecoin_SOURCES = $(GENERATED_TEST_FILES)
 
@@ -47,7 +44,7 @@ if ENABLE_ZMQ
 bench_bench_jokecoin_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
 
-bench_bench_jokecoin_LDADD += $(LIBBITCOIN_CONSENSUS) $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+bench_bench_jokecoin_LDADD += $(LIBBITCOIN_CONSENSUS) $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 bench_bench_jokecoin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 # !TODO: .raw.h generated test files are not removed with make clean

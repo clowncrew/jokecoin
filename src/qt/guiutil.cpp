@@ -17,7 +17,7 @@
 #include "protocol.h"
 #include "script/script.h"
 #include "script/standard.h"
-#include "util/system.h"
+#include "util.h"
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
@@ -250,7 +250,7 @@ bool isDust(const QString& address, const CAmount& amount)
     CTxDestination dest = DecodeDestination(address.toStdString());
     CScript script = GetScriptForDestination(dest);
     CTxOut txOut(amount, script);
-    return IsDust(txOut, dustRelayFee);
+    return IsDust(txOut, ::minRelayTxFee);
 }
 
 QString HtmlEscape(const QString& str, bool fMultiLine)
@@ -422,7 +422,7 @@ bool openDebugLogfile()
 
 bool openConfigfile()
 {
-    return openFile(GetConfigFile(gArgs.GetArg("-conf", JokeCoin_CONF_FILENAME)), true);
+    return openFile(GetConfigFile(), true);
 }
 
 bool openMNConfigfile()
@@ -630,10 +630,9 @@ bool DHMSTableWidgetItem::operator<(QTableWidgetItem const& item) const
 #ifdef WIN32
 fs::path static StartupShortcutPath()
 {
-    std::string chain = gArgs.GetChainName();
-    if (chain == CBaseChainParams::TESTNET)
+    if (gArgs.GetBoolArg("-testnet", false))
         return GetSpecialFolderPath(CSIDL_STARTUP) / "JokeCoin (testnet).lnk";
-    else if (chain == CBaseChainParams::REGTEST)
+    else if (gArgs.GetBoolArg("-regtest", false))
         return GetSpecialFolderPath(CSIDL_STARTUP) / "JokeCoin (regtest).lnk";
 
     return GetSpecialFolderPath(CSIDL_STARTUP) / "JokeCoin.lnk";

@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2021 The Bitcoin developers
+// Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2021 The JokeCoin developers
+// Copyright (c) 2015-2020 The JokeCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,11 +11,10 @@
 
 #include "base58.h"
 #include "protocol.h"
-#include "reverse_iterate.h"
 #include "sapling/key_io_sapling.h"
 #include "serialize.h"
 #include "sync.h"
-#include "util/system.h"
+#include "util.h"
 #include "utiltime.h"
 #include "wallet/wallet.h"
 
@@ -24,43 +23,7 @@
 
 #include <boost/thread.hpp>
 
-namespace DBKeys {
-    const std::string BESTBLOCK_NOMERKLE{"bestblock_nomerkle"};
-    const std::string BESTBLOCK{"bestblock"};
-    const std::string CRYPTED_KEY{"ckey"};
-    const std::string CSCRIPT{"cscript"};
-    const std::string DEFAULTKEY{"defaultkey"};
-    const std::string DESTDATA{"destdata"};
-    const std::string HDCHAIN{"hdchain"};
-    const std::string KEYMETA{"keymeta"};
-    const std::string KEY{"key"};
-    const std::string MASTER_KEY{"mkey"};
-    const std::string MINVERSION{"minversion"};
-    const std::string NAME{"name"};
-    const std::string ORDERPOSNEXT{"orderposnext"};
-    const std::string POOL{"pool"};
-    const std::string PURPOSE{"purpose"};
-    const std::string TX{"tx"};
-    const std::string VERSION{"version"};
-    const std::string WATCHS{"watchs"};
-
-    // Sapling
-    const std::string SAP_KEYMETA{"sapzkeymeta"};
-    const std::string SAP_KEY{"sapzkey"};
-    const std::string SAP_KEY_CRIPTED{"csapzkey"};
-    const std::string SAP_ADDR{"sapzaddr"};
-    const std::string SAP_COMMON_OVK{"commonovk"};
-    const std::string SAP_HDCHAIN{"hdchain_sap"};
-    const std::string SAP_WITNESS_CACHE_SIZE{"witnesscachesize"};
-
-    // Wallet custom settings
-    const std::string AUTOCOMBINE{"autocombinesettings"};
-    const std::string STAKE_SPLIT_THRESHOLD{"stakeSplitThreshold"};
-    const std::string USE_CUSTOM_FEE{"fUseCustomFee"};
-    const std::string CUSTOM_FEE_VALUE{"nCustomFee"};
-
-} // namespace DBKeys
-
+static std::atomic<unsigned int> nWalletDBUpdateCounter;
 
 //
 // CWalletDB
@@ -68,41 +31,49 @@ namespace DBKeys {
 
 bool CWalletDB::WriteName(const std::string& strAddress, const std::string& strName)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::NAME), strAddress), strName);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("name"), strAddress), strName);
 }
 
 bool CWalletDB::EraseName(const std::string& strAddress)
 {
     // This should only be used for sending addresses, never for receiving addresses,
     // receiving addresses must always have an address book entry if they're not change return.
-    return EraseIC(std::make_pair(std::string(DBKeys::NAME), strAddress));
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("name"), strAddress));
 }
 
 bool CWalletDB::WritePurpose(const std::string& strAddress, const std::string& strPurpose)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::PURPOSE), strAddress), strPurpose);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("purpose"), strAddress), strPurpose);
 }
 
 bool CWalletDB::ErasePurpose(const std::string& strPurpose)
 {
-    return EraseIC(std::make_pair(std::string(DBKeys::PURPOSE), strPurpose));
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("purpose"), strPurpose));
 }
 
 bool CWalletDB::WriteTx(const CWalletTx& wtx)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::TX), wtx.GetHash()), wtx);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("tx"), wtx.GetHash()), wtx);
 }
 
 bool CWalletDB::EraseTx(uint256 hash)
 {
-    return EraseIC(std::make_pair(std::string(DBKeys::TX), hash));
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("tx"), hash));
 }
 
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
 {
-    if (!WriteIC(std::make_pair(std::string(DBKeys::KEYMETA), vchPubKey), keyMeta, false)) {
+    nWalletDBUpdateCounter++;
+
+    if (!batch.Write(std::make_pair(std::string("keymeta"), vchPubKey),
+               keyMeta, false))
         return false;
-    }
 
     // hash pubkey/privkey to accelerate wallet load
     std::vector<unsigned char> vchKey;
@@ -110,26 +81,26 @@ bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, c
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
 
-    return WriteIC(std::make_pair(std::string(DBKeys::KEY), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
+    return batch.Write(std::make_pair(std::string("key"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
 bool CWalletDB::WriteCryptedKey(const CPubKey& vchPubKey,
-                                const std::vector<unsigned char>& vchCryptedSecret,
-                                const CKeyMetadata& keyMeta)
+    const std::vector<unsigned char>& vchCryptedSecret,
+    const CKeyMetadata& keyMeta)
 {
     const bool fEraseUnencryptedKey = true;
+    nWalletDBUpdateCounter++;
 
-    if (!WriteIC(std::make_pair(std::string(DBKeys::KEYMETA), vchPubKey), keyMeta)) {
+    if (!batch.Write(std::make_pair(std::string("keymeta"), vchPubKey),
+            keyMeta))
         return false;
-    }
 
-    if (!WriteIC(std::make_pair(std::string(DBKeys::CRYPTED_KEY), vchPubKey), vchCryptedSecret, false)) {
+    if (!batch.Write(std::make_pair(std::string("ckey"), vchPubKey), vchCryptedSecret, false))
         return false;
-    }
     if (fEraseUnencryptedKey) {
-        EraseIC(std::make_pair(std::string(DBKeys::KEY), vchPubKey));
+        batch.Erase(std::make_pair(std::string("key"), vchPubKey));
+        batch.Erase(std::make_pair(std::string("wkey"), vchPubKey));
     }
-
     return true;
 }
 
@@ -137,143 +108,245 @@ bool CWalletDB::WriteSaplingZKey(const libzcash::SaplingIncomingViewingKey &ivk,
                                  const libzcash::SaplingExtendedSpendingKey &key,
                                  const CKeyMetadata &keyMeta)
 {
-    if (!WriteIC(std::make_pair(std::string(DBKeys::SAP_KEYMETA), ivk), keyMeta)) {
+    nWalletDBUpdateCounter++;
+
+    if (!batch.Write(std::make_pair(std::string("sapzkeymeta"), ivk), keyMeta))
         return false;
-    }
 
-    return WriteIC(std::make_pair(std::string(DBKeys::SAP_KEY), ivk), key, false);
+    return batch.Write(std::make_pair(std::string("sapzkey"), ivk), key, false);
 }
 
-bool CWalletDB::WriteSaplingPaymentAddress(const libzcash::SaplingPaymentAddress &addr,
-                                           const libzcash::SaplingIncomingViewingKey &ivk)
+bool CWalletDB::WriteSaplingPaymentAddress(
+        const libzcash::SaplingPaymentAddress &addr,
+        const libzcash::SaplingIncomingViewingKey &ivk)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::SAP_ADDR), addr), ivk, false);
+    nWalletDBUpdateCounter++;
+
+    return batch.Write(std::make_pair(std::string("sapzaddr"), addr), ivk, false);
 }
 
-bool CWalletDB::WriteCryptedSaplingZKey(const libzcash::SaplingExtendedFullViewingKey &extfvk,
-                                        const std::vector<unsigned char>& vchCryptedSecret,
-                                        const CKeyMetadata &keyMeta)
+bool CWalletDB::WriteCryptedSaplingZKey(
+        const libzcash::SaplingExtendedFullViewingKey &extfvk,
+        const std::vector<unsigned char>& vchCryptedSecret,
+        const CKeyMetadata &keyMeta)
 {
     const bool fEraseUnencryptedKey = true;
+    nWalletDBUpdateCounter++;
     auto ivk = extfvk.fvk.in_viewing_key();
 
-    if (!WriteIC(std::make_pair(std::string(DBKeys::SAP_KEYMETA), ivk), keyMeta)) {
+    if (!batch.Write(std::make_pair(std::string("sapzkeymeta"), ivk), keyMeta))
         return false;
-    }
 
-    if (!WriteIC(std::make_pair(std::string(DBKeys::SAP_KEY_CRIPTED), ivk),
-                 std::make_pair(extfvk, vchCryptedSecret), false)) {
+    if (!batch.Write(std::make_pair(std::string("csapzkey"), ivk), std::make_pair(extfvk, vchCryptedSecret), false))
         return false;
-    }
 
     if (fEraseUnencryptedKey) {
-        EraseIC(std::make_pair(std::string(DBKeys::SAP_KEY), ivk));
+        batch.Erase(std::make_pair(std::string("sapzkey"), ivk));
     }
     return true;
 }
 
 bool CWalletDB::WriteSaplingCommonOVK(const uint256& ovk)
 {
-    return WriteIC(std::string(DBKeys::SAP_COMMON_OVK), ovk);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("commonovk"), ovk);
 }
 
 bool CWalletDB::ReadSaplingCommonOVK(uint256& ovkRet)
 {
-    return batch.Read(std::string(DBKeys::SAP_COMMON_OVK), ovkRet);
+    return batch.Read(std::string("commonovk"), ovkRet);
 }
 
 bool CWalletDB::WriteWitnessCacheSize(int64_t nWitnessCacheSize)
 {
-    return WriteIC(std::string(DBKeys::SAP_WITNESS_CACHE_SIZE), nWitnessCacheSize);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("witnesscachesize"), nWitnessCacheSize);
 }
 
 bool CWalletDB::WriteMasterKey(unsigned int nID, const CMasterKey& kMasterKey)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::MASTER_KEY), nID), kMasterKey, true);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("mkey"), nID), kMasterKey, true);
 }
 
 bool CWalletDB::WriteCScript(const uint160& hash, const CScript& redeemScript)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::CSCRIPT), hash), redeemScript, false);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("cscript"), hash), redeemScript, false);
 }
 
 bool CWalletDB::WriteWatchOnly(const CScript& dest)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::WATCHS), dest), '1');
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("watchs"), dest), '1');
 }
 
 bool CWalletDB::EraseWatchOnly(const CScript& dest)
 {
-    return EraseIC(std::make_pair(std::string(DBKeys::WATCHS), dest));
+
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("watchs"), dest));
+}
+
+bool CWalletDB::WriteMultiSig(const CScript& dest)
+{
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("multisig"), dest), '1');
+}
+
+bool CWalletDB::EraseMultiSig(const CScript& dest)
+{
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("multisig"), dest));
 }
 
 bool CWalletDB::WriteBestBlock(const CBlockLocator& locator)
 {
-    WriteIC(std::string(DBKeys::BESTBLOCK), CBlockLocator()); // Write empty block locator so versions that require a merkle branch automatically rescan
-    return WriteIC(std::string(DBKeys::BESTBLOCK_NOMERKLE), locator);
+    nWalletDBUpdateCounter++;
+    batch.Write(std::string("bestblock"), CBlockLocator()); // Write empty block locator so versions that require a merkle branch automatically rescan
+    return batch.Write(std::string("bestblock_nomerkle"), locator);
 }
 
 bool CWalletDB::ReadBestBlock(CBlockLocator& locator)
 {
-    if (batch.Read(std::string(DBKeys::BESTBLOCK), locator) && !locator.vHave.empty()) {
-        return true;
-    }
-    return batch.Read(std::string(DBKeys::BESTBLOCK_NOMERKLE), locator);
+    if (batch.Read(std::string("bestblock"), locator) && !locator.vHave.empty()) return true;
+    return batch.Read(std::string("bestblock_nomerkle"), locator);
 }
 
 bool CWalletDB::WriteOrderPosNext(int64_t nOrderPosNext)
 {
-    return WriteIC(std::string(DBKeys::ORDERPOSNEXT), nOrderPosNext);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("orderposnext"), nOrderPosNext);
 }
 
 bool CWalletDB::WriteStakeSplitThreshold(const CAmount& nStakeSplitThreshold)
 {
-    return WriteIC(std::string(DBKeys::STAKE_SPLIT_THRESHOLD), nStakeSplitThreshold);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("stakeSplitThreshold"), nStakeSplitThreshold);
 }
 
 bool CWalletDB::WriteUseCustomFee(bool fUse)
 {
-    return WriteIC(std::string(DBKeys::USE_CUSTOM_FEE), fUse);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("fUseCustomFee"), fUse);
 }
 
 bool CWalletDB::WriteCustomFeeValue(const CAmount& nFee)
 {
-    return WriteIC(std::string(DBKeys::CUSTOM_FEE_VALUE), nFee);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::string("nCustomFee"), nFee);
+}
+
+bool CWalletDB::WriteMultiSend(std::vector<std::pair<std::string, int> > vMultiSend)
+{
+    return false;
+    /* disable multisend
+    nWalletDBUpdateCounter++;
+    bool ret = true;
+    for (unsigned int i = 0; i < vMultiSend.size(); i++) {
+        std::pair<std::string, int> pMultiSend;
+        pMultiSend = vMultiSend[i];
+        if (!Write(std::make_pair(std::string("multisend"), i), pMultiSend, true))
+            ret = false;
+    }
+    return ret;
+    */
+}
+
+bool CWalletDB::EraseMultiSend(std::vector<std::pair<std::string, int> > vMultiSend)
+{
+    return false;
+    /* disable multisend
+    nWalletDBUpdateCounter++;
+    bool ret = true;
+    for (unsigned int i = 0; i < vMultiSend.size(); i++) {
+        std::pair<std::string, int> pMultiSend;
+        pMultiSend = vMultiSend[i];
+        if (!Erase(std::make_pair(std::string("multisend"), i)))
+            ret = false;
+    }
+    return ret;
+    */
+}
+
+bool CWalletDB::WriteMSettings(bool fMultiSendStake, bool fMultiSendMasternode, int nLastMultiSendHeight)
+{
+    return false;
+    /* disable multisend
+    nWalletDBUpdateCounter++;
+    std::pair<bool, bool> enabledMS(fMultiSendStake, fMultiSendMasternode);
+    std::pair<std::pair<bool, bool>, int> pSettings(enabledMS, nLastMultiSendHeight);
+
+    return Write(std::string("msettingsv2"), pSettings, true);
+    */
+}
+
+bool CWalletDB::WriteMSDisabledAddresses(std::vector<std::string> vDisabledAddresses)
+{
+    return false;
+    /* disable multisend
+    nWalletDBUpdateCounter++;
+    bool ret = true;
+    for (unsigned int i = 0; i < vDisabledAddresses.size(); i++) {
+        if (!Write(std::make_pair(std::string("mdisabled"), i), vDisabledAddresses[i]))
+            ret = false;
+    }
+    return ret;
+    */
+}
+
+bool CWalletDB::EraseMSDisabledAddresses(std::vector<std::string> vDisabledAddresses)
+{
+    return false;
+    /* disable multisend
+    nWalletDBUpdateCounter++;
+    bool ret = true;
+    for (unsigned int i = 0; i < vDisabledAddresses.size(); i++) {
+        if (!batch.Erase(std::make_pair(std::string("mdisabled"), i)))
+            ret = false;
+    }
+    return ret;
+    */
 }
 
 bool CWalletDB::WriteAutoCombineSettings(bool fEnable, CAmount nCombineThreshold)
 {
+    nWalletDBUpdateCounter++;
     std::pair<bool, CAmount> pSettings;
     pSettings.first = fEnable;
     pSettings.second = nCombineThreshold;
-    return WriteIC(std::string(DBKeys::AUTOCOMBINE), pSettings, true);
+    return batch.Write(std::string("autocombinesettings"), pSettings, true);
 }
 
 bool CWalletDB::ReadPool(int64_t nPool, CKeyPool& keypool)
 {
-    return batch.Read(std::make_pair(std::string(DBKeys::POOL), nPool), keypool);
+    return batch.Read(std::make_pair(std::string("pool"), nPool), keypool);
 }
 
 bool CWalletDB::WritePool(int64_t nPool, const CKeyPool& keypool)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::POOL), nPool), keypool);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("pool"), nPool), keypool);
 }
 
 bool CWalletDB::ErasePool(int64_t nPool)
 {
-    return EraseIC(std::make_pair(std::string(DBKeys::POOL), nPool));
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("pool"), nPool));
 }
 
 bool CWalletDB::WriteMinVersion(int nVersion)
 {
-    return WriteIC(std::string(DBKeys::MINVERSION), nVersion);
+    return batch.Write(std::string("minversion"), nVersion);
 }
 
 bool CWalletDB::WriteHDChain(const CHDChain& chain)
 {
-    std::string key = chain.chainType == HDChain::ChainCounterType::Sapling ?
-                        DBKeys::SAP_HDCHAIN : DBKeys::HDCHAIN;
-    return WriteIC(key, chain);
+    nWalletDBUpdateCounter++;
+    std::string key = std::string("hdchain");
+    if (chain.chainType == HDChain::ChainCounterType::Sapling)
+        key += std::string("_sap");
+    return batch.Write(key, chain);
 }
 
 DBErrors CWalletDB::ReorderTransactions(CWallet* pwallet)
@@ -286,7 +359,7 @@ DBErrors CWalletDB::ReorderTransactions(CWallet* pwallet)
     typedef std::multimap<int64_t, CWalletTx*> TxItems;
     TxItems txByTime;
 
-    for (auto it = pwallet->mapWallet.begin(); it != pwallet->mapWallet.end(); ++it) {
+    for (std::map<uint256, CWalletTx>::iterator it = pwallet->mapWallet.begin(); it != pwallet->mapWallet.end(); ++it) {
         CWalletTx* wtx = &((*it).second);
         txByTime.insert(std::make_pair(wtx->nTimeReceived, wtx));
     }
@@ -302,8 +375,8 @@ DBErrors CWalletDB::ReorderTransactions(CWallet* pwallet)
             nOrderPos = nOrderPosNext++;
             nOrderPosOffsets.push_back(nOrderPos);
 
-            if (!WriteTx(*pwtx)) return DB_LOAD_FAIL;
-
+            if (!WriteTx(*pwtx))
+                return DB_LOAD_FAIL;
         } else {
             int64_t nOrderPosOff = 0;
             for (const int64_t& nOffsetStart : nOrderPosOffsets) {
@@ -313,10 +386,12 @@ DBErrors CWalletDB::ReorderTransactions(CWallet* pwallet)
             nOrderPos += nOrderPosOff;
             nOrderPosNext = std::max(nOrderPosNext, nOrderPos + 1);
 
-            if (!nOrderPosOff) continue;
+            if (!nOrderPosOff)
+                continue;
 
             // Since we're changing the order, write it back
-            if (!WriteTx(*pwtx)) return DB_LOAD_FAIL;
+            if (!WriteTx(*pwtx))
+                return DB_LOAD_FAIL;
         }
     }
     WriteOrderPosNext(nOrderPosNext);
@@ -354,19 +429,19 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
         // Taking advantage of the fact that pair serialization
         // is just the two items serialized one after the other
         ssKey >> strType;
-        if (strType == DBKeys::NAME) {
+        if (strType == "name") {
             std::string strAddress;
             ssKey >> strAddress;
             std::string strName;
             ssValue >> strName;
             pwallet->LoadAddressBookName(Standard::DecodeDestination(strAddress), strName);
-        } else if (strType == DBKeys::PURPOSE) {
+        } else if (strType == "purpose") {
             std::string strAddress;
             ssKey >> strAddress;
             std::string strPurpose;
             ssValue >> strPurpose;
             pwallet->LoadAddressBookPurpose(Standard::DecodeDestination(strAddress), strPurpose);
-        } else if (strType == DBKeys::TX) {
+        } else if (strType == "tx") {
             uint256 hash;
             ssKey >> hash;
             CWalletTx wtx(nullptr /* pwallet */, MakeTransactionRef());
@@ -395,7 +470,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 wss.fAnyUnordered = true;
 
             pwallet->LoadToWallet(wtx);
-        } else if (strType == DBKeys::WATCHS) {
+        } else if (strType == "watchs") {
             CScript script;
             ssKey >> script;
             char fYes;
@@ -406,7 +481,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             // Watch-only addresses have no birthday information for now,
             // so set the wallet birthday to the beginning of time.
             pwallet->nTimeFirstKey = 1;
-        } else if (strType == DBKeys::KEY) {
+        } else if (strType == "key" || strType == "wkey") {
             CPubKey vchPubKey;
             ssKey >> vchPubKey;
             if (!vchPubKey.IsValid()) {
@@ -416,8 +491,15 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             CKey key;
             CPrivKey pkey;
             uint256 hash;
-            wss.nKeys++;
-            ssValue >> pkey;
+
+            if (strType == "key") {
+                wss.nKeys++;
+                ssValue >> pkey;
+            } else {
+                CWalletKey wkey;
+                ssValue >> wkey;
+                pkey = wkey.vchPrivKey;
+            }
 
             // Old wallets store keys as "key" [pubkey] => [privkey]
             // ... which was slow for wallets with lots of keys, because the public key is re-derived from the private key
@@ -454,7 +536,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadKey failed";
                 return false;
             }
-        } else if (strType == DBKeys::MASTER_KEY) {
+        } else if (strType == "mkey") {
             unsigned int nID;
             ssKey >> nID;
             CMasterKey kMasterKey;
@@ -466,7 +548,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             pwallet->mapMasterKeys[nID] = kMasterKey;
             if (pwallet->nMasterKeyMaxID < nID)
                 pwallet->nMasterKeyMaxID = nID;
-        } else if (strType == DBKeys::CRYPTED_KEY) {
+        } else if (strType == "ckey") {
             CPubKey vchPubKey;
             ssKey >> vchPubKey;
             std::vector<unsigned char> vchPrivKey;
@@ -478,7 +560,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 return false;
             }
             wss.fIsEncrypted = true;
-        } else if (strType == DBKeys::KEYMETA) {
+        } else if (strType == "keymeta") {
             CPubKey vchPubKey;
             ssKey >> vchPubKey;
             CKeyMetadata keyMeta;
@@ -491,7 +573,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             if (!pwallet->nTimeFirstKey ||
                 (keyMeta.nCreateTime < pwallet->nTimeFirstKey))
                 pwallet->nTimeFirstKey = keyMeta.nCreateTime;
-        } else if (strType == DBKeys::DEFAULTKEY) {
+        } else if (strType == "defaultkey") {
             // We don't want or need the default key, but if there is one set,
             // we want to make sure that it is valid so that we can detect corruption
             CPubKey vchPubKey;
@@ -500,17 +582,17 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: Default Key corrupt";
                 return false;
             }
-        } else if (strType == DBKeys::POOL) {
+        } else if (strType == "pool") {
             int64_t nIndex;
             ssKey >> nIndex;
             CKeyPool keypool;
             ssValue >> keypool;
             pwallet->GetScriptPubKeyMan()->LoadKeyPool(nIndex, keypool);
-        } else if (strType == DBKeys::VERSION) {
+        } else if (strType == "version") {
             ssValue >> wss.nFileVersion;
             if (wss.nFileVersion == 10300)
                 wss.nFileVersion = 300;
-        } else if (strType == DBKeys::CSCRIPT) {
+        } else if (strType == "cscript") {
             uint160 hash;
             ssKey >> hash;
             CScript script;
@@ -519,26 +601,43 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadCScript failed";
                 return false;
             }
-        } else if (strType == DBKeys::ORDERPOSNEXT) {
+        } else if (strType == "orderposnext") {
             ssValue >> pwallet->nOrderPosNext;
-        } else if (strType == DBKeys::STAKE_SPLIT_THRESHOLD) {
+        } else if (strType == "stakeSplitThreshold") {
             ssValue >> pwallet->nStakeSplitThreshold;
             // originally saved as integer
             if (pwallet->nStakeSplitThreshold < COIN)
                 pwallet->nStakeSplitThreshold *= COIN;
-        } else if (strType == DBKeys::USE_CUSTOM_FEE) {
+        } else if (strType == "fUseCustomFee") {
             ssValue >> pwallet->fUseCustomFee;
-        } else if (strType == DBKeys::CUSTOM_FEE_VALUE) {
+        } else if (strType == "nCustomFee") {
             ssValue >> pwallet->nCustomFee;
-        } else if (strType == DBKeys::AUTOCOMBINE) {
+        /* disable multisend
+        } else if (strType == "multisend") {
+            unsigned int i;
+            ssKey >> i;
+            std::pair<std::string, int> pMultiSend;
+            ssValue >> pMultiSend;
+            if (CBitcoinAddress(pMultiSend.first).IsValid()) {
+                pwallet->vMultiSend.push_back(pMultiSend);
+            }
+        } else if (strType == "msettingsv2") {
+            std::pair<std::pair<bool, bool>, int> pSettings;
+            ssValue >> pSettings;
+            pwallet->fMultiSendStake = pSettings.first.first;
+            pwallet->fMultiSendMasternodeReward = pSettings.first.second;
+            pwallet->nLastMultiSendHeight = pSettings.second;
+        } else if (strType == "mdisabled") {
+            std::string strDisabledAddress;
+            ssValue >> strDisabledAddress;
+            pwallet->vDisabledAddresses.push_back(strDisabledAddress);
+            */
+        } else if (strType == "autocombinesettings") {
             std::pair<bool, CAmount> pSettings;
             ssValue >> pSettings;
             pwallet->fCombineDust = pSettings.first;
             pwallet->nAutoCombineThreshold = pSettings.second;
-            // originally saved as integer
-            if (pwallet->nAutoCombineThreshold < COIN)
-                pwallet->nAutoCombineThreshold *= COIN;
-        } else if (strType == DBKeys::DESTDATA) {
+        } else if (strType == "destdata") {
             std::string strAddress, strKey, strValue;
             ssKey >> strAddress;
             ssKey >> strKey;
@@ -547,15 +646,15 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadDestData failed";
                 return false;
             }
-        } else if (strType == DBKeys::HDCHAIN) { // Regular key chain counter
+        } else if (strType == "hdchain") { // Regular key chain counter
             CHDChain chain;
             ssValue >> chain;
             pwallet->GetScriptPubKeyMan()->SetHDChain(chain, true);
-        } else if (strType == DBKeys::SAP_HDCHAIN) {
+        } else if (strType == "hdchain_sap") {
             CHDChain chain;
             ssValue >> chain;
             pwallet->GetSaplingScriptPubKeyMan()->SetHDChain(chain, true);
-        } else if (strType == DBKeys::SAP_KEY) {
+        } else if (strType == "sapzkey") {
             libzcash::SaplingIncomingViewingKey ivk;
             ssKey >> ivk;
             libzcash::SaplingExtendedSpendingKey key;
@@ -566,11 +665,11 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             }
             //add checks for integrity
             wss.nZKeys++;
-        } else if (strType == DBKeys::SAP_COMMON_OVK) {
+        } else if (strType == "commonovk") {
             uint256 ovk;
             ssValue >> ovk;
             pwallet->GetSaplingScriptPubKeyMan()->setCommonOVK(ovk);
-        } else if (strType == DBKeys::SAP_KEY_CRIPTED) {
+        } else if (strType == "csapzkey") {
             libzcash::SaplingIncomingViewingKey ivk;
             ssKey >> ivk;
             libzcash::SaplingExtendedFullViewingKey extfvk;
@@ -584,7 +683,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 return false;
             }
             wss.fIsEncrypted = true;
-        } else if (strType == DBKeys::SAP_KEYMETA) {
+        } else if (strType == "sapzkeymeta") {
             libzcash::SaplingIncomingViewingKey ivk;
             ssKey >> ivk;
             CKeyMetadata keyMeta;
@@ -593,7 +692,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             wss.nZKeyMeta++;
 
             pwallet->LoadSaplingZKeyMetadata(ivk, keyMeta);
-        } else if (strType == DBKeys::SAP_ADDR) {
+        } else if (strType == "sapzaddr") {
             libzcash::SaplingPaymentAddress addr;
             ssKey >> addr;
             libzcash::SaplingIncomingViewingKey ivk;
@@ -605,7 +704,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadSaplingPaymentAddress failed";
                 return false;
             }
-        } else if (strType == DBKeys::SAP_WITNESS_CACHE_SIZE) {
+        } else if (strType == "witnesscachesize") {
             ssValue >> pwallet->GetSaplingScriptPubKeyMan()->nWitnessCacheSize;
         }
     } catch (...) {
@@ -616,9 +715,9 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
 
 bool CWalletDB::IsKeyType(const std::string& strType)
 {
-    return (strType == DBKeys::KEY ||
-            strType == DBKeys::MASTER_KEY || strType == DBKeys::CRYPTED_KEY ||
-            strType == DBKeys::SAP_KEY || strType == DBKeys::SAP_KEY_CRIPTED);
+    return (strType == "key" || strType == "wkey" ||
+            strType == "mkey" || strType == "ckey" ||
+            strType == "sapzkey" || strType == "csapzkey");
 }
 
 DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
@@ -630,10 +729,9 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
     LOCK(pwallet->cs_wallet);
     try {
         int nMinVersion = 0;
-        if (batch.Read((std::string) DBKeys::MINVERSION, nMinVersion)) {
-            if (nMinVersion > CLIENT_VERSION) {
+        if (batch.Read((std::string) "minversion", nMinVersion)) {
+            if (nMinVersion > CLIENT_VERSION)
                 return DB_TOO_NEW;
-            }
             pwallet->LoadMinVersion(nMinVersion);
         }
 
@@ -649,9 +747,9 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
             CDataStream ssKey(SER_DISK, CLIENT_VERSION);
             CDataStream ssValue(SER_DISK, CLIENT_VERSION);
             int ret = batch.ReadAtCursor(pcursor, ssKey, ssValue);
-            if (ret == DB_NOTFOUND) {
+            if (ret == DB_NOTFOUND)
                 break;
-            } else if (ret != 0) {
+            else if (ret != 0) {
                 LogPrintf("Error reading next record from wallet database\n");
                 return DB_CORRUPT;
             }
@@ -661,12 +759,12 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
             if (!ReadKeyValue(pwallet, ssKey, ssValue, wss, strType, strErr)) {
                 // losing keys is considered a catastrophic error, anything else
                 // we assume the user can live with:
-                if (IsKeyType(strType) || strType == DBKeys::DEFAULTKEY) {
+                if (IsKeyType(strType) || strType == "defaultkey")
                     result = DB_CORRUPT;
-                } else {
+                else {
                     // Leave other errors alone, if we try to fix them we might make things worse.
                     fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
-                    if (strType == DBKeys::TX)
+                    if (strType == "tx")
                         // Rescan if there is a bad transaction record:
                         gArgs.SoftSetBoolArg("-rescan", true);
                 }
@@ -701,22 +799,18 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
     if ((wss.nKeys + wss.nCKeys) != wss.nKeyMeta)
         pwallet->nTimeFirstKey = 1; // 0 would be considered 'no value'
 
-    for (const uint256& hash : wss.vWalletUpgrade) {
+    for (const uint256& hash : wss.vWalletUpgrade)
         WriteTx(pwallet->mapWallet.at(hash));
-    }
 
     // Rewrite encrypted wallets of versions 0.4.0 and 0.5.0rc:
-    if (wss.fIsEncrypted && (wss.nFileVersion == 40000 || wss.nFileVersion == 50000)) {
+    if (wss.fIsEncrypted && (wss.nFileVersion == 40000 || wss.nFileVersion == 50000))
         return DB_NEED_REWRITE;
-    }
 
-    if (wss.nFileVersion < CLIENT_VERSION) { // Update
+    if (wss.nFileVersion < CLIENT_VERSION) // Update
         WriteVersion(CLIENT_VERSION);
-    }
 
-    if (wss.fAnyUnordered) {
+    if (wss.fAnyUnordered)
         result = ReorderTransactions(pwallet);
-    }
 
     return result;
 }
@@ -729,10 +823,9 @@ DBErrors CWalletDB::FindWalletTx(CWallet* pwallet, std::vector<uint256>& vTxHash
     try {
         LOCK(pwallet->cs_wallet);
         int nMinVersion = 0;
-        if (batch.Read((std::string) DBKeys::MINVERSION, nMinVersion)) {
-            if (nMinVersion > CLIENT_VERSION) {
+        if (batch.Read((std::string) "minversion", nMinVersion)) {
+            if (nMinVersion > CLIENT_VERSION)
                 return DB_TOO_NEW;
-            }
             pwallet->LoadMinVersion(nMinVersion);
         }
 
@@ -748,16 +841,16 @@ DBErrors CWalletDB::FindWalletTx(CWallet* pwallet, std::vector<uint256>& vTxHash
             CDataStream ssKey(SER_DISK, CLIENT_VERSION);
             CDataStream ssValue(SER_DISK, CLIENT_VERSION);
             int ret = batch.ReadAtCursor(pcursor, ssKey, ssValue);
-            if (ret == DB_NOTFOUND) {
+            if (ret == DB_NOTFOUND)
                 break;
-            } else if (ret != 0) {
+            else if (ret != 0) {
                 LogPrintf("Error reading next record from wallet database\n");
                 return DB_CORRUPT;
             }
 
             std::string strType;
             ssKey >> strType;
-            if (strType == DBKeys::TX) {
+            if (strType == "tx") {
                 uint256 hash;
                 ssKey >> hash;
 
@@ -786,13 +879,13 @@ DBErrors CWalletDB::ZapWalletTx(CWallet* pwallet, std::vector<CWalletTx>& vWtx)
     // build list of wallet TXs
     std::vector<uint256> vTxHash;
     DBErrors err = FindWalletTx(pwallet, vTxHash, vWtx);
-    if (err != DB_LOAD_OK) {
+    if (err != DB_LOAD_OK)
         return err;
-    }
 
     // erase each wallet TX
     for (uint256& hash : vTxHash) {
-        if (!EraseTx(hash)) return DB_CORRUPT;
+        if (!EraseTx(hash))
+            return DB_CORRUPT;
     }
 
     return DB_LOAD_OK;
@@ -808,22 +901,20 @@ void MaybeCompactWalletDB()
         return;
     }
 
-    for (CWalletRef pwallet : vpwallets) {
-        CWalletDBWrapper& dbh = pwallet->GetDBHandle();
+    static unsigned int nLastSeen = CWalletDB::GetUpdateCounter();
+    static unsigned int nLastFlushed = CWalletDB::GetUpdateCounter();
+    static int64_t nLastWalletUpdate = GetTime();
 
-        unsigned int nUpdateCounter = dbh.nUpdateCounter;
-        if (dbh.nLastSeen != nUpdateCounter) {
-            dbh.nLastSeen = nUpdateCounter;
-            dbh.nLastWalletUpdate = GetTime();
-        }
-
-        if (dbh.nLastFlushed != nUpdateCounter && GetTime() - dbh.nLastWalletUpdate >= 2) {
-            if (CDB::PeriodicFlush(dbh)) {
-                dbh.nLastFlushed = nUpdateCounter;
-            }
-        }
+    if (nLastSeen != CWalletDB::GetUpdateCounter()) {
+        nLastSeen = CWalletDB::GetUpdateCounter();
+        nLastWalletUpdate = GetTime();
     }
 
+    if (nLastFlushed != CWalletDB::GetUpdateCounter() && GetTime() - nLastWalletUpdate >= 2) {
+        if (CDB::PeriodicFlush(pwalletMain->GetDBHandle())) {
+            nLastFlushed = CWalletDB::GetUpdateCounter();
+        }
+    }
     fOneThread = false;
 }
 
@@ -853,97 +944,6 @@ std::pair<fs::path, fs::path> GetBackupPath(const CWallet& wallet)
         }
     }
     return {pathCustom, pathWithFile};
-}
-
-bool AutoBackupWallet(const std::string& strWalletFile, std::string& strBackupWarning, std::string& strBackupError)
-{
-    strBackupWarning = strBackupError = "";
-
-    int nWalletBackups = gArgs.GetArg("-createwalletbackups", DEFAULT_CREATEWALLETBACKUPS);
-    nWalletBackups = std::max(0, std::min(10, nWalletBackups));
-
-    if (nWalletBackups == 0) {
-        LogPrintf("Automatic wallet backups are disabled!\n");
-        return false;
-    }
-
-    fs::path backupsDir = GetDataDir() / "backups";
-    if (!fs::exists(backupsDir)) {
-        // Always create backup folder to not confuse the operating system's file browser
-        LogPrintf("Creating backup folder %s\n", backupsDir.string());
-        if(!fs::create_directories(backupsDir)) {
-            // smth is wrong, we shouldn't continue until it's resolved
-            strBackupError = strprintf(_("Wasn't able to create wallet backup folder %s!"), backupsDir.string());
-            LogPrintf("%s\n", strBackupError);
-            nWalletBackups = -1;
-            return false;
-        }
-    }
-    // Create backup of the ...
-    std::string dateTimeStr = FormatISO8601DateTimeForBackup(GetTime());
-
-    // ... strWalletFile file
-    fs::path sourceFile = GetDataDir() / strWalletFile;
-    fs::path backupFile = backupsDir / (strWalletFile + dateTimeStr);
-    sourceFile.make_preferred();
-    backupFile.make_preferred();
-    if (fs::exists(backupFile)) {
-        strBackupWarning = _("Failed to create backup, file already exists! This could happen if you restarted wallet in less than 60 seconds. You can continue if you are ok with this.");
-        LogPrintf("%s\n", strBackupWarning);
-        return false;
-    }
-    if(fs::exists(sourceFile)) {
-#if BOOST_VERSION >= 105800
-        try {
-            fs::copy_file(sourceFile, backupFile);
-            LogPrintf("Creating backup of %s -> %s\n", sourceFile.string(), backupFile.string());
-        } catch(fs::filesystem_error &error) {
-            strBackupWarning = strprintf(_("Failed to create backup, error: %s"), error.what());
-            LogPrintf("%s\n", strBackupWarning);
-            nWalletBackups = -1;
-            return false;
-        }
-#else
-        std::ifstream src(sourceFile.string(), std::ios::binary);
-        std::ofstream dst(backupFile.string(), std::ios::binary);
-        dst << src.rdbuf();
-#endif
-    }
-
-    // Keep only the last 10 backups, including the new one of course
-    typedef std::multimap<std::time_t, fs::path> folder_set_t;
-    folder_set_t folder_set;
-    fs::directory_iterator end_iter;
-    backupsDir.make_preferred();
-    // Build map of backup files for current(!) wallet sorted by last write time
-    fs::path currentFile;
-    for (fs::directory_iterator dir_iter(backupsDir); dir_iter != end_iter; ++dir_iter) {
-        // Only check regular files
-        if ( fs::is_regular_file(dir_iter->status())) {
-            currentFile = dir_iter->path().filename();
-            // Only add the backups for the current wallet, e.g. wallet.dat.*
-            if(dir_iter->path().stem().string() == strWalletFile) {
-                folder_set.insert(folder_set_t::value_type(fs::last_write_time(dir_iter->path()), *dir_iter));
-            }
-        }
-    }
-    // Loop backward through backup files and keep the N newest ones (1 <= N <= 10)
-    int counter = 0;
-    for (std::pair<const std::time_t, fs::path> file : reverse_iterate(folder_set)) {
-        counter++;
-        if (counter > nWalletBackups) {
-            // More than nWalletBackups backups: delete oldest one(s)
-            try {
-                fs::remove(file.second);
-                LogPrintf("Old backup deleted: %s\n", file.second);
-            } catch(fs::filesystem_error &error) {
-                strBackupWarning = strprintf(_("Failed to delete backup, error: %s"), error.what());
-                LogPrintf("%s\n", strBackupWarning);
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 void MultiBackup(const CWallet& wallet, fs::path pathCustom, fs::path pathWithFile, const fs::path& pathSrc)
@@ -1074,16 +1074,16 @@ bool AttemptBackupWallet(const CWallet& wallet, const fs::path& pathSrc, const f
 //
 // Try to (very carefully!) recover wallet file if there is a problem.
 //
-bool CWalletDB::Recover(const std::string& filename, void *callbackDataIn, bool (*recoverKVcallback)(void* callbackData, CDataStream ssKey, CDataStream ssValue), std::string& out_backup_filename)
+bool CWalletDB::Recover(const std::string& filename, void *callbackDataIn, bool (*recoverKVcallback)(void* callbackData, CDataStream ssKey, CDataStream ssValue))
 {
-    return CDB::Recover(filename, callbackDataIn, recoverKVcallback, out_backup_filename);
+    return CDB::Recover(filename, callbackDataIn, recoverKVcallback);
 }
 
-bool CWalletDB::Recover(const std::string& filename, std::string& out_backup_filename)
+bool CWalletDB::Recover(const std::string& filename)
 {
     // recover without a key filter callback
     // results in recovering all record types
-    return CWalletDB::Recover(filename, NULL, NULL, out_backup_filename);
+    return CWalletDB::Recover(filename, NULL, NULL);
 }
 
 bool CWalletDB::RecoverKeysOnlyFilter(void *callbackData, CDataStream ssKey, CDataStream ssValue)
@@ -1098,7 +1098,7 @@ bool CWalletDB::RecoverKeysOnlyFilter(void *callbackData, CDataStream ssKey, CDa
         fReadOK = ReadKeyValue(dummyWallet, ssKey, ssValue,
                                dummyWss, strType, strErr);
     }
-    if (!IsKeyType(strType) && strType != DBKeys::HDCHAIN)
+    if (!IsKeyType(strType) && strType != "hdchain")
         return false;
     if (!fReadOK)
     {
@@ -1121,12 +1121,24 @@ bool CWalletDB::VerifyDatabaseFile(const std::string& walletFile, const fs::path
 
 bool CWalletDB::WriteDestData(const std::string& address, const std::string& key, const std::string& value)
 {
-    return WriteIC(std::make_pair(std::string(DBKeys::DESTDATA), std::make_pair(address, key)), value);
+    nWalletDBUpdateCounter++;
+    return batch.Write(std::make_pair(std::string("destdata"), std::make_pair(address, key)), value);
 }
 
 bool CWalletDB::EraseDestData(const std::string& address, const std::string& key)
 {
-    return EraseIC(std::make_pair(std::string(DBKeys::DESTDATA), std::make_pair(address, key)));
+    nWalletDBUpdateCounter++;
+    return batch.Erase(std::make_pair(std::string("destdata"), std::make_pair(address, key)));
+}
+
+void CWalletDB::IncrementUpdateCounter()
+{
+    nWalletDBUpdateCounter++;
+}
+
+unsigned int CWalletDB::GetUpdateCounter()
+{
+    return nWalletDBUpdateCounter;
 }
 
 bool CWalletDB::TxnBegin()

@@ -74,8 +74,6 @@ static const unsigned int DEFAULT_LIMITFREERELAY = 30;
 /** The maximum size for transactions we're willing to relay/mine */
 static const unsigned int MAX_STANDARD_TX_SIZE = 100000;
 static const unsigned int MAX_ZEROCOIN_TX_SIZE = 150000;
-/** Maximum kilobytes for transactions to store for processing during reorg */
-static const unsigned int MAX_DISCONNECTED_TX_POOL_SIZE = 20000;
 /** Default for -checkblocks */
 static const signed int DEFAULT_CHECKBLOCKS = 10;
 /** The maximum size of a blk?????.dat file (since 0.8) */
@@ -142,7 +140,6 @@ extern std::atomic<bool> fImporting;
 extern std::atomic<bool> fReindex;
 extern int nScriptCheckThreads;
 extern bool fTxIndex;
-extern bool fRequireStandard;
 extern bool fCheckBlockIndex;
 extern size_t nCoinCacheUsage;
 extern CFeeRate minRelayTxFee;
@@ -159,6 +156,9 @@ extern CMoneySupply MoneySupply;
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex* pindexBestHeader;
 
+/** Minimum disk space required - used in CheckDiskSpace() */
+static const uint64_t nMinDiskSpace = 52428800;
+
 /**
  * Process an incoming block. This only returns after the best known valid
  * block is made active. Note that it does not, however, guarantee that the
@@ -171,16 +171,17 @@ extern CBlockIndex* pindexBestHeader;
  * @param[out]  fAccepted  Whether the block is accepted or not
  * @return True if state.IsValid()
  */
-bool ProcessNewBlock(CValidationState& state, CNode* pfrom, const std::shared_ptr<const CBlock> pblock, FlatFilePos* dbp, bool* fAccepted = nullptr);
-
+bool ProcessNewBlock(CValidationState& state, CNode* pfrom, const std::shared_ptr<const CBlock> pblock, CDiskBlockPos* dbp, bool* fAccepted = nullptr);
+/** Check whether enough disk space is available for an incoming block */
+bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
 /** Open a block file (blk?????.dat) */
-FILE* OpenBlockFile(const FlatFilePos& pos, bool fReadOnly = false);
+FILE* OpenBlockFile(const CDiskBlockPos& pos, bool fReadOnly = false);
 /** Open an undo file (rev?????.dat) */
-FILE* OpenUndoFile(const FlatFilePos& pos, bool fReadOnly = false);
+FILE* OpenUndoFile(const CDiskBlockPos& pos, bool fReadOnly = false);
 /** Translation to a filesystem path */
-fs::path GetBlockPosFilename(const FlatFilePos &pos);
+fs::path GetBlockPosFilename(const CDiskBlockPos& pos, const char* prefix);
 /** Import blocks from an external file */
-bool LoadExternalBlockFile(FILE* fileIn, FlatFilePos* dbp = NULL);
+bool LoadExternalBlockFile(FILE* fileIn, CDiskBlockPos* dbp = NULL);
 /** Ensures we have a genesis block in the block tree, possibly writing one to disk. */
 bool LoadGenesisBlock();
 /** Load the block tree and coins database from disk,
@@ -268,12 +269,6 @@ bool IsBlockHashInChain(const uint256& hashBlock);
  */
 bool CheckFinalTx(const CTransactionRef& tx, int flags = -1);
 
-/*
- * Retrieve an unspent coin in pcoinsTip. Lock cs_main.
- */
-bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin);
-Optional<int> GetUTXOHeight(const COutPoint& outpoint);
-
 /**
  * Closure representing one script verification
  * Note that this stores references to the spending transaction
@@ -281,7 +276,8 @@ Optional<int> GetUTXOHeight(const COutPoint& outpoint);
 class CScriptCheck
 {
 private:
-    CTxOut m_tx_out;
+    CScript scriptPubKey;
+    CAmount amount;
     const CTransaction* ptxTo;
     unsigned int nIn;
     unsigned int nFlags;
@@ -290,9 +286,10 @@ private:
     PrecomputedTransactionData *precomTxData;
 
 public:
-    CScriptCheck() : ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR), precomTxData(nullptr) {}
-    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* cachedHashesIn) :
-        m_tx_out(outIn),
+    CScriptCheck() : amount(0), ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR), precomTxData(nullptr) {}
+    CScriptCheck(const CScript& scriptPubKeyIn, const CAmount amountIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* cachedHashesIn) :
+        scriptPubKey(scriptPubKeyIn),
+        amount(amountIn),
         ptxTo(&txToIn),
         nIn(nInIn),
         nFlags(nFlagsIn),
@@ -304,8 +301,9 @@ public:
 
     void swap(CScriptCheck& check)
     {
+        scriptPubKey.swap(check.scriptPubKey);
         std::swap(ptxTo, check.ptxTo);
-        std::swap(m_tx_out, check.m_tx_out);
+        std::swap(amount, check.amount);
         std::swap(nIn, check.nIn);
         std::swap(nFlags, check.nFlags);
         std::swap(cacheStore, check.cacheStore);
@@ -318,8 +316,8 @@ public:
 
 
 /** Functions for disk access for blocks */
-bool WriteBlockToDisk(const CBlock& block, FlatFilePos& pos);
-bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos);
+bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos);
+bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex);
 
 
@@ -337,7 +335,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
 bool TestBlockValidity(CValidationState& state, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fCheckBlockSig = true);
 
 /** Store block on disk. If dbp is provided, the file is known to already reside on disk */
-bool AcceptBlock(const CBlock& block, CValidationState& state, CBlockIndex** pindex, FlatFilePos* dbp = NULL);
+bool AcceptBlock(const CBlock& block, CValidationState& state, CBlockIndex** pindex, CDiskBlockPos* dbp = NULL);
 bool AcceptBlockHeader(const CBlock& block, CValidationState& state, CBlockIndex** ppindex = nullptr, CBlockIndex* pindexPrev = nullptr);
 
 
@@ -400,9 +398,6 @@ static const unsigned int REJECT_HIGHFEE = 0x100;
 static const unsigned int REJECT_ALREADY_KNOWN = 0x101;
 /** Transaction conflicts with a transaction already known */
 static const unsigned int REJECT_CONFLICT = 0x102;
-
-/** Get block file info entry for one block file */
-CBlockFileInfo* GetBlockFileInfo(size_t n);
 
 /** Dump the mempool to disk. */
 bool DumpMempool(const CTxMemPool& pool);

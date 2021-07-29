@@ -32,7 +32,7 @@ static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
 //! min. -dbcache in (MiB)
 static const int64_t nMinDbCache = 4;
 
-struct CDiskTxPos : public FlatFilePos
+struct CDiskTxPos : public CDiskBlockPos
 {
     unsigned int nTxOffset; // after header
 
@@ -41,11 +41,11 @@ struct CDiskTxPos : public FlatFilePos
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITEAS(FlatFilePos, *this);
+        READWRITE(*static_cast<CDiskBlockPos*>(this));
         READWRITE(VARINT(nTxOffset));
     }
 
-    CDiskTxPos(const FlatFilePos& blockIn, unsigned int nTxOffsetIn) : FlatFilePos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn)
+    CDiskTxPos(const CDiskBlockPos& blockIn, unsigned int nTxOffsetIn) : CDiskBlockPos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn)
     {
     }
 
@@ -56,7 +56,7 @@ struct CDiskTxPos : public FlatFilePos
 
     void SetNull()
     {
-        FlatFilePos::SetNull();
+        CDiskBlockPos::SetNull();
         nTxOffset = 0;
     }
 };
@@ -142,6 +142,7 @@ public:
     bool WriteInt(const std::string& name, int nValue);
     bool ReadInt(const std::string& name, int& nValue);
     bool LoadBlockIndexGuts(std::function<CBlockIndex*(const uint256&)> insertBlockIndex);
+    bool ReadLegacyBlockIndex(const uint256& blockHash, CLegacyBlockIndex& biRet);
 };
 
 /** Zerocoin database (zerocoin/) */
@@ -155,11 +156,21 @@ private:
     void operator=(const CZerocoinDB&);
 
 public:
+    /** Write zJOKE mints to the zerocoinDB in a batch */
+    bool WriteCoinMintBatch(const std::vector<std::pair<libzerocoin::PublicCoin, uint256> >& mintInfo);
+    bool ReadCoinMint(const CBigNum& bnPubcoin, uint256& txHash);
+    bool ReadCoinMint(const uint256& hashPubcoin, uint256& hashTx);
     /** Write zJOKE spends to the zerocoinDB in a batch */
     bool WriteCoinSpendBatch(const std::vector<std::pair<libzerocoin::CoinSpend, uint256> >& spendInfo);
     bool ReadCoinSpend(const CBigNum& bnSerial, uint256& txHash);
+    bool ReadCoinSpend(const uint256& hashSerial, uint256 &txHash);
+    bool EraseCoinMint(const CBigNum& bnPubcoin);
     bool EraseCoinSpend(const CBigNum& bnSerial);
+    bool WipeCoins(std::string strType);
 
+    /** Map supply [denom] --> supply     */
+    bool WriteZCSupply(const std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS);
+    bool ReadZCSupply(std::map<libzerocoin::CoinDenomination, int64_t>& mapZCS) const;
     /** Accumulators (only for zPoS IBD): [checksum, denom] --> block height **/
     bool WriteAccChecksum(const uint32_t& nChecksum, const libzerocoin::CoinDenomination denom, const int nHeight);
     bool ReadAccChecksum(const uint32_t& nChecksum, const libzerocoin::CoinDenomination denom, int& nHeightRet);

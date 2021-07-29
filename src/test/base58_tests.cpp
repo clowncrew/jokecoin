@@ -12,7 +12,7 @@
 #include "key.h"
 #include "script/script.h"
 #include "uint256.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilstrencodings.h"
 #include "test/test_jokecoin.h"
 

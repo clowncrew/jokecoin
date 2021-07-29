@@ -43,24 +43,23 @@ from .util import (
     PortSeed,
     assert_equal,
     assert_greater_than,
+    assert_greater_than_or_equal,
     check_json_precision,
     connect_nodes,
     connect_nodes_clique,
     disconnect_nodes,
-    get_collateral_vout,
     Decimal,
     DEFAULT_FEE,
     get_datadir_path,
     hex_str_to_bytes,
     bytes_to_hex_str,
     initialize_datadir,
-    is_coin_locked_by,
-    create_new_dmn,
     p2p_port,
     set_node_times,
     SPORK_ACTIVATION_TIME,
     SPORK_DEACTIVATION_TIME,
-    satoshi_round
+    vZC_DENOMS,
+    wait_until,
 )
 
 class TestStatus(Enum):
@@ -339,7 +338,6 @@ class JokeCoinTestFramework():
         with tempfile.SpooledTemporaryFile(max_size=2**16) as log_stderr:
             try:
                 self.start_node(i, extra_args, stderr=log_stderr, *args, **kwargs)
-                self.nodes[i].wait_for_rpc_connection()
                 self.stop_node(i)
             except Exception as e:
                 assert 'jokecoind exited' in str(e)  # node must have shutdown
@@ -452,7 +450,7 @@ class JokeCoinTestFramework():
         ll = int(self.options.loglevel) if self.options.loglevel.isdigit() else self.options.loglevel.upper()
         ch.setLevel(ll)
         # Format logs the same as jokecoind's debug.log with microprecision (so log files can be concatenated and sorted)
-        formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000Z %(name)s (%(levelname)s): %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
+        formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000 %(name)s (%(levelname)s): %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         formatter.converter = time.gmtime
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
@@ -492,7 +490,7 @@ class JokeCoinTestFramework():
             node_0_datadir = os.path.join(get_datadir_path(cachedir, 0), "regtest")
             for i in range(from_num, MAX_NODES):
                 node_i_datadir = os.path.join(get_datadir_path(cachedir, i), "regtest")
-                for subdir in ["blocks", "chainstate", "evodb", "sporks", "zerocoin"]:
+                for subdir in ["blocks", "chainstate", "sporks", "zerocoin"]:
                     copy_and_overwrite(os.path.join(node_0_datadir, subdir),
                                     os.path.join(node_i_datadir, subdir))
                 initialize_datadir(cachedir, i)  # Overwrite port/rpcport in jokecoin.conf
@@ -512,7 +510,7 @@ class JokeCoinTestFramework():
 
             for i in range(MAX_NODES):
                 for entry in os.listdir(cache_path(i)):
-                    if entry not in ['wallet.dat', 'chainstate', 'blocks', 'sporks', 'evodb', 'zerocoin', 'backups']:
+                    if entry not in ['wallet.dat', 'chainstate', 'blocks', 'sporks', 'zerocoin', 'backups']:
                         os.remove(cache_path(i, entry))
 
         def clean_cache_dir():
@@ -1050,10 +1048,9 @@ class JokeCoinTestFramework():
 
     def send_pings(self, mnodes):
         for node in mnodes:
-            try:
-                node.mnping()["sent"]
-            except:
-                pass
+            sent = node.mnping()["sent"]
+            if sent != "YES" and "Too early to send Masternode Ping" not in sent:
+                raise AssertionError("Unable to send ping: \"sent\" = %s" % sent)
             time.sleep(1)
 
 
@@ -1071,68 +1068,6 @@ class JokeCoinTestFramework():
             if len(with_ping_mns) > 0:
                 self.send_pings(with_ping_mns)
 
-    # !TODO: remove after obsoleting legacy system
-    def setupDMN(self,
-                 mnOwner,
-                 miner,
-                 mnRemotePos,
-                 strType,           # "fund"|"internal"|"external"
-                 outpoint=None):    # COutPoint, only for "external"
-        self.log.info("Creating%s proRegTx for deterministic masternode..." % (
-                      " and funding" if strType == "fFund" else ""))
-        collateralAdd = mnOwner.getnewaddress("dmn")
-        ipport = "127.0.0.1:" + str(p2p_port(mnRemotePos))
-        ownerAdd = mnOwner.getnewaddress("dmn_owner")
-        operatorAdd = mnOwner.getnewaddress("dmn_operator")
-        operatorKey = mnOwner.dumpprivkey(operatorAdd)
-        votingAdd = mnOwner.getnewaddress("dmn_voting")
-        if strType == "fund":
-            # send to the owner the collateral tx cost + some dust for the ProReg and fee
-            fundingTxId = miner.sendtoaddress(collateralAdd, Decimal('101'))
-            # confirm and verify reception
-            self.stake_and_sync(self.nodes.index(miner), 1)
-            assert_greater_than(mnOwner.getrawtransaction(fundingTxId, 1)["confirmations"], 0)
-            # create and send the ProRegTx funding the collateral
-            proTxId = mnOwner.protx_register_fund(collateralAdd, ipport, ownerAdd,
-                                                  operatorAdd, votingAdd, collateralAdd)
-        elif strType == "internal":
-            mnOwner.getnewaddress("dust")
-            # send to the owner the collateral tx cost + some dust for the ProReg and fee
-            collateralTxId = miner.sendtoaddress(collateralAdd, Decimal('100'))
-            miner.sendtoaddress(collateralAdd, Decimal('1'))
-            # confirm and verify reception
-            self.stake_and_sync(self.nodes.index(miner), 1)
-            json_tx = mnOwner.getrawtransaction(collateralTxId, True)
-            collateralTxId_n = -1
-            for o in json_tx["vout"]:
-                if o["value"] == Decimal('100'):
-                    collateralTxId_n = o["n"]
-                    break
-            assert_greater_than(collateralTxId_n, -1)
-            assert_greater_than(json_tx["confirmations"], 0)
-            proTxId = mnOwner.protx_register(collateralTxId, collateralTxId_n, ipport, ownerAdd,
-                                             operatorAdd, votingAdd, collateralAdd)
-        elif strType == "external":
-            self.log.info("Setting up ProRegTx with collateral externally-signed...")
-            # send the tx from the miner
-            payoutAdd = mnOwner.getnewaddress("payout")
-            register_res = miner.protx_register_prepare(outpoint.hash, outpoint.n, ipport, ownerAdd,
-                                                        operatorAdd, votingAdd, payoutAdd)
-            self.log.info("ProTx prepared")
-            message_to_sign = register_res["signMessage"]
-            collateralAdd = register_res["collateralAddress"]
-            signature = mnOwner.signmessage(collateralAdd, message_to_sign)
-            self.log.info("ProTx signed")
-            proTxId = miner.protx_register_submit(register_res["tx"], signature)
-        else:
-            raise Exception("Type %s not available" % strType)
-
-        self.sync_mempools([mnOwner, miner])
-        # confirm and verify inclusion in list
-        self.stake_and_sync(self.nodes.index(miner), 1)
-        assert_greater_than(self.nodes[mnRemotePos].getrawtransaction(proTxId, 1)["confirmations"], 0)
-        assert proTxId in self.nodes[mnRemotePos].protx_list(False)
-        return proTxId, operatorKey
 
     def setupMasternode(self,
                         mnOwner,
@@ -1144,200 +1079,70 @@ class JokeCoinTestFramework():
         self.log.info("adding balance to the mn owner for " + masternodeAlias + "..")
         mnAddress = mnOwner.getnewaddress(masternodeAlias)
         # send to the owner the collateral tx cost
-        collateralTxId = miner.sendtoaddress(mnAddress, Decimal('100'))
+        collateralTxId = miner.sendtoaddress(mnAddress, Decimal('10000'))
         # confirm and verify reception
         self.stake_and_sync(self.nodes.index(miner), 1)
-        json_tx = mnOwner.getrawtransaction(collateralTxId, True)
-        collateralTxId_n = -1
-        for o in json_tx["vout"]:
-            if o["value"] == Decimal('100'):
-                collateralTxId_n = o["n"]
+        assert_greater_than_or_equal(mnOwner.getbalance(), Decimal('10000'))
+        assert_greater_than(mnOwner.getrawtransaction(collateralTxId, 1)["confirmations"], 0)
+
+        self.log.info("all good, creating masternode " + masternodeAlias + "..")
+
+        # get the collateral output using the RPC command
+        mnCollateralOutputIndex = -1
+        for mnc in mnOwner.getmasternodeoutputs():
+            if collateralTxId == mnc["txhash"]:
+                mnCollateralOutputIndex = mnc["outputidx"]
                 break
-        assert_greater_than(collateralTxId_n, -1)
-        assert_greater_than(json_tx["confirmations"], 0)
-        # update masternode file
-        self.log.info("collateral accepted for " + masternodeAlias + ". Updating masternode.conf...")
-        confData = "%s 127.0.0.1:%d %s %s %d" % (masternodeAlias,
-                                                 p2p_port(mnRemotePos),
-                                                 masternodePrivKey,
-                                                 collateralTxId,
-                                                 collateralTxId_n)
-        destPath = os.path.join(mnOwnerDirPath, "masternode.conf")
+        assert_greater_than(mnCollateralOutputIndex, -1)
+
+        self.log.info("collateral accepted for "+ masternodeAlias +". Updating masternode.conf...")
+
+        # verify collateral confirmed
+        confData = "%s %s %s %s %d" % (
+                masternodeAlias, "127.0.0.1:" + str(p2p_port(mnRemotePos)),
+                masternodePrivKey, collateralTxId, mnCollateralOutputIndex)
+        destinationDirPath = mnOwnerDirPath
+        destPath = os.path.join(destinationDirPath, "masternode.conf")
         with open(destPath, "a+") as file_object:
             file_object.write("\n")
             file_object.write(confData)
 
-        # lock collateral
-        mnOwner.lockunspent(False, [{"txid": collateralTxId, "vout": collateralTxId_n}])
+        # lock the collateral
+        mnOwner.lockunspent(False, [{"txid": collateralTxId, "vout": mnCollateralOutputIndex}])
 
-        # return the collateral outpoint
-        return COutPoint(collateralTxId, collateralTxId_n)
-
-
-### ----------------------
-### ----- DMN setup ------
-### ----------------------
-
-    def connect_to_all(self, nodePos):
-        for i in range(self.num_nodes):
-            if i != nodePos and self.nodes[i] is not None:
-                connect_nodes(self.nodes[i], nodePos)
-
-    def assert_equal_for_all(self, expected, func_name, *args):
-        def not_found():
-            raise Exception("function %s not found!" % func_name)
-
-        assert_equal([getattr(x, func_name, not_found)(*args) for x in self.nodes],
-                     [expected] * self.num_nodes)
-
-    """
-    Create a ProReg tx, which has the collateral as one of its outputs
-    """
-    def protx_register_fund(self, miner, controller, dmn, collateral_addr, op_rew=None):
-        # send to the owner the collateral tx + some dust for the ProReg and fee
-        funding_txid = miner.sendtoaddress(collateral_addr, Decimal('101'))
-        # confirm and verify reception
-        miner.generate(1)
-        self.sync_blocks([miner, controller])
-        assert_greater_than(controller.getrawtransaction(funding_txid, True)["confirmations"], 0)
-        # create and send the ProRegTx funding the collateral
-        if op_rew is None:
-            dmn.proTx = controller.protx_register_fund(collateral_addr, dmn.ipport, dmn.owner,
-                                                       dmn.operator, dmn.voting, dmn.payee)
-        else:
-            dmn.proTx = controller.protx_register_fund(collateral_addr, dmn.ipport, dmn.owner,
-                                                       dmn.operator, dmn.voting, dmn.payee,
-                                                       op_rew["reward"], op_rew["address"])
-        dmn.collateral = COutPoint(int(dmn.proTx, 16),
-                                   get_collateral_vout(controller.getrawtransaction(dmn.proTx, True)))
-
-    """
-    Create a ProReg tx, which references an 100 JOKE UTXO as collateral.
-    The controller node owns the collateral and creates the ProReg tx.
-    """
-    def protx_register(self, miner, controller, dmn, collateral_addr):
-        # send to the owner the exact collateral tx amount
-        funding_txid = miner.sendtoaddress(collateral_addr, Decimal('100'))
-        # send another output to be used for the fee of the proReg tx
-        miner.sendtoaddress(collateral_addr, Decimal('1'))
-        # confirm and verify reception
-        miner.generate(1)
-        self.sync_blocks([miner, controller])
-        json_tx = controller.getrawtransaction(funding_txid, True)
-        assert_greater_than(json_tx["confirmations"], 0)
-        # create and send the ProRegTx
-        dmn.collateral = COutPoint(int(funding_txid, 16), get_collateral_vout(json_tx))
-        dmn.proTx = controller.protx_register(funding_txid, dmn.collateral.n, dmn.ipport, dmn.owner,
-                                              dmn.operator, dmn.voting, dmn.payee)
-
-    """
-    Create a ProReg tx, referencing a collateral signed externally (eg. HW wallets).
-    Here the controller node owns the collateral (and signs), but the miner creates the ProReg tx.
-    """
-    def protx_register_ext(self, miner, controller, dmn, outpoint, fSubmit):
-        # send to the owner the collateral tx if the outpoint is not specified
-        if outpoint is None:
-            funding_txid = miner.sendtoaddress(controller.getnewaddress("collateral"), Decimal('100'))
-            # confirm and verify reception
-            miner.generate(1)
-            self.sync_blocks([miner, controller])
-            json_tx = controller.getrawtransaction(funding_txid, True)
-            assert_greater_than(json_tx["confirmations"], 0)
-            outpoint = COutPoint(int(funding_txid, 16), get_collateral_vout(json_tx))
-        dmn.collateral = outpoint
-        # Prepare the message to be signed externally by the owner of the collateral (the controller)
-        reg_tx = miner.protx_register_prepare("%064x" % outpoint.hash, outpoint.n, dmn.ipport, dmn.owner,
-                                              dmn.operator, dmn.voting, dmn.payee)
-        sig = controller.signmessage(reg_tx["collateralAddress"], reg_tx["signMessage"])
-        if fSubmit:
-            dmn.proTx = miner.protx_register_submit(reg_tx["tx"], sig)
-        else:
-            return reg_tx["tx"], sig
-
-    """ Create and register new deterministic masternode
-    :param   idx:              (int) index of the (remote) node in self.nodes
-             miner_idx:        (int) index of the miner in self.nodes
-             controller_idx:   (int) index of the controller in self.nodes
-             strType:          (string) "fund"|"internal"|"external"
-             payout_addr:      (string) payee address. If not specified, reuse the collateral address.
-             outpoint:         (COutPoint) collateral outpoint to be used with "external".
-                                 It must be owned by the controller (proTx is sent from the miner).
-                                 If not provided, a new utxo is created, sending it from the miner.
-             op_addr_and_key:  (list of strings) List with two entries, operator address (0) and private key (1).
-                                 If not provided, a new address-key pair is generated.
-    :return: dmn:              (Masternode) the deterministic masternode object
-    """
-    def register_new_dmn(self, idx, miner_idx, controller_idx, strType,
-                         payout_addr=None, outpoint=None, op_addr_and_key=None):
-        # Prepare remote node
-        assert idx != miner_idx
-        assert idx != controller_idx
-        miner_node = self.nodes[miner_idx]
-        controller_node = self.nodes[controller_idx]
-        mn_node = self.nodes[idx]
-
-        # Generate ip and addresses/keys
-        collateral_addr = controller_node.getnewaddress("mncollateral-%d" % idx)
-        if payout_addr is None:
-            payout_addr = collateral_addr
-        dmn = create_new_dmn(idx, controller_node, payout_addr, op_addr_and_key)
-
-        # Create ProRegTx
-        self.log.info("Creating%s proRegTx for deterministic masternode idx=%d..." % (
-            " and funding" if strType == "fund" else "", idx))
-        if strType == "fund":
-            self.protx_register_fund(miner_node, controller_node, dmn, collateral_addr)
-        elif strType == "internal":
-            self.protx_register(miner_node, controller_node, dmn, collateral_addr)
-        elif strType == "external":
-            self.protx_register_ext(miner_node, controller_node, dmn, outpoint, True)
-        else:
-            raise Exception("Type %s not available" % strType)
-        time.sleep(1)
-        self.sync_mempools([miner_node, controller_node])
-
-        # confirm and verify inclusion in list
-        miner_node.generate(1)
-        self.sync_blocks()
-        json_tx = mn_node.getrawtransaction(dmn.proTx, 1)
-        assert_greater_than(json_tx["confirmations"], 0)
-        assert dmn.proTx in mn_node.protx_list(False)
-
-        # check coin locking
-        assert is_coin_locked_by(controller_node, dmn.collateral)
-
-        # check json payload against local dmn object
-        self.check_proreg_payload(dmn, json_tx)
-
-        return dmn
-
-    def check_mn_list_on_node(self, idx, mns):
-        self.nodes[idx].syncwithvalidationinterfacequeue()
-        mnlist = self.nodes[idx].listmasternodes()
-        if len(mnlist) != len(mns):
-            raise Exception("Invalid mn list on node %d:\n%s\nExpected:%s" % (idx, str(mnlist), str(mns)))
-        protxs = [x["proTxHash"] for x in mnlist]
-        for mn in mns:
-            if mn.proTx not in protxs:
-                raise Exception("ProTx for mn %d (%s) not found in the list of node %d" % (mn.idx, mn.proTx, idx))
-
-    def check_proreg_payload(self, dmn, json_tx):
-        assert "payload" in json_tx
-        # null hash if funding collateral
-        collateral_hash = 0 if int(json_tx["txid"], 16) == dmn.collateral.hash \
-                            else dmn.collateral.hash
-        pl = json_tx["payload"]
-        assert_equal(pl["version"], 1)
-        assert_equal(pl["collateralHash"], "%064x" % collateral_hash)
-        assert_equal(pl["collateralIndex"], dmn.collateral.n)
-        assert_equal(pl["service"], dmn.ipport)
-        assert_equal(pl["ownerAddress"], dmn.owner)
-        assert_equal(pl["votingAddress"], dmn.voting)
-        assert_equal(pl["operatorAddress"], dmn.operator)
-        assert_equal(pl["payoutAddress"], dmn.payee)
-
+        # return the collateral id
+        return collateralTxId
 
 ### ------------------------------------------------------
+
+class ComparisonTestFramework(JokeCoinTestFramework):
+    """Test framework for doing p2p comparison testing
+
+    Sets up some jokecoind binaries:
+    - 1 binary: test binary
+    - 2 binaries: 1 test binary, 1 ref binary
+    - n>2 binaries: 1 test binary, n-1 ref binaries"""
+
+    def set_test_params(self):
+        self.num_nodes = 2
+        self.setup_clean_chain = True
+
+    def add_options(self, parser):
+        parser.add_option("--testbinary", dest="testbinary",
+                          default=os.getenv("BITCOIND", "jokecoind"),
+                          help="jokecoind binary to test")
+        parser.add_option("--refbinary", dest="refbinary",
+                          default=os.getenv("BITCOIND", "jokecoind"),
+                          help="jokecoind binary to use for reference nodes (if any)")
+
+    def setup_network(self):
+        extra_args = [['-whitelist=127.0.0.1']] * self.num_nodes
+        if hasattr(self, "extra_args"):
+            extra_args = self.extra_args
+        self.add_nodes(self.num_nodes, extra_args,
+                       binary=[self.options.testbinary] +
+                       [self.options.refbinary] * (self.num_nodes - 1))
+        self.start_nodes()
 
 class SkipTest(Exception):
     """This exception is raised to skip a test"""
@@ -1348,12 +1153,17 @@ class SkipTest(Exception):
 '''
 JokeCoinTestFramework extensions
 '''
-# !TODO: remove after obsoleting legacy system
+
 class JokeCoinTier2TestFramework(JokeCoinTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.num_nodes = 6
+        self.num_nodes = 5
+        self.extra_args = [[],
+                           ["-listen", "-externalip=127.0.0.1"],
+                           [],
+                           ["-listen", "-externalip=127.0.0.1"],
+                           ["-sporkkey=932HEevBSujW2ud7RfB1YF91AFygbBRQj3de3LyaCRqNzKKgWXi"]]
         self.enable_mocktime()
 
         self.ownerOnePos = 0
@@ -1361,12 +1171,6 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
         self.ownerTwoPos = 2
         self.remoteTwoPos = 3
         self.minerPos = 4
-        self.remoteDMN1Pos = 5
-
-        self.extra_args = [["-nuparams=v5_shield:249", "-nuparams=v6_evo:250"]] * self.num_nodes
-        for i in [self.remoteOnePos, self.remoteTwoPos, self.remoteDMN1Pos]:
-            self.extra_args[i] += ["-listen", "-externalip=127.0.0.1"]
-        self.extra_args[self.minerPos].append("-sporkkey=932HEevBSujW2ud7RfB1YF91AFygbBRQj3de3LyaCRqNzKKgWXi")
 
         self.masternodeOneAlias = "mnOne"
         self.masternodeTwoAlias = "mntwo"
@@ -1374,25 +1178,22 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
         self.mnOnePrivkey = "9247iC59poZmqBYt9iDh9wDam6v9S1rW5XekjLGyPnDhrDkP4AK"
         self.mnTwoPrivkey = "92Hkebp3RHdDidGZ7ARgS4orxJAGyFUPDXNqtsYsiwho1HGVRbF"
 
-        # Updated in setup_3_masternodes_network() to be called at the start of run_test
+        # Updated in setup_2_masternodes_network() to be called at the start of run_test
         self.ownerOne = None        # self.nodes[self.ownerOnePos]
         self.remoteOne = None       # self.nodes[self.remoteOnePos]
         self.ownerTwo = None        # self.nodes[self.ownerTwoPos]
         self.remoteTwo = None       # self.nodes[self.remoteTwoPos]
         self.miner = None           # self.nodes[self.minerPos]
-        self.remoteDMN1 = None       # self.nodes[self.remoteDMN1Pos]
-        self.mnOneCollateral = COutPoint()
-        self.mnTwoCollateral = COutPoint()
-        self.proRegTx1 = None       # hash of provider-register-tx
+        self.mnOneTxHash = ""
+        self.mnTwoTxHash = ""
 
 
     def send_3_pings(self):
-        mns = [self.remoteOne, self.remoteTwo]
         self.advance_mocktime(30)
-        self.send_pings(mns)
-        self.stake(1, mns)
+        self.send_pings([self.remoteOne, self.remoteTwo])
+        self.stake(1, [self.remoteOne, self.remoteTwo])
         self.advance_mocktime(30)
-        self.send_pings(mns)
+        self.send_pings([self.remoteOne, self.remoteTwo])
         time.sleep(2)
 
     def stake(self, num_blocks, with_ping_mns=[]):
@@ -1401,12 +1202,12 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
     def controller_start_all_masternodes(self):
         self.controller_start_masternode(self.ownerOne, self.masternodeOneAlias)
         self.controller_start_masternode(self.ownerTwo, self.masternodeTwoAlias)
-        self.wait_until_mn_preenabled(self.mnOneCollateral.hash, 40)
-        self.wait_until_mn_preenabled(self.mnTwoCollateral.hash, 40)
+        self.wait_until_mn_preenabled(self.mnOneTxHash, 40)
+        self.wait_until_mn_preenabled(self.mnTwoTxHash, 40)
         self.log.info("masternodes started, waiting until both get enabled..")
         self.send_3_pings()
-        self.wait_until_mn_enabled(self.mnOneCollateral.hash, 120, [self.remoteOne, self.remoteTwo])
-        self.wait_until_mn_enabled(self.mnTwoCollateral.hash, 120, [self.remoteOne, self.remoteTwo])
+        self.wait_until_mn_enabled(self.mnOneTxHash, 120, [self.remoteOne, self.remoteTwo])
+        self.wait_until_mn_enabled(self.mnTwoTxHash, 120, [self.remoteOne, self.remoteTwo])
         self.log.info("masternodes enabled and running properly!")
 
     def advance_mocktime_and_stake(self, secs_to_add):
@@ -1414,27 +1215,26 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
         self.mocktime = self.generate_pos(self.minerPos, self.mocktime)
         time.sleep(2)
 
-    def setup_3_masternodes_network(self):
+    def setup_2_masternodes_network(self):
         self.ownerOne = self.nodes[self.ownerOnePos]
         self.remoteOne = self.nodes[self.remoteOnePos]
         self.ownerTwo = self.nodes[self.ownerTwoPos]
         self.remoteTwo = self.nodes[self.remoteTwoPos]
         self.miner = self.nodes[self.minerPos]
-        self.remoteDMN1 = self.nodes[self.remoteDMN1Pos]
-        ownerOneDir = os.path.join(self.options.tmpdir, "node%d" % self.ownerOnePos)
-        ownerTwoDir = os.path.join(self.options.tmpdir, "node%d" % self.ownerTwoPos)
+        ownerOneDir = os.path.join(self.options.tmpdir, "node0")
+        ownerTwoDir = os.path.join(self.options.tmpdir, "node2")
 
-        self.log.info("generating 256 blocks..")
+        self.log.info("generating 259 blocks..")
         # First mine 250 PoW blocks
         for i in range(250):
             self.mocktime = self.generate_pow(self.minerPos, self.mocktime)
         self.sync_blocks()
         # Then start staking
-        self.stake(6)
+        self.stake(9)
 
         self.log.info("masternodes setup..")
         # setup first masternode node, corresponding to nodeOne
-        self.mnOneCollateral = self.setupMasternode(
+        self.mnOneTxHash = self.setupMasternode(
             self.ownerOne,
             self.miner,
             self.masternodeOneAlias,
@@ -1442,20 +1242,13 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
             self.remoteOnePos,
             self.mnOnePrivkey)
         # setup second masternode node, corresponding to nodeTwo
-        self.mnTwoCollateral = self.setupMasternode(
+        self.mnTwoTxHash = self.setupMasternode(
             self.ownerTwo,
             self.miner,
             self.masternodeTwoAlias,
             os.path.join(ownerTwoDir, "regtest"),
             self.remoteTwoPos,
             self.mnTwoPrivkey)
-        # setup deterministic masternode
-        self.proRegTx1, self.dmn1Privkey = self.setupDMN(
-            self.ownerOne,
-            self.miner,
-            self.remoteDMN1Pos,
-            "fund"
-        )
 
         self.log.info("masternodes setup completed, initializing them..")
 
@@ -1467,7 +1260,6 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
         remoteTwoPort = p2p_port(self.remoteTwoPos)
         self.remoteOne.initmasternode(self.mnOnePrivkey, "127.0.0.1:"+str(remoteOnePort))
         self.remoteTwo.initmasternode(self.mnTwoPrivkey, "127.0.0.1:"+str(remoteTwoPort))
-        self.remoteDMN1.initmasternode(self.dmn1Privkey, "", True)
 
         # wait until mnsync complete on all nodes
         self.stake(1)
@@ -1476,16 +1268,3 @@ class JokeCoinTier2TestFramework(JokeCoinTestFramework):
 
         # Now everything is set, can start both masternodes
         self.controller_start_all_masternodes()
-
-    def spend_collateral(self, mnOwner, collateralOutpoint, miner):
-        send_value = satoshi_round(100 - 0.001)
-        inputs = [{'txid': collateralOutpoint.hash, 'vout': collateralOutpoint.n}]
-        outputs = {}
-        outputs[mnOwner.getnewaddress()] = float(send_value)
-        rawtx = mnOwner.createrawtransaction(inputs, outputs)
-        signedtx = mnOwner.signrawtransaction(rawtx)
-        txid = miner.sendrawtransaction(signedtx['hex'])
-        self.sync_mempools()
-        self.log.info("Collateral spent in %s" % txid)
-        self.send_pings([self.remoteTwo])
-        self.stake(1, [self.remoteTwo])

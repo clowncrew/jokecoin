@@ -12,7 +12,7 @@
 #include "masternodeconfig.h"
 #include "noui.h"
 #include "rpc/server.h"
-#include "util/system.h"
+#include "util.h"
 
 #include <stdio.h>
 
@@ -82,14 +82,14 @@ bool AppInit(int argc, char* argv[])
             return false;
         }
         try {
-            gArgs.ReadConfigFile(gArgs.GetArg("-conf", JokeCoin_CONF_FILENAME));
+            gArgs.ReadConfigFile();
         } catch (const std::exception& e) {
             fprintf(stderr, "Error reading configuration file: %s\n", e.what());
             return false;
         }
         // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
         try {
-            SelectParams(gArgs.GetChainName());
+            SelectParams(ChainNameFromCommandLine());
         } catch(const std::exception& e) {
             fprintf(stderr, "Error: %s\n", e.what());
             return false;
@@ -105,12 +105,12 @@ bool AppInit(int argc, char* argv[])
         // Error out when loose non-argument tokens are encountered on command line
         for (int i = 1; i < argc; i++) {
             if (!IsSwitchChar(argv[i][0])) {
-                fprintf(stderr, "Error: Command line contains unexpected token '%s', see jokecoind -h for a list of options.\n", argv[i]);
+                fprintf(stderr, "Error: Command line contains unexpected token '%s', see bitcoind -h for a list of options.\n", argv[i]);
                 exit(EXIT_FAILURE);
             }
         }
 
-        // -server defaults to true for jokecoind but not for the GUI so do this here
+        // -server defaults to true for bitcoind but not for the GUI so do this here
         gArgs.SoftSetBoolArg("-server", true);
         // Set this early so that parameter interactions go to console
         InitLogging();

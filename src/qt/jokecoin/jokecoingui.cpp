@@ -19,7 +19,7 @@
 #include "qt/jokecoin/defaultdialog.h"
 
 #include "init.h"
-#include "util/system.h"
+#include "util.h"
 
 #include <QApplication>
 #include <QColor>
@@ -59,7 +59,7 @@ JokeCoinGUI::JokeCoinGUI(const NetworkStyle* networkStyle, QWidget* parent) :
 
 #ifdef ENABLE_WALLET
     /* if compiled with wallet support, -disablewallet can still disable the wallet */
-    enableWallet = !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
+    enableWallet = !gArgs.GetBoolArg("-disablewallet", false);
 #else
     enableWallet = false;
 #endif // ENABLE_WALLET
@@ -657,7 +657,7 @@ void JokeCoinGUI::incomingTransaction(const QString& date, int unit, const CAmou
     // Only send notifications when not disabled
     if (!bdisableSystemnotifications) {
         // On new transaction, make an info balloon
-        message(amount < 0 ? tr("Sent transaction") : tr("Incoming transaction"),
+        message((amount) < 0 ? (pwalletMain->fMultiSendNotify == true ? tr("Sent MultiSend transaction") : tr("Sent transaction")) : tr("Incoming transaction"),
             tr("Date: %1\n"
                "Amount: %2\n"
                "Type: %3\n"
@@ -667,6 +667,8 @@ void JokeCoinGUI::incomingTransaction(const QString& date, int unit, const CAmou
                 .arg(type)
                 .arg(address),
             CClientUIInterface::MSG_INFORMATION);
+
+        pwalletMain->fMultiSendNotify = false;
     }
 }
 

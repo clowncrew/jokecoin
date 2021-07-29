@@ -8,7 +8,7 @@
 #include "noui.h"
 
 #include "guiinterface.h"
-#include "util/system.h"
+#include "util.h"
 
 #include <cstdio>
 #include <stdint.h>

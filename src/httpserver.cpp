@@ -1,5 +1,5 @@
-// Copyright (c) 2015-2021 The Bitcoin Core developers
-// Copyright (c) 2018-2021 The JokeCoin developers
+// Copyright (c) 2015 The Bitcoin Core developers
+// Copyright (c) 2018-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,7 +7,7 @@
 
 #include "chainparamsbase.h"
 #include "compat.h"
-#include "util/system.h"
+#include "util.h"
 #include "netbase.h"
 #include "rpc/protocol.h" // For HTTP status codes
 #include "sync.h"
@@ -678,16 +678,4 @@ void UnregisterHTTPHandler(const std::string &prefix, bool exactMatch)
         LogPrint(BCLog::HTTP, "Unregistering HTTP handler for %s (exactmatch %d)\n", prefix, exactMatch);
         pathHandlers.erase(i);
     }
-}
-
-std::string urlDecode(const std::string &urlEncoded) {
-    std::string res;
-    if (!urlEncoded.empty()) {
-        char *decoded = evhttp_uridecode(urlEncoded.c_str(), false, NULL);
-        if (decoded) {
-            res = std::string(decoded);
-            free(decoded);
-        }
-    }
-    return res;
 }

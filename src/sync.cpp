@@ -5,15 +5,14 @@
 
 #include "sync.h"
 
-#include "logging.h"
+#include <memory>
+#include <set>
+
+#include "util.h"
 #include "utilstrencodings.h"
 #include "util/threadnames.h"
 
 #include <stdio.h>
-
-#include <map>
-#include <memory>
-#include <set>
 
 #ifdef DEBUG_LOCKCONTENTION
 #if !defined(HAVE_THREAD_LOCAL)

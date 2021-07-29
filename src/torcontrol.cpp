@@ -10,7 +10,7 @@
 #include "utilstrencodings.h"
 #include "netbase.h"
 #include "net.h"
-#include "util/system.h"
+#include "util.h"
 #include "crypto/hmac_sha256.h"
 
 #include <vector>
@@ -663,7 +663,7 @@ void TorController::protocolinfo_cb(TorControlConnection& _conn, const TorContro
                 // _conn.Command("AUTHENTICATE " + HexStr(status_cookie.second), std::bind(&TorController::auth_cb, this, std::placeholders::_1, std::placeholders::_2));
                 cookie = std::vector<uint8_t>(status_cookie.second.begin(), status_cookie.second.end());
                 clientNonce = std::vector<uint8_t>(TOR_NONCE_SIZE, 0);
-                GetRandBytes(clientNonce.data(), TOR_NONCE_SIZE);
+                GetRandBytes(&clientNonce[0], TOR_NONCE_SIZE);
                 _conn.Command("AUTHCHALLENGE SAFECOOKIE " + HexStr(clientNonce), std::bind(&TorController::authchallenge_cb, this, std::placeholders::_1, std::placeholders::_2));
             } else {
                 if (status_cookie.first) {

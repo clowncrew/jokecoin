@@ -102,13 +102,9 @@ public:
     CScript scriptSig;
     uint32_t nSequence;
 
-    /* Setting nSequence to this value for every input in a transaction
-     * disables nLockTime. */
-    static const uint32_t SEQUENCE_FINAL = 0xffffffff;
-
-    CTxIn() { nSequence = SEQUENCE_FINAL; }
-    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=SEQUENCE_FINAL);
-    CTxIn(uint256 hashPrevTx, uint32_t nOut, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=SEQUENCE_FINAL);
+    CTxIn() { nSequence = std::numeric_limits<unsigned int>::max(); }
+    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=std::numeric_limits<unsigned int>::max());
+    CTxIn(uint256 hashPrevTx, uint32_t nOut, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=std::numeric_limits<uint32_t>::max());
 
     ADD_SERIALIZE_METHODS;
 
@@ -119,7 +115,7 @@ public:
         READWRITE(nSequence);
     }
 
-    bool IsFinal() const { return nSequence == SEQUENCE_FINAL; }
+    bool IsFinal() const { return nSequence == std::numeric_limits<uint32_t>::max(); }
     bool IsNull() const { return prevout.IsNull() && scriptSig.empty() && IsFinal(); }
 
     bool IsZerocoinSpend() const;
@@ -272,7 +268,6 @@ public:
     /** Transaction types */
     enum TxType: int16_t {
         NORMAL = 0,
-        PROREG = 1,
     };
 
     static const int16_t CURRENT_VERSION = TxVersion::LEGACY;
@@ -389,7 +384,7 @@ public:
 
     bool IsCoinBase() const
     {
-        return (vin.size() == 1 && vin[0].prevout.IsNull() && !vin[0].scriptSig.IsZerocoinSpend());
+        return (vin.size() == 1 && vin[0].prevout.IsNull() && !ContainsZerocoins());
     }
 
     bool IsCoinStake() const;
@@ -453,11 +448,6 @@ struct CMutableTransaction
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */
     uint256 GetHash() const;
-
-    bool hasExtraPayload() const
-    {
-        return extraPayload != nullopt && !extraPayload->empty();
-    }
 
     // Ensure that special and sapling fields are signed
     SigVersion GetRequiredSigVersion() const

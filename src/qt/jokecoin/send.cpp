@@ -73,7 +73,7 @@ SendWidget::SendWidget(JokeCoinGUI* parent) :
 
     // Uri
     ui->btnUri->setTitleClassAndText("btn-title-grey", tr("Open URI"));
-    ui->btnUri->setSubTitleClassAndText("text-subtitle", tr("Parse a JokeCoin URI"));
+    ui->btnUri->setSubTitleClassAndText("text-subtitle", tr("Parse a payment request"));
 
     // Shield coins
     ui->btnShieldCoins->setTitleClassAndText("btn-title-grey", tr("Shield Coins"));
@@ -415,6 +415,11 @@ void SendWidget::ProcessSend(QList<SendCoinsRecipient>& recipients, bool hasShie
     // First check SPORK_20 (before unlock)
     bool isShieldedTx = hasShieldedOutput || !isTransparent;
     if (isShieldedTx) {
+        if (!walletModel->isSaplingEnforced()) {
+            inform(tr("Cannot perform shielded operations, v5 upgrade isn't being enforced yet!"));
+            return;
+        }
+
         if (walletModel->isSaplingInMaintenance()) {
             inform(tr("Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)"));
             return;
@@ -697,8 +702,8 @@ void SendWidget::onCoinControlClicked()
 
 void SendWidget::onShieldCoinsClicked()
 {
-    if (walletModel->isSaplingInMaintenance()) {
-        inform(tr("Sapling Protocol temporarily in maintenance. Shielded transactions disabled (SPORK 20)"));
+    if (!walletModel->isSaplingEnforced()) {
+        inform(tr("Cannot perform shielded operations, v5 upgrade isn't being enforced yet!"));
         return;
     }
 
@@ -787,6 +792,13 @@ void SendWidget::onCheckBoxChanged()
 void SendWidget::onJOKESelected(bool _isTransparent)
 {
     isTransparent = _isTransparent;
+
+    if (!isTransparent && !walletModel->isSaplingEnforced()) {
+        ui->pushLeft->setChecked(true);
+        inform(tr("Cannot perform shielded operations, v5 upgrade isn't being enforced yet!"));
+        return;
+    }
+
     resetChangeAddress();
     resetCoinControl();
     tryRefreshAmounts();

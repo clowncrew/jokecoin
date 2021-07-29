@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[jokecoin-project-translations.qt-translation-50x]
+[jokecoin-project-translations.qt-translation-52x]
 file_filter = src/qt/locale/jokecoin_<lang>.ts
 source_file = src/qt/locale/jokecoin_en.ts
 source_lang = en

@@ -5,7 +5,7 @@
 
 #include "consensus/params.h"
 #include "consensus/upgrades.h"
-#include "util/system.h"
+#include "util.h"
 
 namespace Consensus {
 

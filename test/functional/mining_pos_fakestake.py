@@ -114,7 +114,7 @@ class FakeStakeTest(JokeCoinTestFramework):
         # nodes[0] mines 5 blocks (251-255) to be used as buffer for adding the fork chain later
         self.log.info("Mining 5 blocks as fork depth...")
         for i in range(5):
-            self.mocktime = self.generate_pos(0, self.mocktime)
+            self.mocktime = self.generate_pow(0, self.mocktime)
         self.sync_blocks()
 
         # nodes[1] spams 3 blocks with height 256 --> [REJECTED]
@@ -136,7 +136,7 @@ class FakeStakeTest(JokeCoinTestFramework):
         # nodes[0] mines 5 more blocks (256-260) to include the spends
         self.log.info("Mining 5 blocks to include the spends...")
         for i in range(5):
-            self.mocktime = self.generate_pos(0, self.mocktime)
+            self.mocktime = self.generate_pow(0, self.mocktime)
         self.sync_blocks()
         self.check_tx_in_chain(0, txid)
         assert_equal(self.nodes[1].getbalance(), 0)

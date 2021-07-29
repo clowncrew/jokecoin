@@ -7,7 +7,7 @@
 
 #include "sync.h"
 #include "clientversion.h"
-#include "util/system.h"
+#include "util.h"
 
 RecursiveMutex cs_warnings;
 std::string strMiscWarning;

@@ -57,12 +57,12 @@ BOOST_AUTO_TEST_CASE(extract_cold_staking_destination_keys)
     CheckValidKeyId(destVector[1], ownerId);
 }
 
-static CScript GetNewP2CS(CKey& stakerKey, CKey& ownerKey, bool fLastOutFree)
+static CScript GetNewP2CS(CKey& stakerKey, CKey& ownerKey)
 {
-    stakerKey = DecodeSecret("YNdsth3BsW53DYmCiR12SofWSAt2utXQUSGoin3PekVQCMbzfS7E");
-    ownerKey = DecodeSecret("YUo8oW3y8cUQdQxQxCdnUJ4Ww5H7nHBEMwD2bNDpBbuLM59t4rvd");
-    return fLastOutFree ? GetScriptForStakeDelegationLOF(stakerKey.GetPubKey().GetID(), ownerKey.GetPubKey().GetID())
-                        : GetScriptForStakeDelegation(stakerKey.GetPubKey().GetID(), ownerKey.GetPubKey().GetID());
+    stakerKey = DecodeSecret("91yo52JPHDVUG3jXWLKGyzEdjn1a9nbnurLdmQEf2UzbgzkTc2c");
+    ownerKey = DecodeSecret("92KgNFNfmVVJRQuzssETc7NhwufGuHsLvPQxW9Nwmxs7PB4ByWB");
+    return GetScriptForStakeDelegation(stakerKey.GetPubKey().GetID(),
+                                       ownerKey.GetPubKey().GetID());
 }
 
 static CScript GetDummyP2CS(const CKeyID& dummyKeyID)
@@ -78,9 +78,9 @@ static CScript GetDummyP2PKH(const CKeyID& dummyKeyID)
 static const CAmount amtIn = 200 * COIN;
 static const unsigned int flags = STANDARD_SCRIPT_VERIFY_FLAGS;
 
-static CMutableTransaction CreateNewColdStakeTx(CScript& scriptP2CS, CKey& stakerKey, CKey& ownerKey, bool fLastOutFree)
+static CMutableTransaction CreateNewColdStakeTx(CScript& scriptP2CS, CKey& stakerKey, CKey& ownerKey)
 {
-    scriptP2CS = GetNewP2CS(stakerKey, ownerKey, fLastOutFree);
+    scriptP2CS = GetNewP2CS(stakerKey, ownerKey);
 
     // Create prev transaction:
     CMutableTransaction txFrom;
@@ -122,13 +122,14 @@ static bool CheckP2CSScript(const CScript& scriptSig, const CScript& scriptPubKe
     return VerifyScript(scriptSig, scriptPubKey, flags, MutableTransactionSignatureChecker(&tx, 0, amtIn), tx.GetRequiredSigVersion(), &err);
 }
 
-BOOST_AUTO_TEST_CASE(coldstake_lof_script)
+BOOST_AUTO_TEST_CASE(coldstake_script)
 {
+    SelectParams(CBaseChainParams::REGTEST);
     CScript scriptP2CS;
     CKey stakerKey, ownerKey;
 
     // create unsigned coinstake transaction
-    CMutableTransaction good_tx = CreateNewColdStakeTx(scriptP2CS, stakerKey, ownerKey, true);
+    CMutableTransaction good_tx = CreateNewColdStakeTx(scriptP2CS, stakerKey, ownerKey);
 
     // sign the input with the staker key
     SignColdStake(good_tx, 0, scriptP2CS, stakerKey, true);
@@ -149,7 +150,7 @@ BOOST_AUTO_TEST_CASE(coldstake_lof_script)
     SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
     BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
 
-    const CKey& dummyKey = DecodeSecret("YNdsth3BsW53DYmCiR12SofWSAt2utXQUSGoin3PekVQCMbzfS7E");
+    const CKey& dummyKey = DecodeSecret("91t7cwPGevo885Uccg87nVjzUxKhXta9JprHM3R21PQkBFMFg2i");
     const CKeyID& dummyKeyID = dummyKey.GetPubKey().GetID();
     const CScript& dummyP2PKH = GetDummyP2PKH(dummyKeyID);
 
@@ -170,78 +171,6 @@ BOOST_AUTO_TEST_CASE(coldstake_lof_script)
     tx.vout[1].nValue -= 3 * COIN;
     tx.vout.emplace_back(3 * COIN, dummyP2PKH);
     tx.vout.emplace_back(3 * COIN, dummyP2PKH);
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
-    // -- but the owner can
-    SignColdStake(tx, 0, scriptP2CS, ownerKey, false);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-
-    // Replace with new p2cs
-    tx = good_tx;
-    tx.vout[1].scriptPubKey = GetDummyP2CS(dummyKeyID);
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
-    // -- but the owner can
-    SignColdStake(tx, 0, scriptP2CS, ownerKey, false);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-
-    // Replace with single dummy out
-    tx = good_tx;
-    tx.vout[1] = CTxOut(COIN, dummyP2PKH);
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
-    // -- but the owner can
-    SignColdStake(tx, 0, scriptP2CS, ownerKey, false);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-}
-
-BOOST_AUTO_TEST_CASE(coldstake_script)
-{
-    CScript scriptP2CS;
-    CKey stakerKey, ownerKey;
-
-    // create unsigned coinstake transaction
-    CMutableTransaction good_tx = CreateNewColdStakeTx(scriptP2CS, stakerKey, ownerKey, false);
-
-    // sign the input with the staker key
-    SignColdStake(good_tx, 0, scriptP2CS, stakerKey, true);
-
-    // check the signature and script
-    ScriptError err = SCRIPT_ERR_OK;
-    CMutableTransaction tx(good_tx);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-
-    // pay less than expected
-    tx.vout[1].nValue -= 3 * COIN;
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
-
-    // Add another p2cs out
-    tx.vout.emplace_back(3 * COIN, scriptP2CS);
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-
-    const CKey& dummyKey = DecodeSecret("YNdsth3BsW53DYmCiR12SofWSAt2utXQUSGoin3PekVQCMbzfS7E");
-    const CKeyID& dummyKeyID = dummyKey.GetPubKey().GetID();
-    const CScript& dummyP2PKH = GetDummyP2PKH(dummyKeyID);
-
-    // Add a dummy P2PKH out at the end
-    tx.vout.emplace_back(3 * COIN, dummyP2PKH);
-    SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
-    BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
-    // -- but the owner can
-    SignColdStake(tx, 0, scriptP2CS, ownerKey, false);
-    BOOST_CHECK(CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
-
-    // Add a dummy P2PKH out at the beginning
-    tx = good_tx;
-    tx.vout[1] = CTxOut(3 * COIN, dummyP2PKH);
-    tx.vout.emplace_back(3 * COIN, scriptP2CS);
     SignColdStake(tx, 0, scriptP2CS, stakerKey, true);
     BOOST_CHECK(!CheckP2CSScript(tx.vin[0].scriptSig, scriptP2CS, tx, err));
     BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_CHECKCOLDSTAKEVERIFY, ScriptErrorString(err));
@@ -305,7 +234,7 @@ static void setupWallet(CWallet& wallet)
 
 BOOST_AUTO_TEST_CASE(fake_script_test)
 {
-    BOOST_ASSERT(!g_IsV6Active);
+    BOOST_ASSERT(!g_newP2CSRules);
 
     CWallet& wallet = *pwalletMain;
     LOCK(wallet.cs_wallet);
@@ -322,8 +251,8 @@ BOOST_AUTO_TEST_CASE(fake_script_test)
     const CScript& scriptP2CS = GetFakeLockingScript(stakerId, ownerId);
 
     // Create prev transaction:
-    // It has two outputs. The first one is spent before v6.
-    // The second one is tested after v6 enforcement.
+    // It has two outputs. The first one is spent before v5.2.
+    // The second one is tested after v5.2 enforcement.
     CMutableTransaction txFrom;
     txFrom.vout.resize(2);
     for (size_t i = 0; i < 2; i++) {
@@ -361,8 +290,8 @@ BOOST_AUTO_TEST_CASE(fake_script_test)
     wallet.AddToWallet({&wallet, MakeTransactionRef(CTransaction(tx))});
     BOOST_CHECK_EQUAL(wallet.GetWalletTx(txFrom.GetHash())->GetAvailableCredit(false, ISMINE_SPENDABLE_TRANSPARENT), amtIn);
 
-    // Now let's activate v6
-    g_IsV6Active = true;
+    // Now let's activate new rules
+    g_newP2CSRules = true;
 
     // it does NOT pass IsPayToColdStaking
     BOOST_CHECK_MESSAGE(!scriptP2CS.IsPayToColdStaking(), "Fake script passes as P2CS");
@@ -370,5 +299,6 @@ BOOST_AUTO_TEST_CASE(fake_script_test)
     // the output amount is NOT credited to the owner wallet
     BOOST_CHECK_EQUAL(wallet.GetWalletTx(txFrom.GetHash())->GetAvailableCredit(false, ISMINE_SPENDABLE_TRANSPARENT), 0);
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()

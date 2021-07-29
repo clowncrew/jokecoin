@@ -161,16 +161,13 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(payee);
+        READWRITE(*(CScriptBase*)(&payee));
         READWRITE(nAmount);
         READWRITE(nProposalHash);
     }
 
     // compare payments by proposal hash
-    inline bool operator>(const CTxBudgetPayment& other) const
-    {
-        return UintToArith256(nProposalHash) > UintToArith256(other.nProposalHash);
-    }
+    inline bool operator>(const CTxBudgetPayment& other) const { return nProposalHash > other.nProposalHash; }
 
 };
 

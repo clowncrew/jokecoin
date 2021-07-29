@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "mintpool.h"
-#include "util/system.h"
+#include "util.h"
 
 
 CMintPool::CMintPool()

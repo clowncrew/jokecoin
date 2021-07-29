@@ -68,8 +68,7 @@ public:
     std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn,
                                    CWallet* pwallet = nullptr,
                                    bool fProofOfStake = false,
-                                   std::vector<CStakeableOutput>* availableCoins = nullptr,
-                                   bool fNoMempoolTx = false);
+                                   std::vector<CStakeableOutput>* availableCoins = nullptr);
 
 private:
     // utility functions
@@ -93,15 +92,13 @@ private:
     bool isStillDependent(CTxMemPool::txiter iter);
 };
 
-/** Modify the nonce/extranonce in a block */
-bool SolveBlock(std::shared_ptr<CBlock>& pblock, int nHeight);
-void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, int nHeight, unsigned int& nExtraNonce);
+/** Modify the extranonce in a block */
+void IncrementExtraNonce(std::shared_ptr<CBlock>& pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 int32_t ComputeBlockVersion(const Consensus::Params& consensusParams, int nHeight);
 
 // Visible for testing purposes only
 bool CreateCoinbaseTx(CBlock* pblock, const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev);
-CMutableTransaction CreateCoinbaseTx(const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev);
 
 // Visible for testing purposes only
 uint256 CalculateSaplingTreeRoot(CBlock* pblock, int nHeight, const CChainParams& chainparams);

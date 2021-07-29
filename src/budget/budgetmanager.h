@@ -9,8 +9,6 @@
 #include "budget/budgetproposal.h"
 #include "budget/finalizedbudget.h"
 
-class CValidationState;
-
 //
 // Budget Manager : Contains all proposals for the budget
 //
@@ -99,10 +97,9 @@ public:
 
     int ProcessBudgetVoteSync(const uint256& nProp, CNode* pfrom);
     int ProcessProposal(CBudgetProposal& proposal);
-    int ProcessFinalizedBudget(CFinalizedBudget& finalbudget);
-
-    bool ProcessProposalVote(CBudgetVote& proposal, CNode* pfrom, CValidationState& state);
-    bool ProcessFinalizedBudgetVote(CFinalizedBudgetVote& vote, CNode* pfrom, CValidationState& state);
+    int ProcessProposalVote(CBudgetVote& proposal, CNode* pfrom);
+    int ProcessFinalizedBudget(CFinalizedBudget& finalbudget, CNode* pfrom);
+    int ProcessFinalizedBudgetVote(CFinalizedBudgetVote& vote, CNode* pfrom);
 
     // functions returning a pointer in the map. Need cs_proposals/cs_budgets locked from the caller
     CBudgetProposal* FindProposal(const uint256& nHash);
@@ -121,15 +118,14 @@ public:
     bool IsBudgetPaymentBlock(int nBlockHeight) const;
     bool IsBudgetPaymentBlock(int nBlockHeight, int& nCountThreshold) const;
     bool AddProposal(CBudgetProposal& budgetProposal);
-    bool AddFinalizedBudget(CFinalizedBudget& finalizedBudget);
-    void ForceAddFinalizedBudget(const uint256& nHash, const uint256& feeTxId, const CFinalizedBudget& finalizedBudget);
+    bool AddFinalizedBudget(CFinalizedBudget& finalizedBudget, CNode* pfrom = nullptr);
     uint256 SubmitFinalBudget();
 
     bool UpdateProposal(const CBudgetVote& vote, CNode* pfrom, std::string& strError);
     bool UpdateFinalizedBudget(CFinalizedBudgetVote& vote, CNode* pfrom, std::string& strError);
     TrxValidationStatus IsTransactionValid(const CTransaction& txNew, const uint256& nBlockHash, int nBlockHeight) const;
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    bool FillBlockPayee(CMutableTransaction& txCoinbase, CMutableTransaction& txCoinstake, const int nHeight, bool fProofOfStake) const;
+    bool FillBlockPayee(CMutableTransaction& txNew, const int nHeight, bool fProofOfStake) const;
 
     // Only initialized masternodes: sign and submit votes on valid finalized budgets
     void VoteOnFinalizedBudgets();

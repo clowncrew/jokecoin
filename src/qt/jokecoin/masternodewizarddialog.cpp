@@ -11,7 +11,6 @@
 #include "qt/jokecoin/mnmodel.h"
 #include "qt/jokecoin/guitransactionsutils.h"
 #include "qt/jokecoin/qtutils.h"
-#include "qt/walletmodeltransaction.h"
 
 #include <QFile>
 #include <QIntValidator>
@@ -263,7 +262,7 @@ bool MasterNodeWizardDialog::createMN()
         int indexOut = -1;
         for (int i=0; i < (int)walletTx->vout.size(); i++) {
             const CTxOut& out = walletTx->vout[i];
-            if (out.nValue == Params().GetConsensus().nMNCollateralAmt) {
+            if (out.nValue == MN_COLL_AMT) {
                 indexOut = i;
                 break;
             }

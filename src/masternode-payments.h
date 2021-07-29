@@ -17,7 +17,6 @@ extern RecursiveMutex cs_mapMasternodePayeeVotes;
 class CMasternodePayments;
 class CMasternodePaymentWinner;
 class CMasternodeBlockPayees;
-class CValidationState;
 
 extern CMasternodePayments masternodePayments;
 
@@ -25,16 +24,10 @@ extern CMasternodePayments masternodePayments;
 #define MNPAYMENTS_SIGNATURES_TOTAL 10
 
 void ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
-bool IsBlockPayeeValid(const CBlock& block, const CBlockIndex* pindexPrev);
+bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight);
 std::string GetRequiredPaymentsString(int nBlockHeight);
-bool IsBlockValueValid(int nHeight, CAmount& nExpectedValue, CAmount nMinted, CAmount& nBudgetAmt);
-void FillBlockPayee(CMutableTransaction& txCoinbase, CMutableTransaction& txCoinstake, const CBlockIndex* pindexPrev, bool fProofOfStake);
-
-/**
- * Check coinbase output value for blocks v10+.
- * It must pay the masternode for regular blocks and a proposal during superblocks.
- */
-bool IsCoinbaseValueValid(const CTransactionRef& tx, CAmount nBudgetAmt, CValidationState& _state);
+bool IsBlockValueValid(int nHeight, CAmount& nExpectedValue, CAmount nMinted);
+void FillBlockPayee(CMutableTransaction& txNew, const int nHeight, bool fProofOfStake);
 
 void DumpMasternodePayments();
 
@@ -85,7 +78,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(scriptPubKey);
+        READWRITE(*(CScriptBase*)(&scriptPubKey));
         READWRITE(nVotes);
     }
 };
@@ -123,12 +116,12 @@ public:
         vecPayments.push_back(c);
     }
 
-    bool GetPayee(CScript& payee) const
+    bool GetPayee(CScript& payee)
     {
         LOCK(cs_vecPayments);
 
         int nVotes = -1;
-        for (const CMasternodePayee& p : vecPayments) {
+        for (CMasternodePayee& p : vecPayments) {
             if (p.nVotes > nVotes) {
                 payee = p.scriptPubKey;
                 nVotes = p.nVotes;
@@ -177,10 +170,10 @@ public:
         payee()
     {}
 
-    CMasternodePaymentWinner(const CTxIn& vinIn, int nHeight):
+    CMasternodePaymentWinner(CTxIn vinIn) :
         CSignedMessage(),
         vinMasternode(vinIn),
-        nBlockHeight(nHeight),
+        nBlockHeight(0),
         payee()
     {}
 
@@ -206,7 +199,7 @@ public:
     {
         READWRITE(vinMasternode);
         READWRITE(nBlockHeight);
-        READWRITE(payee);
+        READWRITE(*(CScriptBase*)(&payee));
         READWRITE(vchSig);
         try
         {
@@ -255,19 +248,13 @@ public:
     }
 
     bool AddWinningMasternode(CMasternodePaymentWinner& winner);
-    void ProcessBlock(int nBlockHeight);
+    bool ProcessBlock(int nBlockHeight);
 
     void Sync(CNode* node, int nCountNeeded);
     void CleanPaymentList(int mnCount, int nHeight);
 
-    // get the masternode payment outs for block built on top of pindexPrev
-    bool GetMasternodeTxOuts(const CBlockIndex* pindexPrev, std::vector<CTxOut>& voutMasternodePaymentsRet) const;
-
-    // can be removed after transition to DMN
-    bool GetLegacyMasternodeTxOut(int nHeight, std::vector<CTxOut>& voutMasternodePaymentsRet) const;
-    bool GetBlockPayee(int nBlockHeight, CScript& payee) const;
-
-    bool IsTransactionValid(const CTransaction& txNew, const CBlockIndex* pindexPrev);
+    bool GetBlockPayee(int nBlockHeight, CScript& payee);
+    bool IsTransactionValid(const CTransaction& txNew, int nBlockHeight);
     bool IsScheduled(const CMasternode& mn, int nNotBlockHeight);
 
     bool CanVote(const COutPoint& outMasternode, int nBlockHeight)
@@ -287,7 +274,7 @@ public:
 
     void ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txCoinbase, CMutableTransaction& txCoinstake, const CBlockIndex* pindexPrev, bool fProofOfStake) const;
+    void FillBlockPayee(CMutableTransaction& txNew, const int nHeight, bool fProofOfStake);
     std::string ToString() const;
 
     ADD_SERIALIZE_METHODS;

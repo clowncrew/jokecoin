@@ -68,7 +68,7 @@ class ReorgStakeTest(JokeCoinTestFramework):
         # JOKE supply: block rewards
         expected_money_supply = 250.0 * 200
         self.check_money_supply(expected_money_supply)
-        initial_time = self.mocktime
+        block_time_0 = block_time_1 = self.mocktime
 
         # Check balances
         self.log.info("Checking balances...")
@@ -83,7 +83,9 @@ class ReorgStakeTest(JokeCoinTestFramework):
         # Stake one block with node-0 and save the stake input
         self.log.info("Staking 1 block with node 0...")
         initial_unspent_0 = self.nodes[0].listunspent()
-        self.mocktime = self.generate_pos(0, self.mocktime)
+        self.nodes[0].generate(1)
+        block_time_0 += 60
+        set_node_times(self.nodes, block_time_0)
         last_block = self.nodes[0].getblock(self.nodes[0].getbestblockhash())
         assert(len(last_block["tx"]) > 1)   # a PoS block has at least two txes
         coinstake_txid = last_block["tx"][1]
@@ -102,7 +104,7 @@ class ReorgStakeTest(JokeCoinTestFramework):
         # Stake 10 more blocks with node-0 and check balances
         self.log.info("Staking 10 more blocks with node 0...")
         for i in range(10):
-            self.mocktime = self.generate_pos(0, self.mocktime)
+            block_time_0 = self.generate_pos(0, block_time_0)
         expected_balance_0 = initial_balance[0] + DecimalAmt(11 * 250.0)
         assert_equal(self.get_tot_balance(0), expected_balance_0)
         self.log.info("Balance for node 0 checks out.")
@@ -127,11 +129,10 @@ class ReorgStakeTest(JokeCoinTestFramework):
         self.log.info("GOOD: spending the stake input was not possible.")
 
         # Stake 12 blocks with node-1
-        self.mocktime = initial_time
-        set_node_times(self.nodes, self.mocktime)
+        set_node_times(self.nodes, block_time_1)
         self.log.info("Staking 12 blocks with node 1...")
         for i in range(12):
-            self.mocktime = self.generate_pos(1, self.mocktime)
+            block_time_1 = self.generate_pos(1, block_time_1)
         expected_balance_1 = initial_balance[1] + DecimalAmt(12 * 250.0)
         assert_equal(self.get_tot_balance(1), expected_balance_1)
         self.log.info("Balance for node 1 checks out.")
@@ -139,7 +140,7 @@ class ReorgStakeTest(JokeCoinTestFramework):
         # re-connect and sync nodes and check that node-0 and node-2 get on the other chain
         new_best_hash = self.nodes[1].getbestblockhash()
         self.log.info("Connecting and syncing nodes...")
-        set_node_times(self.nodes, self.mocktime)
+        set_node_times(self.nodes, block_time_1)
         connect_nodes_clique(self.nodes)
         self.sync_blocks()
         for i in [0, 2]:
@@ -151,19 +152,18 @@ class ReorgStakeTest(JokeCoinTestFramework):
 
         # check that NOW the original stakeinput is present and spendable
         res, utxo = findUtxoInList(stakeinput["txid"], stakeinput["vout"], self.nodes[0].listunspent())
-        assert res and utxo["spendable"]
+        assert (res and utxo["spendable"])
         self.log.info("Coinstake input %s...%s-%d is spendable again." % (
             stakeinput["txid"][:9], stakeinput["txid"][-4:], stakeinput["vout"]))
         self.nodes[0].sendrawtransaction(rawtx["hex"])
-        self.sync_mempools()
-        self.mocktime = self.generate_pos(1, self.mocktime)
+        self.nodes[1].generate(1)
         self.sync_blocks()
         res, utxo = findUtxoInList(stakeinput["txid"], stakeinput["vout"], self.nodes[0].listunspent())
-        assert not res
+        assert (not res or not utxo["spendable"])
 
-        # Verify that JOKE supply was properly updated after the reorgs (including burned fee)
+        # Verify that JOKE supply was properly updated after the reorgs
         self.log.info("Check JOKE supply...")
-        expected_money_supply += 250.0 * (self.nodes[1].getblockcount() - 200) - 0.01
+        expected_money_supply += 250.0 * (self.nodes[1].getblockcount() - 200)
         self.check_money_supply(expected_money_supply)
         self.log.info("Supply checks out.")
 

@@ -11,14 +11,17 @@
 #include "clientmodel.h"
 #include "guiutil.h"
 #include "peertablemodel.h"
-#include "qt/rpcexecutor.h"
 
 #include "chainparams.h"
 #include "netbase.h"
-#include "util/system.h"
+#include "rpc/client.h"
+#include "rpc/server.h"
+#include "util.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif // ENABLE_WALLET
+
+#include <univalue.h>
 
 #ifdef ENABLE_WALLET
 #include <db_cxx.h>
@@ -30,6 +33,7 @@
 #include <QScrollBar>
 #include <QThread>
 #include <QTime>
+#include <QTimer>
 #include <QStringList>
 
 // TODO: add a scrollback limit, as there is currently none
@@ -59,6 +63,193 @@ const struct {
     {"cmd-error", ":/icons/tx_output"},
     {"misc", ":/icons/tx_inout"},
     {NULL, NULL}};
+
+/* Object for executing console RPC commands in a separate thread.
+*/
+class RPCExecutor : public QObject
+{
+    Q_OBJECT
+
+public Q_SLOTS:
+    void request(const QString& command);
+
+Q_SIGNALS:
+    void reply(int category, const QString& command);
+};
+
+/** Class for handling RPC timers
+ * (used for e.g. re-locking the wallet after a timeout)
+ */
+class QtRPCTimerBase: public QObject, public RPCTimerBase
+{
+    Q_OBJECT
+public:
+    QtRPCTimerBase(std::function<void(void)>& _func, int64_t millis):
+        func(_func)
+    {
+        timer.setSingleShot(true);
+        connect(&timer, &QTimer::timeout, [this]{ func(); });
+        timer.start(millis);
+    }
+    ~QtRPCTimerBase() {}
+
+private:
+    QTimer timer;
+    std::function<void(void)> func;
+};
+
+class QtRPCTimerInterface: public RPCTimerInterface
+{
+public:
+    ~QtRPCTimerInterface() {}
+    const char *Name() { return "Qt"; }
+    RPCTimerBase* NewTimer(std::function<void(void)>& func, int64_t millis)
+    {
+        return new QtRPCTimerBase(func, millis);
+    }
+};
+
+#include "rpcconsole.moc"
+
+/**
+ * Split shell command line into a list of arguments. Aims to emulate \c bash and friends.
+ *
+ * - Arguments are delimited with whitespace
+ * - Extra whitespace at the beginning and end and between arguments will be ignored
+ * - Text can be "double" or 'single' quoted
+ * - The backslash \c \ is used as escape character
+ *   - Outside quotes, any character can be escaped
+ *   - Within double quotes, only escape \c " and backslashes before a \c " or another backslash
+ *   - Within single quotes, no escaping is possible and no special interpretation takes place
+ *
+ * @param[out]   args        Parsed arguments will be appended to this list
+ * @param[in]    strCommand  Command line to split
+ */
+bool parseCommandLine(std::vector<std::string>& args, const std::string& strCommand)
+{
+    enum CmdParseState {
+        STATE_EATING_SPACES,
+        STATE_ARGUMENT,
+        STATE_SINGLEQUOTED,
+        STATE_DOUBLEQUOTED,
+        STATE_ESCAPE_OUTER,
+        STATE_ESCAPE_DOUBLEQUOTED
+    } state = STATE_EATING_SPACES;
+    std::string curarg;
+    for (char ch : strCommand) {
+        switch (state) {
+        case STATE_ARGUMENT:      // In or after argument
+        case STATE_EATING_SPACES: // Handle runs of whitespace
+            switch (ch) {
+            case '"':
+                state = STATE_DOUBLEQUOTED;
+                break;
+            case '\'':
+                state = STATE_SINGLEQUOTED;
+                break;
+            case '\\':
+                state = STATE_ESCAPE_OUTER;
+                break;
+            case ' ':
+            case '\n':
+            case '\t':
+                if (state == STATE_ARGUMENT) // Space ends argument
+                {
+                    args.push_back(curarg);
+                    curarg.clear();
+                }
+                state = STATE_EATING_SPACES;
+                break;
+            default:
+                curarg += ch;
+                state = STATE_ARGUMENT;
+            }
+            break;
+        case STATE_SINGLEQUOTED: // Single-quoted string
+            switch (ch) {
+            case '\'':
+                state = STATE_ARGUMENT;
+                break;
+            default:
+                curarg += ch;
+            }
+            break;
+        case STATE_DOUBLEQUOTED: // Double-quoted string
+            switch (ch) {
+            case '"':
+                state = STATE_ARGUMENT;
+                break;
+            case '\\':
+                state = STATE_ESCAPE_DOUBLEQUOTED;
+                break;
+            default:
+                curarg += ch;
+            }
+            break;
+        case STATE_ESCAPE_OUTER: // '\' outside quotes
+            curarg += ch;
+            state = STATE_ARGUMENT;
+            break;
+        case STATE_ESCAPE_DOUBLEQUOTED:                  // '\' in double-quoted text
+            if (ch != '"' && ch != '\\') curarg += '\\'; // keep '\' for everything but the quote and '\' itself
+            curarg += ch;
+            state = STATE_DOUBLEQUOTED;
+            break;
+        }
+    }
+    switch (state) // final state
+    {
+    case STATE_EATING_SPACES:
+        return true;
+    case STATE_ARGUMENT:
+        args.push_back(curarg);
+        return true;
+    default: // ERROR to end in one of the other states
+        return false;
+    }
+}
+
+void RPCExecutor::request(const QString& command)
+{
+    std::vector<std::string> args;
+    if (!parseCommandLine(args, command.toStdString())) {
+        Q_EMIT reply(RPCConsole::CMD_ERROR, QString("Parse error: unbalanced ' or \""));
+        return;
+    }
+    if (args.empty())
+        return; // Nothing to do
+    try {
+        std::string strPrint;
+        // Convert argument list to JSON objects in method-dependent way,
+        // and pass it along with the method name to the dispatcher.
+        JSONRPCRequest req;
+        req.params = RPCConvertValues(args[0], std::vector<std::string>(args.begin() + 1, args.end()));
+        req.strMethod = args[0];
+        UniValue result = tableRPC.execute(req);
+
+        // Format result reply
+        if (result.isNull())
+            strPrint = "";
+        else if (result.isStr())
+            strPrint = result.get_str();
+        else
+            strPrint = result.write(2);
+
+        Q_EMIT reply(RPCConsole::CMD_REPLY, QString::fromStdString(strPrint));
+    } catch (const UniValue& objError) {
+        try // Nice formatting for standard-format error
+        {
+            int code = find_value(objError, "code").get_int();
+            std::string message = find_value(objError, "message").get_str();
+            Q_EMIT reply(RPCConsole::CMD_ERROR, QString::fromStdString(message) + " (code " + QString::number(code) + ")");
+        } catch (const std::runtime_error&) // raised when converting to invalid type, i.e. missing code or message
+        {                             // Show raw JSON object
+            Q_EMIT reply(RPCConsole::CMD_ERROR, QString::fromStdString(objError.write()));
+        }
+    } catch (const std::exception& e) {
+        Q_EMIT reply(RPCConsole::CMD_ERROR, QString("Error: ") + QString::fromStdString(e.what()));
+    }
+}
 
 RPCConsole::RPCConsole(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
                                           ui(new Ui::RPCConsole),
@@ -290,7 +481,6 @@ void RPCConsole::setClientModel(ClientModel* model)
             wordList << ("help " + commandList[i]).c_str();
         }
 
-        wordList << "help-console";
         wordList.sort();
         autoCompleter = new QCompleter(wordList, this);
         autoCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
@@ -298,6 +488,23 @@ void RPCConsole::setClientModel(ClientModel* model)
 
         // clear the lineEdit after activating from QCompleter
         autoCompleter->popup()->installEventFilter(this);
+    }
+}
+
+static QString categoryClass(int category)
+{
+    switch (category) {
+    case RPCConsole::CMD_REQUEST:
+        return "cmd-request";
+        break;
+    case RPCConsole::CMD_REPLY:
+        return "cmd-reply";
+        break;
+    case RPCConsole::CMD_ERROR:
+        return "cmd-error";
+        break;
+    default:
+        return "misc";
     }
 }
 
@@ -413,10 +620,9 @@ void RPCConsole::clear()
     QString clsKey = "Ctrl-L";
 #endif
 
-    message(RPCExecutor::CMD_REPLY, (tr("Welcome to the JokeCoin RPC console.") + "<br>" +
+    message(CMD_REPLY, (tr("Welcome to the JokeCoin RPC console.") + "<br>" +
                         tr("Use up and down arrows to navigate history, and %1 to clear screen.").arg("<b>"+clsKey+"</b>") + "<br>" +
-                        tr("Type %1 for an overview of available commands.").arg("<b>help</b>") + "<br>" +
-                        tr("For more information on using this console type %1.").arg("<b>help-console</b>") +
+                        tr("Type <b>help</b> for an overview of available commands.") +
                         "<br><span class=\"secwarning\"><br>" +
                         tr("WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramifications of a command.") +
                         "</span>"),
@@ -436,8 +642,8 @@ void RPCConsole::message(int category, const QString& message, bool html)
     QString timeString = time.toString();
     QString out;
     out += "<table><tr><td class=\"time\" width=\"65\">" + timeString + "</td>";
-    out += "<td class=\"icon\" width=\"32\"><img src=\"" + RPCExecutor::categoryClass(category) + "\"></td>";
-    out += "<td class=\"message " + RPCExecutor::categoryClass(category) + "\" valign=\"middle\">";
+    out += "<td class=\"icon\" width=\"32\"><img src=\"" + categoryClass(category) + "\"></td>";
+    out += "<td class=\"message " + categoryClass(category) + "\" valign=\"middle\">";
     if (html)
         out += message;
     else
@@ -478,7 +684,7 @@ void RPCConsole::on_lineEdit_returnPressed()
     ui->lineEdit->clear();
 
     if (!cmd.isEmpty()) {
-        message(RPCExecutor::CMD_REQUEST, cmd);
+        message(CMD_REQUEST, cmd);
         Q_EMIT cmdRequest(cmd);
         // Remove command, if already in history
         history.removeOne(cmd);
@@ -695,11 +901,11 @@ void RPCConsole::updateNodeDetail(const CNodeCombinedStats* stats)
         peerAddrDetails += "<br />" + tr("via %1").arg(QString::fromStdString(stats->nodeStats.addrLocal));
     ui->peerHeading->setText(peerAddrDetails);
     ui->peerServices->setText(GUIUtil::formatServicesStr(stats->nodeStats.nServices));
-    ui->peerLastSend->setText(stats->nodeStats.nLastSend ? GUIUtil::formatDurationStr(GetSystemTimeInSeconds() - stats->nodeStats.nLastSend) : tr("never"));
-    ui->peerLastRecv->setText(stats->nodeStats.nLastRecv ? GUIUtil::formatDurationStr(GetSystemTimeInSeconds() - stats->nodeStats.nLastRecv) : tr("never"));
+    ui->peerLastSend->setText(stats->nodeStats.nLastSend ? GUIUtil::formatDurationStr(GetTime() - stats->nodeStats.nLastSend) : tr("never"));
+    ui->peerLastRecv->setText(stats->nodeStats.nLastRecv ? GUIUtil::formatDurationStr(GetTime() - stats->nodeStats.nLastRecv) : tr("never"));
     ui->peerBytesSent->setText(FormatBytes(stats->nodeStats.nSendBytes));
     ui->peerBytesRecv->setText(FormatBytes(stats->nodeStats.nRecvBytes));
-    ui->peerConnTime->setText(GUIUtil::formatDurationStr(GetSystemTimeInSeconds() - stats->nodeStats.nTimeConnected));
+    ui->peerConnTime->setText(GUIUtil::formatDurationStr(GetTime() - stats->nodeStats.nTimeConnected));
     ui->peerPingTime->setText(GUIUtil::formatPingTime(stats->nodeStats.dPingTime));
     ui->peerPingWait->setText(GUIUtil::formatPingTime(stats->nodeStats.dPingWait));
     ui->timeoffset->setText(GUIUtil::formatTimeOffset(stats->nodeStats.nTimeOffset));

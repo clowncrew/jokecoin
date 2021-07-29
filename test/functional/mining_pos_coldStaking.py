@@ -25,7 +25,7 @@ from decimal import Decimal
 
 # filter utxos based on first 5 bytes of scriptPubKey
 def getDelegatedUtxos(utxos):
-    return [x for x in utxos if x["scriptPubKey"][:10] == '76a97b63d1' or x["scriptPubKey"][:10] == '76a97b63d2']
+    return [x for x in utxos if x["scriptPubKey"][:10] == '76a97b63d1']
 
 
 class JokeCoin_ColdStakingTest(JokeCoinTestFramework):
@@ -125,7 +125,7 @@ class JokeCoin_ColdStakingTest(JokeCoinTestFramework):
                                                              "amount": Decimal('250.00')}], 1)
         self.sync_all()
         for i in range(6):
-            self.mocktime = self.generate_pos(0, self.mocktime)
+            self.mocktime = self.generate_pow(0, self.mocktime)
         self.sync_blocks()
         assert_equal(self.nodes[0].getshieldbalance(), 250)
 
@@ -340,7 +340,7 @@ class JokeCoin_ColdStakingTest(JokeCoinTestFramework):
         # Try to submit the block
         ret = self.nodes[1].submitblock(bytes_to_hex_str(new_block.serialize()))
         self.log.info("Block %s submitted." % new_block.hash)
-        assert ret in ["bad-p2cs-outs", "rejected"]
+        assert_equal(ret, "bad-p2cs-outs")
 
         # Verify that nodes[0] rejects it
         self.sync_blocks()

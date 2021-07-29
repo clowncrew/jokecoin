@@ -18,56 +18,51 @@
 class CCoinControl;
 struct TxValues;
 
-class ShieldedRecipient final : public CRecipientBase
+struct ShieldedRecipient
 {
-public:
     const libzcash::SaplingPaymentAddress address;
+    const CAmount amount;
     const std::string memo;
-    ShieldedRecipient(const libzcash::SaplingPaymentAddress& _address, const CAmount& _amount, const std::string& _memo, bool _fSubtractFeeFromAmount) :
-        CRecipientBase(_amount, _fSubtractFeeFromAmount), address(_address), memo(_memo) {}
-    bool isTransparent() const override { return false; }
-    Optional<libzcash::SaplingPaymentAddress> getSapPaymentAddr() const override { return {address}; };
-    std::string getMemo() const override { return memo; }
+    ShieldedRecipient(const libzcash::SaplingPaymentAddress& _address, const CAmount& _amount, const std::string& _memo) :
+        address(_address),
+        amount(_amount),
+        memo(_memo)
+    {}
 };
 
 struct SendManyRecipient
 {
-    const std::shared_ptr<CRecipientBase> recipient;
+    const Optional<ShieldedRecipient> shieldedRecipient{nullopt};
+    const Optional<CTxOut> transparentRecipient{nullopt};
 
-    bool IsTransparent() const { return recipient->isTransparent(); }
-    bool IsSubtractFee() const { return recipient->fSubtractFeeFromAmount; }
-    CAmount getAmount() const { return recipient->nAmount; };
-    CScript getScript() const { assert(IsTransparent()); return *recipient->getScript(); }
-    libzcash::SaplingPaymentAddress getSapPaymentAddr() const { assert(!IsTransparent()); return *recipient->getSapPaymentAddr(); }
-    std::string getMemo() const { return recipient->getMemo(); }
+    bool IsTransparent() const { return transparentRecipient != nullopt; }
 
     // Prevent default empty initialization
     SendManyRecipient() = delete;
 
     // Shielded recipient
-    SendManyRecipient(const libzcash::SaplingPaymentAddress& address, const CAmount& amount, const std::string& memo, bool fSubtractFeeFromAmount):
-            recipient(new ShieldedRecipient(address, amount, memo, fSubtractFeeFromAmount))
+    SendManyRecipient(const libzcash::SaplingPaymentAddress& address, const CAmount& amount, const std::string& memo):
+        shieldedRecipient(ShieldedRecipient(address, amount, memo))
     {}
 
     // Transparent recipient: P2PKH
-    SendManyRecipient(const CTxDestination& dest, const CAmount& amount, bool fSubtractFeeFromAmount):
-            recipient(new CRecipient(GetScriptForDestination(dest), amount, fSubtractFeeFromAmount))
+    SendManyRecipient(const CTxDestination& dest, const CAmount& amount):
+        transparentRecipient(CTxOut(amount, GetScriptForDestination(dest)))
     {}
 
     // Transparent recipient: P2CS
-    SendManyRecipient(const CKeyID& ownerKey, const CKeyID& stakerKey, const CAmount& amount, bool fV6Enforced):
-            recipient(new CRecipient(fV6Enforced ? GetScriptForStakeDelegation(stakerKey, ownerKey)
-                        : GetScriptForStakeDelegationLOF(stakerKey, ownerKey), amount, false))
+    SendManyRecipient(const CKeyID& ownerKey, const CKeyID& stakerKey, const CAmount& amount):
+        transparentRecipient(CTxOut(amount, GetScriptForStakeDelegation(stakerKey, ownerKey)))
     {}
 
     // Transparent recipient: multisig
     SendManyRecipient(int nRequired, const std::vector<CPubKey>& keys, const CAmount& amount):
-            recipient(new CRecipient(GetScriptForMultisig(nRequired, keys), amount, false))
+        transparentRecipient(CTxOut(amount, GetScriptForMultisig(nRequired, keys)))
     {}
 
     // Transparent recipient: OP_RETURN
     SendManyRecipient(const uint256& message):
-            recipient(new CRecipient(GetScriptForOpReturn(message), 0, false))
+        transparentRecipient(CTxOut(0, GetScriptForOpReturn(message)))
     {}
 };
 
@@ -86,8 +81,10 @@ public:
 
 class SaplingOperation {
 public:
-    explicit SaplingOperation(const Consensus::Params& consensusParams, int nHeight, CWallet* _wallet);
-    ~SaplingOperation();
+    explicit SaplingOperation(const Consensus::Params& consensusParams, int chainHeight) : txBuilder(consensusParams, chainHeight) {};
+    explicit SaplingOperation(TransactionBuilder& _builder) : txBuilder(_builder) {};
+
+    ~SaplingOperation() { delete tkeyChange; }
 
     OperationResult build();
     OperationResult send(std::string& retTxHash);
@@ -102,6 +99,7 @@ public:
     SaplingOperation* setRecipients(std::vector<SendManyRecipient>& vec) { recipients = std::move(vec); return this; };
     SaplingOperation* setFee(CAmount _fee) { fee = _fee; return this; }
     SaplingOperation* setMinDepth(int _mindepth) { assert(_mindepth >= 0); mindepth = _mindepth; return this; }
+    SaplingOperation* setTxBuilder(TransactionBuilder& builder) { txBuilder = builder; return this; }
     SaplingOperation* setTransparentKeyChange(CReserveKey* reserveKey) { tkeyChange = reserveKey; return this; }
     SaplingOperation* setCoinControl(const CCoinControl* _coinControl) { coinControl = _coinControl; return this; }
 
@@ -110,13 +108,6 @@ public:
     CTransactionRef getFinalTxRef() { return finalTx; }
 
 private:
-    /*
-     * Cannot be nullptr. A pointer to the wallet, used to retrieve the inputs to spend, the keys to create the outputs,
-     * sapling notes and nullifiers, as well as to commit transactions.
-     * The same keystore is passed to the transaction builder in order to produce the required signatures.
-     */
-    CWallet* wallet{nullptr};
-
     FromAddress fromAddress;
     // In case of no addressFrom filter selected, it will accept any utxo in the wallet as input.
     bool selectFromtaddrs{false};

@@ -5,16 +5,11 @@
 #include "test/librust/sapling_test_fixture.h"
 #include "sapling/sapling_util.h"
 
-SaplingTestingSetup::SaplingTestingSetup(const std::string& chainName) : TestingSetup(chainName)
+SaplingTestingSetup::SaplingTestingSetup() : TestingSetup()
 {
     initZKSNARKS(); // init zk-snarks lib
 }
 
 SaplingTestingSetup::~SaplingTestingSetup()
 {
-}
-
-SaplingRegTestingSetup::SaplingRegTestingSetup() : SaplingTestingSetup(CBaseChainParams::REGTEST)
-{
-    UpdateNetworkUpgradeParameters(Consensus::UPGRADE_V5_0, Consensus::NetworkUpgrade::ALWAYS_ACTIVE);
 }

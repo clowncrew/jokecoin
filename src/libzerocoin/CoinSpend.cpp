@@ -24,7 +24,7 @@ const uint256 CoinSpend::signatureHash() const
     h << serialCommitmentToCoinValue << accCommitmentToCoinValue << commitmentPoK << accumulatorPoK << ptxHash
       << coinSerialNumber << accChecksum << denomination;
 
-    if (version >= PUBKEY_VERSION)
+    if (version >= PrivateCoin::PUBKEY_VERSION)
         h << spendType;
 
     return h.GetHash();
@@ -47,12 +47,12 @@ bool CoinSpend::HasValidSignature() const
 {
     const int coinVersion = getCoinVersion();
     //No private key for V1
-    if (coinVersion < PUBKEY_VERSION)
+    if (coinVersion < PrivateCoin::PUBKEY_VERSION)
         return true;
 
     try {
         //V2 serial requires that the signature hash be signed by the public key associated with the serial
-        arith_uint256 hashedPubkey = UintToArith256(Hash(pubkey.begin(), pubkey.end())) >> V2_BITSHIFT;
+        uint256 hashedPubkey = Hash(pubkey.begin(), pubkey.end()) >> PrivateCoin::V2_BITSHIFT;
         if (hashedPubkey != GetAdjustedSerial(coinSerialNumber).getuint256()) {
             //cout << "CoinSpend::HasValidSignature() hashedpubkey is not equal to the serial!\n";
             return false;

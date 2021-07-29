@@ -64,13 +64,6 @@ const CBlockIndex* CChain::FindFork(const CBlockIndex* pindex) const
     return pindex;
 }
 
-CBlockIndex* CChain::FindEarliestAtLeast(int64_t nTime) const
-{
-    std::vector<CBlockIndex*>::const_iterator lower = std::lower_bound(vChain.begin(), vChain.end(), nTime,
-        [](CBlockIndex* pBlock, const int64_t& time) -> bool { return pBlock->GetBlockTimeMax() < time; });
-    return (lower == vChain.end() ? nullptr : *lower);
-}
-
 /** Turn the lowest '1' bit in the binary representation of a number into a '0'. */
 int static inline InvertLowestOne(int n) { return n & (n - 1); }
 
@@ -101,7 +94,6 @@ CBlockIndex* CBlockIndex::GetAncestor(int height)
             pindexWalk = pindexWalk->pskip;
             heightWalk = heightSkip;
         } else {
-            assert(pindexWalk->pprev);
             pindexWalk = pindexWalk->pprev;
             heightWalk--;
         }
@@ -142,9 +134,9 @@ std::string CBlockIndex::ToString() const
         GetBlockHash().ToString());
 }
 
-FlatFilePos CBlockIndex::GetBlockPos() const
+CDiskBlockPos CBlockIndex::GetBlockPos() const
 {
-    FlatFilePos ret;
+    CDiskBlockPos ret;
     if (nStatus & BLOCK_HAVE_DATA) {
         ret.nFile = nFile;
         ret.nPos = nDataPos;
@@ -152,9 +144,9 @@ FlatFilePos CBlockIndex::GetBlockPos() const
     return ret;
 }
 
-FlatFilePos CBlockIndex::GetUndoPos() const
+CDiskBlockPos CBlockIndex::GetUndoPos() const
 {
-    FlatFilePos ret;
+    CDiskBlockPos ret;
     if (nStatus & BLOCK_HAVE_UNDO) {
         ret.nFile = nFile;
         ret.nPos = nUndoPos;
@@ -217,6 +209,9 @@ int64_t CBlockIndex::GetMedianTimePast() const
 unsigned int CBlockIndex::GetStakeEntropyBit() const
 {
     unsigned int nEntropyBit = ((GetBlockHash().GetCheapHash()) & 1);
+    if (gArgs.GetBoolArg("-printstakemodifier", false))
+        LogPrintf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetBlockHash().ToString().c_str(), nEntropyBit);
+
     return nEntropyBit;
 }
 

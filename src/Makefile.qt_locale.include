@@ -11,5 +11,4 @@ QT_TS = \
   qt/locale/jokecoin_nl.ts \
   qt/locale/jokecoin_pl.ts \
   qt/locale/jokecoin_ru.ts \
-  qt/locale/jokecoin_tr.ts \
   qt/locale/jokecoin_zh_CN.ts

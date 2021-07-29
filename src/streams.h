@@ -7,8 +7,8 @@
 #ifndef BITCOIN_STREAMS_H
 #define BITCOIN_STREAMS_H
 
+#include "allocators.h"
 #include "serialize.h"
-#include "support/allocators/zeroafterfree.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -267,7 +267,7 @@ public:
     {
         // Special case: stream << stream concatenates like stream += stream
         if (!vch.empty())
-            s.write((char*)vch.data(), vch.size() * sizeof(value_type));
+            s.write((char*)&vch[0], vch.size() * sizeof(vch[0]));
     }
 
     template <typename T>
@@ -279,7 +279,7 @@ public:
     }
 
     template <typename T>
-    CBaseDataStream& operator>>(T&& obj)
+    CBaseDataStream& operator>>(T& obj)
     {
         // Unserialize from this stream
         ::Unserialize(*this, obj);
@@ -503,8 +503,8 @@ public:
         return (*this);
     }
 
-    template<typename T>
-    CAutoFile& operator>>(T&& obj)
+    template <typename T>
+    CAutoFile& operator>>(T& obj)
     {
         // Unserialize from this stream
         if (!file)
@@ -650,8 +650,9 @@ public:
         return true;
     }
 
-    template<typename T>
-    CBufferedFile& operator>>(T&& obj) {
+    template <typename T>
+    CBufferedFile& operator>>(T& obj)
+    {
         // Unserialize from this stream
         ::Unserialize(*this, obj);
         return (*this);

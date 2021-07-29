@@ -28,7 +28,7 @@ bool CBudgetDB::Write(const CBudgetManager& objToSave)
     CDataStream ssObj(SER_DISK, CLIENT_VERSION);
     ssObj << BUDGET_DB_VERSION;
     ssObj << strMagicMessage;                   // masternode cache file specific magic message
-    ssObj << Params().MessageStart(); // network specific magic number
+    ssObj << FLATDATA(Params().MessageStart()); // network specific magic number
     ssObj << objToSave;
     uint256 hash = Hash(ssObj.begin(), ssObj.end());
     ssObj << hash;

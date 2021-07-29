@@ -5,8 +5,10 @@
 
 from test_framework.test_framework import JokeCoinTier2TestFramework
 from test_framework.util import (
+    assert_equal,
     connect_nodes_clique,
     disconnect_nodes,
+    satoshi_round,
     wait_until,
 )
 
@@ -41,11 +43,27 @@ class MasternodeActivationTest(JokeCoinTier2TestFramework):
         self.wait_until_mnsync_finished()
         self.controller_start_all_masternodes()
 
+    def spend_collateral(self):
+        mnCollateralOutput = self.ownerOne.getmasternodeoutputs()[0]
+        assert_equal(mnCollateralOutput["txhash"], self.mnOneTxHash)
+        mnCollateralOutputIndex = mnCollateralOutput["outputidx"]
+        send_value = satoshi_round(10000 - 0.001)
+        inputs = [{'txid' : self.mnOneTxHash, 'vout' : mnCollateralOutputIndex}]
+        outputs = {}
+        outputs[self.ownerOne.getnewaddress()] = float(send_value)
+        rawtx = self.ownerOne.createrawtransaction(inputs, outputs)
+        signedtx = self.ownerOne.signrawtransaction(rawtx)
+        txid = self.miner.sendrawtransaction(signedtx['hex'])
+        self.sync_mempools()
+        self.log.info("Collateral spent in %s" % txid)
+        self.send_pings([self.remoteTwo])
+        self.stake(1, [self.remoteTwo])
+
     # Similar to base class wait_until_mn_status but skipping the disconnected nodes
     def wait_until_mn_expired(self, _timeout, removed=False):
         collaterals = {
-            self.remoteOnePos: self.mnOneCollateral.hash,
-            self.remoteTwoPos: self.mnTwoCollateral.hash
+            self.remoteOnePos: self.mnOneTxHash,
+            self.remoteTwoPos: self.mnTwoTxHash
         }
         for k in collaterals:
             for i in range(self.num_nodes):
@@ -68,11 +86,11 @@ class MasternodeActivationTest(JokeCoinTier2TestFramework):
 
     def run_test(self):
         self.enable_mocktime()
-        self.setup_3_masternodes_network()
+        self.setup_2_masternodes_network()
 
         # check masternode expiration
         self.log.info("testing expiration now.")
-        expiration_time = 12 * 60  # regtest expiration time
+        expiration_time = 180  # regtest expiration time
         self.log.info("disconnect remote and move time %d seconds in the future..." % expiration_time)
         self.disconnect_remotes()
         self.advance_mocktime_and_stake(expiration_time)
@@ -81,7 +99,7 @@ class MasternodeActivationTest(JokeCoinTier2TestFramework):
 
         # check masternode removal
         self.log.info("testing removal now.")
-        removal_time = 13 * 60  # regtest removal time
+        removal_time = 200  # regtest removal time
         self.advance_mocktime_and_stake(removal_time - expiration_time)
         self.wait_until_mn_expired(30, removed=True)
         self.log.info("masternodes removed successfully")
@@ -90,11 +108,11 @@ class MasternodeActivationTest(JokeCoinTier2TestFramework):
         self.reconnect_and_restart_masternodes()
         self.advance_mocktime(30)
         self.log.info("spending the collateral now..")
-        self.spend_collateral(self.ownerOne, self.mnOneCollateral, self.miner)
+        self.spend_collateral()
         self.sync_blocks()
         self.log.info("checking mn status..")
         time.sleep(3)           # wait a little bit
-        self.wait_until_mn_vinspent(self.mnOneCollateral.hash, 30, [self.remoteTwo])
+        self.wait_until_mn_vinspent(self.mnOneTxHash, 30, [self.remoteTwo])
         self.log.info("masternode list updated successfully, vin spent")
 
 

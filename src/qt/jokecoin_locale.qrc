@@ -12,7 +12,6 @@
         <file alias="nl">locale/jokecoin_nl.qm</file>
         <file alias="pl">locale/jokecoin_pl.qm</file>
         <file alias="ru">locale/jokecoin_ru.qm</file>
-        <file alias="tr">locale/jokecoin_tr.qm</file>
         <file alias="zh_CN">locale/jokecoin_zh_CN.qm</file>
     </qresource>
 </RCC>

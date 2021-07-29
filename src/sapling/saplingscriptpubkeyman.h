@@ -297,8 +297,6 @@ public:
                           bool requireSpendingKey=true,
                           bool ignoreLocked=true) const;
 
-    /* Return list of available notes grouped by sapling address. */
-    std::map<libzcash::SaplingPaymentAddress, std::vector<SaplingNoteEntry>> ListNotes() const;
 
     //! Return the address from where the shielded spend is taking the funds from (if possible)
     Optional<libzcash::SaplingPaymentAddress> GetAddressFromInputIfPossible(const CWalletTx* wtx, int index) const;

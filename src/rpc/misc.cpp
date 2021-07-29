@@ -16,9 +16,8 @@
 #include "rpc/server.h"
 #include "spork.h"
 #include "timedata.h"
-#include "util/system.h"
+#include "util.h"
 #ifdef ENABLE_WALLET
-#include "wallet/rpcwallet.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
@@ -48,8 +47,6 @@ UniValue getsupplyinfo(const JSONRPCRequest& request);
  **/
 UniValue getinfo(const JSONRPCRequest& request)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getinfo\n"
@@ -86,7 +83,7 @@ UniValue getinfo(const JSONRPCRequest& request)
             HelpExampleCli("getinfo", "") + HelpExampleRpc("getinfo", ""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
 #endif
@@ -117,10 +114,10 @@ UniValue getinfo(const JSONRPCRequest& request)
     obj.pushKV("protocolversion", PROTOCOL_VERSION);
     obj.pushKV("services", services);
 #ifdef ENABLE_WALLET
-    if (pwallet) {
-        obj.pushKV("walletversion", pwallet->GetVersion());
-        obj.pushKV("balance", ValueFromAmount(pwallet->GetAvailableBalance()));
-        obj.pushKV("staking status", (pwallet->pStakerStatus->IsActive() ? "Staking Active" : "Staking Not Active"));
+    if (pwalletMain) {
+        obj.pushKV("walletversion", pwalletMain->GetVersion());
+        obj.pushKV("balance", ValueFromAmount(pwalletMain->GetAvailableBalance()));
+        obj.pushKV("staking status", (pwalletMain->pStakerStatus->IsActive() ? "Staking Active" : "Staking Not Active"));
     }
 #endif
     obj.pushKV("blocks", (int)chainActive.Height());
@@ -138,13 +135,13 @@ UniValue getinfo(const JSONRPCRequest& request)
     obj.pushKV("shieldsupply", supply_info["shieldsupply"]);
 
 #ifdef ENABLE_WALLET
-    if (pwallet) {
-        obj.pushKV("keypoololdest", pwallet->GetOldestKeyPoolTime());
-        size_t kpExternalSize = pwallet->KeypoolCountExternalKeys();
+    if (pwalletMain) {
+        obj.pushKV("keypoololdest", pwalletMain->GetOldestKeyPoolTime());
+        size_t kpExternalSize = pwalletMain->KeypoolCountExternalKeys();
         obj.pushKV("keypoolsize", (int64_t)kpExternalSize);
     }
-    if (pwallet && pwallet->IsCrypted())
-        obj.pushKV("unlocked_until", pwallet->nRelockTime);
+    if (pwalletMain && pwalletMain->IsCrypted())
+        obj.pushKV("unlocked_until", nWalletUnlockTime);
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
 #endif
     obj.pushKV("relayfee", ValueFromAmount(::minRelayTxFee.GetFeePerK()));
@@ -226,10 +223,11 @@ UniValue mnsync(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
 class DescribeAddressVisitor : public boost::static_visitor<UniValue>
 {
-public:
-    CWallet * const pwallet;
+private:
+    isminetype mine;
 
-    DescribeAddressVisitor(CWallet *_pwallet) : pwallet(_pwallet) {}
+public:
+    DescribeAddressVisitor(isminetype mineIn) : mine(mineIn) {}
 
     UniValue operator()(const CNoDestination &dest) const { return UniValue(UniValue::VOBJ); }
 
@@ -237,7 +235,8 @@ public:
         UniValue obj(UniValue::VOBJ);
         CPubKey vchPubKey;
         obj.pushKV("isscript", false);
-        if (pwallet && pwallet->GetPubKey(keyID, vchPubKey)) {
+        if (bool(mine & ISMINE_ALL)) {
+            pwalletMain->GetPubKey(keyID, vchPubKey);
             obj.pushKV("pubkey", HexStr(vchPubKey));
             obj.pushKV("iscompressed", vchPubKey.IsCompressed());
         }
@@ -248,20 +247,19 @@ public:
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isscript", true);
         CScript subscript;
-        if (pwallet && pwallet->GetCScript(scriptID, subscript)) {
-            std::vector<CTxDestination> addresses;
-            txnouttype whichType;
-            int nRequired;
-            ExtractDestinations(subscript, whichType, addresses, nRequired);
-            obj.pushKV("script", GetTxnOutputType(whichType));
-            obj.pushKV("hex", HexStr(subscript.begin(), subscript.end()));
-            UniValue a(UniValue::VARR);
-            for (const CTxDestination& addr : addresses)
-                a.push_back(EncodeDestination(addr));
-            obj.pushKV("addresses", a);
-            if (whichType == TX_MULTISIG)
-                obj.pushKV("sigsrequired", nRequired);
-        }
+        pwalletMain->GetCScript(scriptID, subscript);
+        std::vector<CTxDestination> addresses;
+        txnouttype whichType;
+        int nRequired;
+        ExtractDestinations(subscript, whichType, addresses, nRequired);
+        obj.pushKV("script", GetTxnOutputType(whichType));
+        obj.pushKV("hex", HexStr(subscript.begin(), subscript.end()));
+        UniValue a(UniValue::VARR);
+        for (const CTxDestination& addr : addresses)
+            a.push_back(EncodeDestination(addr));
+        obj.pushKV("addresses", a);
+        if (whichType == TX_MULTISIG)
+            obj.pushKV("sigsrequired", nRequired);
         return obj;
     }
 };
@@ -336,7 +334,7 @@ typedef boost::variant<libzcash::InvalidEncoding, libzcash::SaplingPaymentAddres
 class DescribePaymentAddressVisitor : public boost::static_visitor<UniValue>
 {
 public:
-    explicit DescribePaymentAddressVisitor(CWallet *_pwallet, bool _isStaking) : pwallet(_pwallet), isStaking(_isStaking) {}
+    explicit DescribePaymentAddressVisitor(bool _isStaking) : isStaking(_isStaking) {}
     UniValue operator()(const libzcash::InvalidEncoding &zaddr) const { return UniValue(UniValue::VOBJ); }
 
     UniValue operator()(const libzcash::SaplingPaymentAddress &zaddr) const {
@@ -344,8 +342,8 @@ public:
         obj.pushKV("diversifier", HexStr(zaddr.d));
         obj.pushKV("diversifiedtransmissionkey", zaddr.pk_d.GetHex());
 #ifdef ENABLE_WALLET
-        if (pwallet) {
-            obj.pushKV("ismine", pwallet->HaveSpendingKeyForPaymentAddress(zaddr));
+        if (pwalletMain) {
+            obj.pushKV("ismine", pwalletMain->HaveSpendingKeyForPaymentAddress(zaddr));
         }
 #endif
         return obj;
@@ -357,27 +355,24 @@ public:
         ret.pushKV("scriptPubKey", HexStr(scriptPubKey.begin(), scriptPubKey.end()));
 
 #ifdef ENABLE_WALLET
-        isminetype mine = pwallet ? IsMine(*pwallet, dest) : ISMINE_NO;
+        isminetype mine = pwalletMain ? IsMine(*pwalletMain, dest) : ISMINE_NO;
         ret.pushKV("ismine", bool(mine & (ISMINE_SPENDABLE_ALL | ISMINE_COLD)));
         ret.pushKV("isstaking", isStaking);
         ret.pushKV("iswatchonly", bool(mine & ISMINE_WATCH_ONLY));
-        UniValue detail = boost::apply_visitor(DescribeAddressVisitor(pwallet), dest);
+        UniValue detail = boost::apply_visitor(DescribeAddressVisitor(mine), dest);
         ret.pushKVs(detail);
-        if (pwallet && pwallet->HasAddressBook(dest))
-            ret.pushKV("label", pwallet->GetNameForAddressBookEntry(dest));
+        if (pwalletMain && pwalletMain->HasAddressBook(dest))
+            ret.pushKV("label", pwalletMain->GetNameForAddressBookEntry(dest));
 #endif
         return ret;
     }
 
 private:
-    CWallet * const pwallet;
     bool isStaking{false};
 };
 
 UniValue validateaddress(const JSONRPCRequest& request)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "validateaddress \"jokecoinaddress\"\n"
@@ -410,7 +405,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
             HelpExampleRpc("validateaddress", "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\""));
 
 #ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : nullptr);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : nullptr);
 #else
     LOCK(cs_main);
 #endif
@@ -434,7 +429,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
     ret.pushKV("isvalid", isValid);
     if (isValid) {
         ret.pushKV("address", strAddress);
-        UniValue detail = boost::apply_visitor(DescribePaymentAddressVisitor(pwallet, isStakingAddress), finalAddress);
+        UniValue detail = boost::apply_visitor(DescribePaymentAddressVisitor(isStakingAddress), finalAddress);
         ret.pushKVs(detail);
     }
 
@@ -444,7 +439,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
 /**
  * Used by addmultisigaddress / createmultisig:
  */
-CScript _createmultisig_redeemScript(CWallet * const pwallet, const UniValue& params)
+CScript _createmultisig_redeemScript(const UniValue& params)
 {
     int nRequired = params[0].get_int();
     const UniValue& keys = params[1].get_array();
@@ -466,14 +461,14 @@ CScript _createmultisig_redeemScript(CWallet * const pwallet, const UniValue& pa
 #ifdef ENABLE_WALLET
         // Case 1: JokeCoin address and we have full public key:
         CTxDestination dest = DecodeDestination(ks);
-        if (pwallet && IsValidDestination(dest)) {
+        if (pwalletMain && IsValidDestination(dest)) {
             const CKeyID* keyID = boost::get<CKeyID>(&dest);
             if (!keyID) {
                 throw std::runtime_error(
                         strprintf("%s does not refer to a key", ks));
             }
             CPubKey vchPubKey;
-            if (!pwallet->GetPubKey(*keyID, vchPubKey))
+            if (!pwalletMain->GetPubKey(*keyID, vchPubKey))
                 throw std::runtime_error(
                     strprintf("no full public key for address %s", ks));
             if (!vchPubKey.IsFullyValid())
@@ -504,8 +499,6 @@ CScript _createmultisig_redeemScript(CWallet * const pwallet, const UniValue& pa
 
 UniValue createmultisig(const JSONRPCRequest& request)
 {
-    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
-
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 2)
         throw std::runtime_error(
             "createmultisig nrequired [\"key\",...]\n"
@@ -533,7 +526,7 @@ UniValue createmultisig(const JSONRPCRequest& request)
             HelpExampleRpc("createmultisig", "2, \"[\\\"16sSauSf5pF2UkUwvKGq4qjNRzBZYqgEL5\\\",\\\"171sgjn4YtPu27adkKGrdDwzRTxnRkBfKV\\\"]\""));
 
     // Construct using pay-to-script-hash:
-    CScript inner = _createmultisig_redeemScript(pwallet, request.params);
+    CScript inner = _createmultisig_redeemScript(request.params);
     CScriptID innerID(inner);
 
     UniValue result(UniValue::VOBJ);
@@ -614,15 +607,17 @@ UniValue setmocktime(const JSONRPCRequest& request)
     if (!Params().IsRegTestNet())
         throw std::runtime_error("setmocktime for regression testing (-regtest mode) only");
 
-    // For now, don't change mocktime if we're in the middle of validation, as
-    // this could have an effect on mempool time-based eviction, as well as
-    // IsCurrentForFeeEstimation() and IsInitialBlockDownload().
-    // TODO: figure out the right way to synchronize around mocktime, and
-    // ensure all callsites of GetTime() are accessing this safely.
     LOCK(cs_main);
 
     RPCTypeCheck(request.params, {UniValue::VNUM});
     SetMockTime(request.params[0].get_int64());
+
+    uint64_t t = GetTime();
+    if(g_connman) {
+        g_connman->ForEachNode([t](CNode* pnode) {
+            pnode->nLastSend = pnode->nLastRecv = t;
+        });
+    }
 
     return NullUniValue;
 }
@@ -705,78 +700,19 @@ UniValue logging(const JSONRPCRequest& request)
     return result;
 }
 
-static UniValue RPCLockedMemoryInfo()
-{
-    LockedPool::Stats stats = LockedPoolManager::Instance().stats();
-    UniValue obj(UniValue::VOBJ);
-    obj.pushKV("used", uint64_t(stats.used));
-    obj.pushKV("free", uint64_t(stats.free));
-    obj.pushKV("total", uint64_t(stats.total));
-    obj.pushKV("locked", uint64_t(stats.locked));
-    obj.pushKV("chunks_used", uint64_t(stats.chunks_used));
-    obj.pushKV("chunks_free", uint64_t(stats.chunks_free));
-    return obj;
-}
-
-UniValue getmemoryinfo(const JSONRPCRequest& request)
-{
-    /* Please, avoid using the word "pool" here in the RPC interface or help,
-     * as users will undoubtedly confuse it with the other "memory pool"
-     */
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getmemoryinfo\n"
-            "Returns an object containing information about memory usage.\n"
-            "\nResult:\n"
-            "{\n"
-            "  \"locked\": {               (json object) Information about locked memory manager\n"
-            "    \"used\": xxxxx,          (numeric) Number of bytes used\n"
-            "    \"free\": xxxxx,          (numeric) Number of bytes available in current arenas\n"
-            "    \"total\": xxxxxxx,       (numeric) Total number of bytes managed\n"
-            "    \"locked\": xxxxxx,       (numeric) Amount of bytes that succeeded locking. If this number is smaller than total, locking pages failed at some point and key data could be swapped to disk.\n"
-            "    \"chunks_used\": xxxxx,   (numeric) Number allocated chunks\n"
-            "    \"chunks_free\": xxxxx,   (numeric) Number unused chunks\n"
-            "  }\n"
-            "}\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getmemoryinfo", "")
-            + HelpExampleRpc("getmemoryinfo", "")
-        );
-    UniValue obj(UniValue::VOBJ);
-    obj.pushKV("locked", RPCLockedMemoryInfo());
-    return obj;
-}
-
-UniValue echo(const JSONRPCRequest& request)
-{
-    if (request.fHelp)
-        throw std::runtime_error(
-            "echo|echojson \"message\" ...\n"
-            "\nSimply echo back the input arguments. This command is for testing.\n"
-            "\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in"
-            "jokecoin-cli and the GUI. There is no server-side difference."
-        );
-
-    return request.params;
-}
-
 static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafe argNames
-  //  --------------------- ------------------------  -----------------------  ------ --------
-    { "control",            "getinfo",                &getinfo,                true,  {} }, /* uses wallet if enabled */
-    { "control",            "getmemoryinfo",          &getmemoryinfo,          true,  {} },
-    { "control",            "mnsync",                 &mnsync,                 true,  {"mode"} },
-    { "control",            "spork",                  &spork,                  true,  {"name","value"} },
-
-    { "util",               "createmultisig",         &createmultisig,         true,  {"nrequired","keys"} },
-    { "util",               "logging",                &logging,                true,  {"include", "exclude"} },
-    { "util",               "validateaddress",        &validateaddress,        true,  {"jokecoinaddress"} }, /* uses wallet if enabled */
-    { "util",               "verifymessage",          &verifymessage,          true,  {"jokecoinaddress","signature","message"} },
+{ //  category              name                      actor (function)         okSafeMode
+  //  --------------------- ------------------------  -----------------------  ----------
+    { "control",            "getinfo",                &getinfo,                true  }, /* uses wallet if enabled */
+    { "control",            "mnsync",                 &mnsync,                 true  },
+    { "control",            "spork",                  &spork,                  true  },
+    { "util",               "validateaddress",        &validateaddress,        true  }, /* uses wallet if enabled */
+    { "util",               "createmultisig",         &createmultisig,         true  },
+    { "util",               "logging",                &logging,                true  },
+    { "util",               "verifymessage",          &verifymessage,          true  },
 
     /* Not shown in help */
-    { "hidden",             "echo",                   &echo,                   true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
-    { "hidden",             "echojson",               &echo,                   true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
-    { "hidden",             "setmocktime",            &setmocktime,            true,  {"timestamp"} },
+    { "hidden",             "setmocktime",            &setmocktime,            true  },
 };
 
 void RegisterMiscRPCCommands(CRPCTable &tableRPC)

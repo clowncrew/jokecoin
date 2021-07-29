@@ -15,6 +15,7 @@
 #include "qt/jokecoin/settings/settingswalletoptionswidget.h"
 #include "qt/jokecoin/settings/settingsmainoptionswidget.h"
 #include "qt/jokecoin/settings/settingsdisplayoptionswidget.h"
+#include "qt/jokecoin/settings/settingsmultisendwidget.h"
 #include "qt/jokecoin/settings/settingsinformationwidget.h"
 #include "qt/jokecoin/settings/settingsconsolewidget.h"
 
@@ -56,6 +57,7 @@ private Q_SLOTS:
     // Wallet Configuration
     void onConfigurationClicked();
     void onBipToolClicked();
+    void onMultisendClicked();
     void onExportCSVClicked();
 
     // Options
@@ -90,6 +92,7 @@ private:
     SettingsWalletOptionsWidget *settingsWalletOptionsWidget{nullptr};
     SettingsMainOptionsWidget *settingsMainOptionsWidget{nullptr};
     SettingsDisplayOptionsWidget *settingsDisplayOptionsWidget{nullptr};
+    SettingsMultisendWidget *settingsMultisendWidget{nullptr};
     SettingsInformationWidget *settingsInformationWidget{nullptr};
     SettingsConsoleWidget *settingsConsoleWidget{nullptr};
 

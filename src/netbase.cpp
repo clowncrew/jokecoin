@@ -14,7 +14,7 @@
 #include "sync.h"
 #include "uint256.h"
 #include "random.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilstrencodings.h"
 
 #include <atomic>
@@ -112,20 +112,14 @@ bool static LookupIntern(const char* pszName, std::vector<CNetAddr>& vIP, unsign
 
     struct addrinfo* aiTrav = aiRes;
     while (aiTrav != NULL && (nMaxSolutions == 0 || vIP.size() < nMaxSolutions)) {
-        CNetAddr resolved;
         if (aiTrav->ai_family == AF_INET) {
             assert(aiTrav->ai_addrlen >= sizeof(sockaddr_in));
-            resolved = CNetAddr(((struct sockaddr_in*)(aiTrav->ai_addr))->sin_addr);
+            vIP.emplace_back(((struct sockaddr_in*)(aiTrav->ai_addr))->sin_addr);
         }
 
         if (aiTrav->ai_family == AF_INET6) {
             assert(aiTrav->ai_addrlen >= sizeof(sockaddr_in6));
-            struct sockaddr_in6* s6 = (struct sockaddr_in6*) aiTrav->ai_addr;
-            resolved = CNetAddr(s6->sin6_addr, s6->sin6_scope_id);
-        }
-        /* Never allow resolving to an internal address. Consider any such result invalid */
-        if (!resolved.IsInternal()) {
-            vIP.push_back(resolved);
+            vIP.emplace_back(((struct sockaddr_in6*)(aiTrav->ai_addr))->sin6_addr);
         }
 
         aiTrav = aiTrav->ai_next;

@@ -14,11 +14,13 @@
 #include "validation.h"
 #include "validationinterface.h"
 
+struct RegtestingSetup : public TestingSetup {
+    RegtestingSetup() : TestingSetup() {
+        SelectParams(CBaseChainParams::REGTEST);
+    }
+};
 
-#define ASSERT_WITH_MSG(cond, msg) if (!cond) { BOOST_ERROR(msg); }
-
-
-BOOST_FIXTURE_TEST_SUITE(validation_block_tests, RegTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(validation_block_tests, RegtestingSetup)
 
 struct TestSubscriber : public CValidationInterface {
     uint256 m_expected_tip;
@@ -30,7 +32,7 @@ struct TestSubscriber : public CValidationInterface {
         BOOST_CHECK_EQUAL(m_expected_tip, pindexNew->GetBlockHash());
     }
 
-    void BlockConnected(const std::shared_ptr<const CBlock>& block, const CBlockIndex* pindex)
+    void BlockConnected(const std::shared_ptr<const CBlock>& block, const CBlockIndex* pindex, const std::vector<CTransactionRef>& txnConflicted)
     {
         BOOST_CHECK_EQUAL(m_expected_tip, block->hashPrevBlock);
         BOOST_CHECK_EQUAL(m_expected_tip, pindex->pprev->GetBlockHash());
@@ -157,7 +159,7 @@ BOOST_AUTO_TEST_CASE(processnewblock_signals_ordering)
                     if (state.GetRejectReason() == "duplicate" ||
                         state.GetRejectReason() == "prevblk-not-found" ||
                         state.GetRejectReason() == "bad-prevblk") continue;
-                    ASSERT_WITH_MSG(!processed,  ("Error: " + state.GetRejectReason()).c_str());
+                    BOOST_ASSERT_MSG(processed,  ("Error: " + state.GetRejectReason()).c_str());
                 }
             }
         });
@@ -168,7 +170,6 @@ BOOST_AUTO_TEST_CASE(processnewblock_signals_ordering)
         MilliSleep(100);
     }
 
-    SyncWithValidationInterfaceQueue();
     UnregisterValidationInterface(&sub);
 
     BOOST_CHECK_EQUAL(sub.m_expected_tip, WITH_LOCK(cs_main, return chainActive.Tip()->GetBlockHash()));

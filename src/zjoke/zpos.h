@@ -25,6 +25,8 @@ public:
     const CBlockIndex* GetIndexFrom() const override;
     CAmount GetValue() const override;
     CDataStream GetUniqueness() const override;
+    bool CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut = UINT256_ZERO) override { return false; /* creation disabled */}
+    bool CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal, const bool onlyP2PK) override { return false; /* creation disabled */}
     bool GetTxOutFrom(CTxOut& out) const override { return false; /* not available */ }
     virtual bool ContextCheck(int nHeight, uint32_t nTime) override;
 };

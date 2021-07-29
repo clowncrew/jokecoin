@@ -40,6 +40,22 @@ bool DisconnectZerocoinTx(const CTransaction& tx, CZerocoinDB* zerocoinDB)
 
             }
         }
+
+        if (tx.HasZerocoinMintOutputs()) {
+            //erase all zerocoinmints in this transaction
+            for (const CTxOut &txout : tx.vout) {
+                if (txout.scriptPubKey.empty() || !txout.IsZerocoinMint())
+                    continue;
+
+                libzerocoin::PublicCoin pubCoin(params);
+                CValidationState state;
+                if (!TxOutToPublicCoin(txout, pubCoin, state))
+                    return error("DisconnectBlock(): TxOutToPublicCoin() failed");
+
+                if (!zerocoinDB->EraseCoinMint(pubCoin.getValue()))
+                    return error("DisconnectBlock(): Failed to erase coin mint");
+            }
+        }
     }
     return true;
 }
@@ -55,8 +71,8 @@ void DataBaseAccChecksum(const CBlockIndex* pindex, bool fWrite)
         pindex->nAccumulatorCheckpoint == pindex->pprev->nAccumulatorCheckpoint)
         return;
 
-    arith_uint256 accCurr = UintToArith256(pindex->nAccumulatorCheckpoint);
-    arith_uint256 accPrev = UintToArith256(pindex->pprev->nAccumulatorCheckpoint);
+    uint256 accCurr = pindex->nAccumulatorCheckpoint;
+    uint256 accPrev = pindex->pprev->nAccumulatorCheckpoint;
     // add/remove changed checksums to/from DB
     for (int i = (int)libzerocoin::zerocoinDenomList.size()-1; i >= 0; i--) {
         const uint32_t& nChecksum = accCurr.Get32();

@@ -2,7 +2,7 @@
 # Copyright (c) 2019 The JokeCoin developers
 name: jokecoin-core
 base: core18
-version: 5.1.99
+version: 5.2.0.1
 summary:   JokeCoin (Private – Instant – Verified – Transaction)
 description: |
   JokeCoin is an MIT licensed,
@@ -311,6 +311,7 @@ parts:
       - python3
       - help2man
       - doxygen
+      - libssl-dev
       - libgmp-dev
       - libevent-dev
       - libboost-all-dev
@@ -345,6 +346,7 @@ parts:
       - ca-certificates
       - libboost-chrono1.65.1
       - libboost-filesystem1.65.1
+      - libboost-program-options1.65.1
       - libboost-system1.65.1
       - libboost-test1.65.1
       - libboost-thread1.65.1

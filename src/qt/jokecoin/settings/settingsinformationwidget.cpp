@@ -8,7 +8,7 @@
 #include "clientmodel.h"
 #include "chainparams.h"
 #include "db.h"
-#include "util/system.h"
+#include "util.h"
 #include "guiutil.h"
 #include "qt/jokecoin/qtutils.h"
 

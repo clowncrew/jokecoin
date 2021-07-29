@@ -16,6 +16,7 @@
 
 #include <streams.h>
 #include <utilstrencodings.h>
+#include "Accumulator.h"
 #include "Coin.h"
 #include "Commitment.h"
 #include "Params.h"

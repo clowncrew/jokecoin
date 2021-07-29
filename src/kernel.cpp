@@ -12,7 +12,7 @@
 #include "policy/policy.h"
 #include "script/interpreter.h"
 #include "stakeinput.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "zjokechain.h"
@@ -59,25 +59,23 @@ uint256 CStakeKernel::GetHash() const
 bool CStakeKernel::CheckKernelHash(bool fSkipLog) const
 {
     // Get weighted target
-    arith_uint256 bnTarget;
+    uint256 bnTarget;
     bnTarget.SetCompact(nBits);
-    bnTarget *= (arith_uint256(stakeValue) / 100);
+    bnTarget *= (uint256(stakeValue) / 100);
 
     // Check PoS kernel hash
-    const arith_uint256& hashProofOfStake = UintToArith256(GetHash());
+    const uint256& hashProofOfStake = GetHash();
     const bool res = hashProofOfStake < bnTarget;
 
     if (!fSkipLog || res) {
         LogPrint(BCLog::STAKING, "%s : Proof Of Stake:"
-                            "\nstakeModifier=%s"
-                            "\nnTimeBlockFrom=%d"
                             "\nssUniqueID=%s"
                             "\nnTimeTx=%d"
                             "\nhashProofOfStake=%s"
                             "\nnBits=%d"
                             "\nweight=%d"
                             "\nbnTarget=%s (res: %d)\n\n",
-            __func__, HexStr(stakeModifier), nTimeBlockFrom, HexStr(stakeUniqueness), nTime, hashProofOfStake.GetHex(),
+            __func__, HexStr(stakeUniqueness), nTime, hashProofOfStake.GetHex(),
             nBits, stakeValue, bnTarget.GetHex(), res);
     }
     return res;
@@ -89,8 +87,19 @@ bool CStakeKernel::CheckKernelHash(bool fSkipLog) const
  */
 
 // helper function for CheckProofOfStake and GetStakeKernelHash
-static bool LoadStakeInput(const CBlock& block, std::unique_ptr<CStakeInput>& stake)
+bool LoadStakeInput(const CBlock& block, const CBlockIndex* pindexPrev, std::unique_ptr<CStakeInput>& stake)
 {
+    // If previous index is not provided, look for it in the blockmap
+    if (!pindexPrev) {
+        BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+        if (mi != mapBlockIndex.end() && (*mi).second) pindexPrev = (*mi).second;
+        else return error("%s : couldn't find previous block", __func__);
+    } else {
+        // check that is the actual parent block
+        if (block.hashPrevBlock != pindexPrev->GetBlockHash())
+            return error("%s : previous block mismatch", __func__);
+    }
+
     // Check that this is a PoS block
     if (!block.IsProofOfStake())
         return error("called on non PoS block");
@@ -144,7 +153,7 @@ bool CheckProofOfStake(const CBlock& block, std::string& strError, const CBlockI
     const int nHeight = pindexPrev->nHeight + 1;
     // Initialize stake input
     std::unique_ptr<CStakeInput> stakeInput;
-    if (!LoadStakeInput(block, stakeInput)) {
+    if (!LoadStakeInput(block, pindexPrev, stakeInput)) {
         strError = "stake input initialization failed";
         return false;
     }
@@ -198,7 +207,7 @@ bool GetStakeKernelHash(uint256& hashRet, const CBlock& block, const CBlockIndex
 {
     // Initialize stake input
     std::unique_ptr<CStakeInput> stakeInput;
-    if (!LoadStakeInput(block, stakeInput))
+    if (!LoadStakeInput(block, pindexPrev, stakeInput))
         return error("%s : stake input initialization failed", __func__);
 
     CStakeKernel stakeKernel(pindexPrev, stakeInput.get(), block.nBits, block.nTime);

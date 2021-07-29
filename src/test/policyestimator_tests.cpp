@@ -6,13 +6,13 @@
 #include "policy/fees.h"
 #include "txmempool.h"
 #include "uint256.h"
-#include "util/system.h"
+#include "util.h"
 
 #include "test/test_jokecoin.h"
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_FIXTURE_TEST_SUITE(policyestimator_tests, TestingSetup)
+BOOST_FIXTURE_TEST_SUITE(policyestimator_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(BlockPolicyEstimates)
 {

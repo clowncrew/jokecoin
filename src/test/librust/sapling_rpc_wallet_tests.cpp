@@ -25,7 +25,6 @@
 
 #include <univalue.h>
 
-
 extern UniValue CallRPC(std::string args); // Implemented in rpc_tests.cpp
 
 namespace {
@@ -56,8 +55,6 @@ BOOST_FIXTURE_TEST_SUITE(sapling_rpc_wallet_tests, WalletTestingSetup)
 BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_validateaddress)
 {
     SelectParams(CBaseChainParams::MAIN);
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
-
     UniValue retValue;
 
     // Check number of args
@@ -84,25 +81,24 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_validateaddress)
     BOOST_CHECK_EQUAL(b, false);
     BOOST_CHECK_EQUAL(find_value(resultObj, "diversifier").get_str(), "e1fd627f1b9a8e4c7e6657");
     BOOST_CHECK_EQUAL(find_value(resultObj, "diversifiedtransmissionkey").get_str(), "d35e0d0897edbd3cf02b3d2327622a14c685534dbd2d3f4f4fa3e0e56cc2f008");
-
-    vpwallets.erase(vpwallets.begin());
 }
 
 BOOST_AUTO_TEST_CASE(rpc_wallet_getbalance)
 {
+    SelectParams(CBaseChainParams::TESTNET);
+
     {
         LOCK(pwalletMain->cs_wallet);
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     BOOST_CHECK_THROW(CallRPC("getshieldbalance too many args"), std::runtime_error);
     BOOST_CHECK_THROW(CallRPC("getshieldbalance invalidaddress"), std::runtime_error);
     BOOST_CHECK_THROW(CallRPC("getshieldbalance tmC6YZnCUhm19dEXxh3Jb7srdBJxDawaCab"), std::runtime_error);
-    BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej"));
-    BOOST_CHECK_THROW(CallRPC("getshieldbalance ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej -1"), std::runtime_error);
-    BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej 0"));
+    BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance ptestsapling1h0w73csah2aq0a32h42kr7tq4htlt5wfn4ejxfnm56f6ehjvek7k4e244g6v8v3pgylmz5ea8jh"));
+    BOOST_CHECK_THROW(CallRPC("getshieldbalance ptestsapling1h0w73csah2aq0a32h42kr7tq4htlt5wfn4ejxfnm56f6ehjvek7k4e244g6v8v3pgylmz5ea8jh -1"), std::runtime_error);
+    BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance ptestsapling1nrn6exksuqtpld9gu6fwdz4hwg54h2x37gutdds89pfyg6mtjf63km45a8eare5qla45cj75vs8 0"));
     BOOST_CHECK_THROW(CallRPC("getshieldbalance tnRZ8bPq2pff3xBWhTJhNkVUkm2uhzksDeW5PvEa7aFKGT9Qi3YgTALZfjaY4jU3HLVKBtHdSXxoPoLA3naMPcHBcY88FcF 1"), std::runtime_error);
     BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance *"));
     BOOST_CHECK_NO_THROW(CallRPC("getshieldbalance * 6"));
@@ -110,23 +106,20 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_getbalance)
 
     BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress too many args"), std::runtime_error);
     // negative minconf not allowed
-    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ -1"), std::runtime_error);
+    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress yBYhwgzufrZ6F5VVuK9nEChENArq934mqC -1"), std::runtime_error);
     // invalid zaddr, taddr not allowed
-    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ 0"), std::runtime_error);
+    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress yBYhwgzufrZ6F5VVuK9nEChENArq934mqC 0"), std::runtime_error);
     // don't have the spending key
-    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej 1"), std::runtime_error);
-
-    vpwallets.erase(vpwallets.begin());
+    BOOST_CHECK_THROW(CallRPC("listreceivedbyshieldaddress ptestsapling1nrn6exksuqtpld9gu6fwdz4hwg54h2x37gutdds89pfyg6mtjf63km45a8eare5qla45cj75vs8 1"), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_importkey_paymentaddress)
-{
+BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_importkey_paymentaddress) {
+    SelectParams(CBaseChainParams::MAIN);
     {
         LOCK(pwalletMain->cs_wallet);
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     auto testAddress = [](const std::string& key) {
         UniValue ret;
@@ -144,7 +137,6 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_importkey_paymentaddress)
                 "8uqmqlx8ccxpsw7ae243quhwr0zyekrrc520gs9z0j8pm954c3cev2yvp29vrc"
                 "0zweu7stxkwhp593p6drheps9uhz9pvkrfgvpxzte8d60uzw0qxadnsc77tcd");
 
-    vpwallets.erase(vpwallets.begin());
 }
 
 /*
@@ -157,8 +149,6 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_importexport)
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
-
     UniValue retValue;
     int n1 = 1000; // number of times to import/export
     int n2 = 1000; // number of addresses to create and list
@@ -233,45 +223,41 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_sapling_importexport)
     BOOST_CHECK((int) listaddrs.size() == numAddrs);
     BOOST_CHECK(myaddrs == listaddrs);
 
-    vpwallets.erase(vpwallets.begin());
 }
 
 // Check if address is of given type and spendable from our wallet.
-void CheckHaveAddr(std::unique_ptr<CWallet>& pwallet, const libzcash::PaymentAddress& addr)
-{
+void CheckHaveAddr(const libzcash::PaymentAddress& addr) {
 
     BOOST_CHECK(IsValidPaymentAddress(addr));
     auto addr_of_type = boost::get<libzcash::SaplingPaymentAddress>(&addr);
     BOOST_ASSERT(addr_of_type != nullptr);
-    BOOST_CHECK(pwallet->HaveSpendingKeyForPaymentAddress(*addr_of_type));
+    BOOST_CHECK(pwalletMain->HaveSpendingKeyForPaymentAddress(*addr_of_type));
 }
 
-BOOST_AUTO_TEST_CASE(rpc_wallet_getnewshieldaddress)
-{
+BOOST_AUTO_TEST_CASE(rpc_wallet_getnewshieldaddress) {
+    UniValue addr;
     {
         LOCK(pwalletMain->cs_wallet);
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     // No parameter defaults to sapling address
-    UniValue addr = CallRPC("getnewshieldaddress");
-    CheckHaveAddr(pwalletMain, KeyIO::DecodePaymentAddress(addr.get_str()));
+    addr = CallRPC("getnewshieldaddress");
+    CheckHaveAddr(KeyIO::DecodePaymentAddress(addr.get_str()));
     // Too many arguments will throw with the help
     BOOST_CHECK_THROW(CallRPC("getnewshieldaddress many args"), std::runtime_error);
-
-    vpwallets.erase(vpwallets.begin());
 }
 
 BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_parameters)
 {
+    SelectParams(CBaseChainParams::TESTNET);
+
     {
         LOCK(pwalletMain->cs_wallet);
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     BOOST_CHECK_THROW(CallRPC("shieldsendmany"), std::runtime_error);
     BOOST_CHECK_THROW(CallRPC("shieldsendmany toofewargs"), std::runtime_error);
@@ -279,40 +265,41 @@ BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_parameters)
 
     // bad from address
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "INVALIDDMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ []"), std::runtime_error);
+                              "INVALIDyBYhwgzufrZ6F5VVuK9nEChENArq934mqC []"), std::runtime_error);
     // empty amounts
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ []"), std::runtime_error);
+                              "yBYhwgzufrZ6F5VVuK9nEChENArq934mqC []"), std::runtime_error);
 
     // don't have the spending key for this address
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej []"), std::runtime_error);
+                              "ptestsapling1wpurflqllgkcs48m46yu9ktlfe3ahndely20dpaanqq3lw9l5xw7yfehst68yclvlpz7x8cltxe"
+                              "UkJ1oSfbhTJhm72WiZizvkZz5aH1 []"), std::runtime_error);
 
     // duplicate address
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "DDTBEPEaub5sk31mUifiv5nHGXtHGnuAJc "
-                              "[{\"address\":\"DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ\", \"amount\":50.0},"
-                              " {\"address\":\"DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ\", \"amount\":12.0} ]"
+                              "yBYhwgzufrZ6F5VVuK9nEChENArq934mqC "
+                              "[{\"address\":\"yAJ4bGeDFcEtx24kbr413fBLpWQcdR5F2z\", \"amount\":50.0},"
+                              " {\"address\":\"yAJ4bGeDFcEtx24kbr413fBLpWQcdR5F2z\", \"amount\":12.0} ]"
     ), std::runtime_error);
 
     // invalid fee amount, cannot be negative
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "DDTBEPEaub5sk31mUifiv5nHGXtHGnuAJc "
-                              "[{\"address\":\"DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ\", \"amount\":50.0}] "
+                              "yBYhwgzufrZ6F5VVuK9nEChENArq934mqC "
+                              "[{\"address\":\"yAJ4bGeDFcEtx24kbr413fBLpWQcdR5F2z\", \"amount\":50.0}] "
                               "1 -0.0001"
     ), std::runtime_error);
 
     // invalid fee amount, bigger than MAX_MONEY
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "DDTBEPEaub5sk31mUifiv5nHGXtHGnuAJc "
-                              "[{\"address\":\"DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ\", \"amount\":50.0}] "
+                              "yBYhwgzufrZ6F5VVuK9nEChENArq934mqC "
+                              "[{\"address\":\"yAJ4bGeDFcEtx24kbr413fBLpWQcdR5F2z\", \"amount\":50.0}] "
                               "1 21000001"
     ), std::runtime_error);
 
     // fee amount is bigger than sum of outputs
     BOOST_CHECK_THROW(CallRPC("shieldsendmany "
-                              "DDTBEPEaub5sk31mUifiv5nHGXtHGnuAJc "
-                              "[{\"address\":\"DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ\", \"amount\":50.0}] "
+                              "yBYhwgzufrZ6F5VVuK9nEChENArq934mqC "
+                              "[{\"address\":\"yAJ4bGeDFcEtx24kbr413fBLpWQcdR5F2z\", \"amount\":50.0}] "
                               "1 50.00000001"
     ), std::runtime_error);
 
@@ -322,21 +309,17 @@ BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_parameters)
     std::string badmemo(v.begin(), v.end());
     auto pa = pwalletMain->GenerateNewSaplingZKey();
     std::string zaddr1 = KeyIO::EncodePaymentAddress(pa);
-    BOOST_CHECK_THROW(CallRPC(std::string("shieldsendmany DMKU6mc52un1MThGCsnNwAtEvncaTdAuaZ ")
+    BOOST_CHECK_THROW(CallRPC(std::string("shieldsendmany yBYhwgzufrZ6F5VVuK9nEChENArq934mqC ")
                               + "[{\"address\":\"" + zaddr1 + "\", \"amount\":123.456}]"), std::runtime_error);
-
-    vpwallets.erase(vpwallets.begin());
 }
 
 // TODO: test private methods
-BOOST_AUTO_TEST_CASE(saplingOperationTests)
-{
-    {
-        LOCK2(cs_main, pwalletMain->cs_wallet);
-        pwalletMain->SetupSPKM(false);
-    }
+BOOST_AUTO_TEST_CASE(saplingOperationTests) {
+    RegtestActivateSapling();
     auto consensusParams = Params().GetConsensus();
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+    pwalletMain->SetupSPKM(false);
 
     UniValue retValue;
 
@@ -349,8 +332,8 @@ BOOST_AUTO_TEST_CASE(saplingOperationTests)
 
     // there are no utxos to spend
     {
-        std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, COIN, "DEADBEEF", false) };
-        SaplingOperation operation(consensusParams, 1, pwalletMain.get());
+        std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, COIN, "DEADBEEF") };
+        SaplingOperation operation(consensusParams, 1);
         operation.setFromAddress(taddr1);
         auto res = operation.setRecipients(recipients)->buildAndSend(ret);
         BOOST_CHECK(!res);
@@ -359,8 +342,8 @@ BOOST_AUTO_TEST_CASE(saplingOperationTests)
 
     // minconf cannot be zero when sending from zaddr
     {
-        std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, COIN, "DEADBEEF", false) };
-        SaplingOperation operation(consensusParams, 1, pwalletMain.get());
+        std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, COIN, "DEADBEEF") };
+        SaplingOperation operation(consensusParams, 1);
         operation.setFromAddress(zaddr1);
         auto res = operation.setRecipients(recipients)->setMinDepth(0)->buildAndSend(ret);
         BOOST_CHECK(!res);
@@ -369,8 +352,8 @@ BOOST_AUTO_TEST_CASE(saplingOperationTests)
 
     // there are no unspent notes to spend
     {
-        std::vector<SendManyRecipient> recipients = { SendManyRecipient(taddr1, COIN, false) };
-        SaplingOperation operation(consensusParams, 1, pwalletMain.get());
+        std::vector<SendManyRecipient> recipients = { SendManyRecipient(taddr1, COIN) };
+        SaplingOperation operation(consensusParams, 1);
         operation.setFromAddress(zaddr1);
         auto res = operation.setRecipients(recipients)->buildAndSend(ret);
         BOOST_CHECK(!res);
@@ -405,18 +388,17 @@ BOOST_AUTO_TEST_CASE(saplingOperationTests)
         const std::string& errStr = res.getError();
         BOOST_CHECK(errStr.find("too big") != std::string::npos);
     }
-
-    vpwallets.erase(vpwallets.begin());
+    RegtestDeactivateSapling();
 }
 
 
 BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_taddr_to_sapling)
 {
-    {
-        LOCK2(cs_main, pwalletMain->cs_wallet);
-        pwalletMain->SetupSPKM(false);
-    }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
+    SelectParams(CBaseChainParams::REGTEST);
+    RegtestActivateSapling();
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+    pwalletMain->SetupSPKM(false);
 
     UniValue retValue;
 
@@ -434,7 +416,7 @@ BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_taddr_to_sapling)
     CMutableTransaction mtx;
     mtx.vout.emplace_back(5 * COIN, GetScriptForDestination(taddr));
     // Add to wallet and get the updated wtx
-    CWalletTx wtxIn(pwalletMain.get(), MakeTransactionRef(mtx));
+    CWalletTx wtxIn(pwalletMain, MakeTransactionRef(mtx));
     pwalletMain->LoadToWallet(wtxIn);
     CWalletTx& wtx = pwalletMain->mapWallet.at(mtx.GetHash());
 
@@ -452,19 +434,23 @@ BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_taddr_to_sapling)
     chainActive.SetTip(&fakeIndex);
     BOOST_CHECK(chainActive.Contains(&fakeIndex));
     BOOST_CHECK_EQUAL(1, chainActive.Height());
-    pwalletMain->BlockConnected(std::make_shared<CBlock>(block), mi->second);
+    std::vector<CTransactionRef> vtxConflicted;
+    pwalletMain->BlockConnected(std::make_shared<CBlock>(block), mi->second, vtxConflicted);
     BOOST_CHECK_MESSAGE(pwalletMain->GetAvailableBalance() > 0, "tx not confirmed");
 
-    std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, 1 * COIN, "ABCD", false) };
-    SaplingOperation operation(consensusParams, nextBlockHeight, pwalletMain.get());
+    // Context that shieldsendmany requires
+    auto builder = TransactionBuilder(consensusParams, nextBlockHeight, pwalletMain);
+
+    std::vector<SendManyRecipient> recipients = { SendManyRecipient(zaddr1, 1 * COIN, "ABCD") };
+    SaplingOperation operation(builder);
     operation.setFromAddress(taddr);
     BOOST_CHECK(operation.setRecipients(recipients)
                          ->setMinDepth(0)
                          ->build());
 
     // try from auto-selected transparent address
-    std::vector<SendManyRecipient> recipients2 = { SendManyRecipient(zaddr1, 1 * COIN, "ABCD", false) };
-    SaplingOperation operation2(consensusParams, nextBlockHeight, pwalletMain.get());
+    std::vector<SendManyRecipient> recipients2 = { SendManyRecipient(zaddr1, 1 * COIN, "ABCD") };
+    SaplingOperation operation2(builder);
     BOOST_CHECK(operation2.setSelectTransparentCoins(true)
                           ->setRecipients(recipients2)
                           ->setMinDepth(0)
@@ -495,7 +481,9 @@ BOOST_AUTO_TEST_CASE(rpc_shieldsendmany_taddr_to_sapling)
     // Tear down
     chainActive.SetTip(nullptr);
     mapBlockIndex.erase(blockHash);
-    vpwallets.erase(vpwallets.begin());
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 BOOST_AUTO_TEST_CASE(rpc_wallet_encrypted_wallet_sapzkeys)
@@ -508,7 +496,6 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_encrypted_wallet_sapzkeys)
         pwalletMain->SetMinVersion(FEATURE_SAPLING);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     // wallet should currently be empty
     std::set<libzcash::SaplingPaymentAddress> addrs;
@@ -557,16 +544,18 @@ BOOST_AUTO_TEST_CASE(rpc_wallet_encrypted_wallet_sapzkeys)
     arr = retValue.get_array();
     BOOST_CHECK((int) arr.size() == n+1);
 
-    vpwallets.erase(vpwallets.begin());
+    // We can't simulate over RPC the wallet closing and being reloaded
+    // but there are tests for this in gtest.
 }
 
 BOOST_AUTO_TEST_CASE(rpc_listshieldunspent_parameters)
 {
+    SelectParams(CBaseChainParams::TESTNET);
+
     {
         LOCK(pwalletMain->cs_wallet);
         pwalletMain->SetupSPKM(false);
     }
-    vpwallets.insert(vpwallets.begin(), pwalletMain.get());
 
     UniValue retValue;
 
@@ -583,19 +572,19 @@ BOOST_AUTO_TEST_CASE(rpc_listshieldunspent_parameters)
     BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 9999999999"), std::runtime_error);
 
     // must be an array of addresses
-    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej"), std::runtime_error);
+    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false ptestsapling1wpurflqllgkcs48m46yu9ktlfe3ahndely20dpaanqq3lw9l5xw7yfehst68yclvlpz7x8cltxe"), std::runtime_error);
 
     // address must be string
     BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false [123456]"), std::runtime_error);
 
     // no spending key
-    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false [\"ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej\"]"), std::runtime_error);
+    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false [\"ptestsapling1wpurflqllgkcs48m46yu9ktlfe3ahndely20dpaanqq3lw9l5xw7yfehst68yclvlpz7x8cltxe\"]"), std::runtime_error);
 
     // allow watch only
-    BOOST_CHECK_NO_THROW(CallRPC("listshieldunspent 1 999 true [\"ps1u87kylcmn28yclnx2uy0psnvuhs2xn608ukm6n2nshrpg2nzyu3n62ls8j77m9cgp40dx40evej\"]"));
+    BOOST_CHECK_NO_THROW(CallRPC("listshieldunspent 1 999 true [\"ptestsapling1wpurflqllgkcs48m46yu9ktlfe3ahndely20dpaanqq3lw9l5xw7yfehst68yclvlpz7x8cltxe\"]"));
 
-    // wrong network, testnet/regtest instead of mainnet
-    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 true [\"ptestsapling1wpurflqllgkcs48m46yu9ktlfe3ahndely20dpaanqq3lw9l5xw7yfehst68yclvlpz7x8cltxe\"]"), std::runtime_error);
+    // wrong network, mainnet instead of testnet
+    BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 true [\"ps1qenk9kapr0crx7lmdl4yclx78spc36wh7d5hm9hglp85f43k9dupyf0c5836h42wq2ejv0ef2v3\"]"), std::runtime_error);
 
     // create shielded address so we have the spending key
     BOOST_CHECK_NO_THROW(retValue = CallRPC("getnewshieldaddress"));
@@ -608,8 +597,6 @@ BOOST_AUTO_TEST_CASE(rpc_listshieldunspent_parameters)
 
     // duplicate address error
     BOOST_CHECK_THROW(CallRPC("listshieldunspent 1 999 false [\"" + myzaddr + "\", \"" + myzaddr + "\"]"), std::runtime_error);
-
-    vpwallets.erase(vpwallets.begin());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

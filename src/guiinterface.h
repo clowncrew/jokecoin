@@ -18,7 +18,6 @@ class CBasicKeyStore;
 class CWallet;
 class uint256;
 class CBlockIndex;
-class CDeterministicMNList;
 
 /** General change type (added, updated, removed). */
 enum ChangeType {
@@ -103,9 +102,6 @@ public:
 
     /** Banlist did change. */
     boost::signals2::signal<void (void)> BannedListChanged;
-
-    /** Deterministic Masternode list has changed */
-    boost::signals2::signal<void (const CDeterministicMNList&)> NotifyMasternodeListChanged;
 };
 
 extern CClientUIInterface uiInterface;

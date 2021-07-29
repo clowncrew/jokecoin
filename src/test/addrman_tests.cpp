@@ -29,28 +29,30 @@ public:
         insecure_rand = FastRandomContext(true);
     }
 
+    int RandomInt(int nMax)
+    {
+        state = ReadLE64((CHashWriter(SER_GETHASH, 0) << state).GetHash().begin());
+        return (unsigned int)(state % nMax);
+    }
+
     CAddrInfo* Find(const CNetAddr& addr, int* pnId = NULL)
     {
-        LOCK(cs);
         return CAddrMan::Find(addr, pnId);
     }
 
     CAddrInfo* Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId = NULL)
     {
-        LOCK(cs);
         return CAddrMan::Create(addr, addrSource, pnId);
     }
 
     void Delete(int nId)
     {
-        LOCK(cs);
         CAddrMan::Delete(nId);
     }
 
     // Simulates connection failure so that we can test eviction of offline nodes
     void SimConnFail(CService& addr)
     {
-         LOCK(cs);
          int64_t nLastSuccess = 1;
          Good_(addr, true, nLastSuccess); // Set last good connection in the deep past.
 

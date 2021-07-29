@@ -1,10 +1,9 @@
-// Copyright (c) 2009-2021 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The JokeCoin Core developers
+// Copyright (c) 2009-2015 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef JokeCoin_NETADDRESS_H
-#define JokeCoin_NETADDRESS_H
+#ifndef BITCOIN_NETADDRESS_H
+#define BITCOIN_NETADDRESS_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/jokecoin-config.h"
@@ -22,7 +21,6 @@ enum Network {
     NET_IPV4,
     NET_IPV6,
     NET_TOR,
-    NET_INTERNAL,
 
     NET_MAX,
 };
@@ -32,7 +30,7 @@ class CNetAddr
 {
 protected:
     unsigned char ip[16]; // in network byte order
-    uint32_t scopeId{0};  // for scoped/link-local ipv6 addresses
+    uint32_t scopeId{0};     // for scoped/link-local ipv6 addresses
 
 public:
     CNetAddr();
@@ -45,12 +43,6 @@ public:
          * @note Only NET_IPV4 and NET_IPV6 are allowed for network.
          */
     void SetRaw(Network network, const uint8_t* data);
-
-    /**
-      * Transform an arbitrary string into a non-routable ipv6 address.
-      * Useful for mapping resolved addresses back to their source.
-    */
-    bool SetInternal(const std::string& name);
 
     bool SetSpecial(const std::string& strName); // for Tor addresses
     bool IsIPv4() const;                         // IPv4 mapped address (::FFFF:0:0/96, 0.0.0.0/0)
@@ -71,8 +63,8 @@ public:
     bool IsTor() const;
     bool IsLocal() const;
     bool IsRoutable() const;
-    bool IsInternal() const;
     bool IsValid() const;
+    bool IsMulticast() const;
     enum Network GetNetwork() const;
     std::string ToString() const;
     std::string ToStringIP() const;
@@ -80,7 +72,7 @@ public:
     uint64_t GetHash() const;
     bool GetInAddr(struct in_addr* pipv4Addr) const;
     std::vector<unsigned char> GetGroup() const;
-    int GetReachabilityFrom(const CNetAddr* paddrPartner = nullptr) const;
+    int GetReachabilityFrom(const CNetAddr* paddrPartner = NULL) const;
 
     CNetAddr(const struct in6_addr& pipv6Addr, const uint32_t scope = 0);
     bool GetIn6Addr(struct in6_addr* pipv6Addr) const;
@@ -94,7 +86,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(ip);
+        READWRITE(FLATDATA(ip));
     }
 
     friend class CSubNet;
@@ -133,8 +125,8 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(network);
-        READWRITE(netmask);
-        READWRITE(valid);
+        READWRITE(FLATDATA(netmask));
+        READWRITE(FLATDATA(valid));
     }
 };
 
@@ -170,7 +162,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        READWRITE(ip);
+        READWRITE(FLATDATA(ip));
         unsigned short portN = htons(port);
         READWRITE(FLATDATA(portN));
         if (ser_action.ForRead())
@@ -178,4 +170,4 @@ public:
     }
 };
 
-#endif // JokeCoin_NETADDRESS_H
+#endif // BITCOIN_NETADDRESS_H

@@ -7,7 +7,7 @@
 
 #include "version.h"
 #include "streams.h"
-#include "util/system.h"
+#include "util.h"
 
 void zmqError(const char *str)
 {
@@ -164,7 +164,7 @@ void CZMQNotificationInterface::TransactionAddedToMempool(const CTransactionRef&
     }
 }
 
-void CZMQNotificationInterface::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexConnected)
+void CZMQNotificationInterface::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexConnected, const std::vector<CTransactionRef>& vtxConflicted)
 {
     for (const CTransactionRef& ptx : pblock->vtx) {
         // Do a normal notify for each transaction added in the block

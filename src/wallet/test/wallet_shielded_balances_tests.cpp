@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(GetShieldedSimpleCachedCreditAndDebit)
     //////// Credit ////////
     ///////////////////////
 
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Main wallet
     CWallet &wallet = *pwalletMain;
@@ -191,6 +191,9 @@ BOOST_AUTO_TEST_CASE(GetShieldedSimpleCachedCreditAndDebit)
     // Checks that the only shielded output of this tx is change.
     BOOST_CHECK(wallet.GetSaplingScriptPubKeyMan()->IsNoteSaplingChange(
             SaplingOutPoint(wtxDebitUpdated.GetHash(), 0), pa));
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 libzcash::SaplingPaymentAddress getNewDummyShieldedAddress()
@@ -234,7 +237,7 @@ CWalletTx& buildTxAndLoadToWallet(CWallet& wallet, const libzcash::SaplingExtend
  */
 BOOST_AUTO_TEST_CASE(VerifyShieldedToRemoteShieldedCachedBalance)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Main wallet
     CWallet &wallet = *pwalletMain;
@@ -277,6 +280,9 @@ BOOST_AUTO_TEST_CASE(VerifyShieldedToRemoteShieldedCachedBalance)
     // Plus, change should be same and be cached as well
     BOOST_CHECK_EQUAL(wtxDebitUpdated.GetShieldedChange(), expectedShieldedChange);
     BOOST_CHECK(wtxDebitUpdated.fShieldedChangeCached);
+
+    // Revert to default
+    RegtestDeactivateSapling();
 }
 
 struct FakeBlock
@@ -314,7 +320,7 @@ FakeBlock SimpleFakeMine(CWalletTx& wtx, SaplingMerkleTree& currentTree, CWallet
  */
 BOOST_AUTO_TEST_CASE(GetShieldedAvailableCredit)
 {
-    auto consensusParams = Params().GetConsensus();
+    auto consensusParams = RegtestActivateSapling();
 
     // Main wallet
     CWallet &wallet = *pwalletMain;

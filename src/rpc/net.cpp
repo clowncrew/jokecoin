@@ -14,10 +14,9 @@
 #include "sync.h"
 #include "timedata.h"
 #include "guiinterface.h"
-#include "util/system.h"
+#include "util.h"
 #include "version.h"
 #include "validation.h"
-#include "warnings.h"
 
 #include <univalue.h>
 
@@ -344,7 +343,7 @@ static UniValue GetNetworksInfo()
     UniValue networks(UniValue::VARR);
     for (int n = 0; n < NET_MAX; ++n) {
         enum Network network = static_cast<enum Network>(n);
-        if (network == NET_UNROUTABLE || network == NET_INTERNAL)
+        if (network == NET_UNROUTABLE)
             continue;
         proxyType proxy;
         UniValue obj(UniValue::VOBJ);
@@ -392,7 +391,6 @@ UniValue getnetworkinfo(const JSONRPCRequest& request)
             "  }\n"
             "  ,...\n"
             "  ]\n"
-            "  \"warnings\": \"...\"                    (string) any network and blockchain warnings\n"
             "}\n"
 
             "\nExamples:\n" +
@@ -422,7 +420,6 @@ UniValue getnetworkinfo(const JSONRPCRequest& request)
         }
     }
     obj.pushKV("localaddresses", localAddresses);
-    obj.pushKV("warnings", GetWarnings("statusbar"));
     return obj;
 }
 
@@ -434,11 +431,11 @@ UniValue setban(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() < 2 ||
         (strCommand != "add" && strCommand != "remove"))
         throw std::runtime_error(
-            "setban \"subnet\" \"add|remove\" ( bantime absolute )\n"
+            "setban \"ip(/netmask)\" \"add|remove\" ( bantime absolute )\n"
             "\nAttempts add or remove a IP/Subnet from the banned list.\n"
 
             "\nArguments:\n"
-            "1. \"subnet\"       (string, required) The IP/Subnet (see getpeerinfo for nodes ip) with a optional netmask (default is /32 = single ip)\n"
+            "1. \"ip(/netmask)\" (string, required) The IP/Subnet (see getpeerinfo for nodes ip) with a optional netmask (default is /32 = single ip)\n"
             "2. \"command\"      (string, required) 'add' to add a IP/Subnet to the list, 'remove' to remove a IP/Subnet from the list\n"
             "3. \"bantime\"      (numeric, optional) time in seconds how long (or until when if [absolute] is set) the ip is banned (0 or empty means using the default time of 24h which can also be overwritten by the -bantime startup argument)\n"
             "4. \"absolute\"     (boolean, optional) If set, the bantime must be a absolute timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
@@ -555,19 +552,19 @@ UniValue clearbanned(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafe argNames
-  //  --------------------- ------------------------  -----------------------  ------ --------
-    { "network",            "addnode",                &addnode,                true,  {"node","command"} },
-    { "network",            "clearbanned",            &clearbanned,            true,  {} },
-    { "network",            "disconnectnode",         &disconnectnode,         true,  {"node"} },
-    { "network",            "getaddednodeinfo",       &getaddednodeinfo,       true,  {"dummy","node"} },
-    { "network",            "getconnectioncount",     &getconnectioncount,     true,  {} },
-    { "network",            "getnettotals",           &getnettotals,           true,  {} },
-    { "network",            "getnetworkinfo",         &getnetworkinfo,         true,  {} },
-    { "network",            "getpeerinfo",            &getpeerinfo,            true,  {} },
-    { "network",            "listbanned",             &listbanned,             true,  {} },
-    { "network",            "ping",                   &ping,                   true,  {} },
-    { "network",            "setban",                 &setban,                 true,  {"subnet", "command", "bantime", "absolute"} },
+{ //  category              name                      actor (function)         okSafeMode
+  //  --------------------- ------------------------  -----------------------  ----------
+    { "network",            "getnetworkinfo",         &getnetworkinfo,         true  },
+    { "network",            "addnode",                &addnode,                true  },
+    { "network",            "disconnectnode",         &disconnectnode,         true  },
+    { "network",            "getaddednodeinfo",       &getaddednodeinfo,       true  },
+    { "network",            "getconnectioncount",     &getconnectioncount,     true  },
+    { "network",            "getnettotals",           &getnettotals,           true  },
+    { "network",            "getpeerinfo",            &getpeerinfo,            true  },
+    { "network",            "ping",                   &ping,                   true  },
+    { "network",            "setban",                 &setban,                 true  },
+    { "network",            "listbanned",             &listbanned,             true  },
+    { "network",            "clearbanned",            &clearbanned,            true  },
 };
 
 void RegisterNetRPCCommands(CRPCTable &tableRPC)

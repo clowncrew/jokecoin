@@ -1,10 +1,10 @@
-// Copyright (c) 2014-2021 The Bitcoin developers
-// Copyright (c) 2017-2021 The JokeCoin developers
+// Copyright (c) 2014 The Bitcoin developers
+// Copyright (c) 2017-2020 The JokeCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef JokeCoin_CHAINPARAMSBASE_H
-#define JokeCoin_CHAINPARAMSBASE_H
+#ifndef BITCOIN_CHAINPARAMSBASE_H
+#define BITCOIN_CHAINPARAMSBASE_H
 
 #include <memory>
 #include <string>
@@ -17,20 +17,17 @@
 class CBaseChainParams
 {
 public:
-    ///@{
-    /** Chain name strings */
+    /** BIP70 chain name strings (main, test or regtest) */
     static const std::string MAIN;
     static const std::string TESTNET;
     static const std::string REGTEST;
-    ///@}
 
     const std::string& DataDir() const { return strDataDir; }
     int RPCPort() const { return nRPCPort; }
 
-    CBaseChainParams() = delete;
-    CBaseChainParams(const std::string& data_dir, int rpc_port) : nRPCPort(rpc_port), strDataDir(data_dir) {}
+protected:
+    CBaseChainParams() {}
 
-private:
     int nRPCPort;
     std::string strDataDir;
 };
@@ -58,9 +55,9 @@ const CBaseChainParams& BaseParams();
 void SelectBaseParams(const std::string& chain);
 
 /**
- * Returns the appropriate chain name from the program arguments.
+ * Looks for -regtest, -testnet and returns the appropriate BIP70 chain name.
  * @return CBaseChainParams::MAX_NETWORK_TYPES if an invalid combination is given. CBaseChainParams::MAIN by default.
  */
 std::string ChainNameFromCommandLine();
 
-#endif // JokeCoin_CHAINPARAMSBASE_H
+#endif // BITCOIN_CHAINPARAMSBASE_H

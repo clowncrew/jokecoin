@@ -10,7 +10,7 @@
 #include "fs.h"
 #include "guiutil.h"
 
-#include "util/system.h"
+#include "util.h"
 #include "qt/jokecoin/qtutils.h"
 
 #include <QFileDialog>
@@ -193,7 +193,7 @@ bool Intro::pickDataDirectory()
             }
             dataDir = intro.getDataDirectory();
             try {
-                TryCreateDirectories(GUIUtil::qstringToBoostPath(dataDir));
+                TryCreateDirectory(GUIUtil::qstringToBoostPath(dataDir));
                 break;
             } catch (const fs::filesystem_error& e) {
                 QMessageBox::critical(0, tr("JokeCoin Core"),

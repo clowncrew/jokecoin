@@ -13,7 +13,7 @@
 #include "serialize.h"
 #include "streams.h"
 #include <univalue.h>
-#include "util/system.h"
+#include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 

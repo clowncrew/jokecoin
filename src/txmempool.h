@@ -18,12 +18,12 @@
 #include "primitives/transaction.h"
 #include "sync.h"
 #include "random.h"
-#include "netaddress.h"
 
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 #include "boost/multi_index/hashed_index.hpp"
-#include <boost/multi_index/sequenced_index.hpp>
+
+#include <boost/signals2/signal.hpp>
 
 class CAutoFile;
 
@@ -182,18 +182,13 @@ private:
     int64_t feeDelta;
 };
 
-// extracts a transaction hash from CTxMempoolEntry or CTransactionRef
+// extracts a TxMemPoolEntry's transaction hash
 struct mempoolentry_txid
 {
     typedef uint256 result_type;
     result_type operator() (const CTxMemPoolEntry &entry) const
     {
         return entry.GetTx().GetHash();
-    }
-
-    result_type operator() (const CTransactionRef& tx) const
-    {
-        return tx->GetHash();
     }
 };
 
@@ -512,11 +507,6 @@ private:
     typedef std::map<txiter, TxLinks, CompareIteratorByHash> txlinksMap;
     txlinksMap mapLinks;
 
-    std::multimap<uint256, uint256> mapProTxRefs; // proTxHash -> transaction (all TXs that refer to an existing proTx)
-    std::map<CService, uint256> mapProTxAddresses;
-    std::map<CKeyID, uint256> mapProTxPubKeyIDs;
-    std::map<COutPoint, uint256> mapProTxCollaterals;
-
     void UpdateParent(txiter entry, txiter parent, bool add);
     void UpdateChild(txiter entry, txiter child, bool add);
 
@@ -557,10 +547,6 @@ public:
     void removeForReorg(const CCoinsViewCache* pcoins, unsigned int nMemPoolHeight, int flags);
     void removeWithAnchor(const uint256& invalidRoot);
     void removeConflicts(const CTransaction& tx);
-    void removeProTxPubKeyConflicts(const CTransaction &tx, const CKeyID &keyId);
-    void removeProTxCollateralConflicts(const CTransaction &tx, const COutPoint &collateralOutpoint);
-    void removeProTxSpentCollateralConflicts(const CTransaction &tx);
-    void removeProTxConflicts(const CTransaction &tx);
     void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight,
                         bool fCurrentEstimate = true);
 
@@ -668,8 +654,6 @@ public:
     TxMempoolInfo info(const uint256& hash) const;
     std::vector<TxMempoolInfo> infoAll() const;
 
-    bool existsProviderTxConflict(const CTransaction &tx) const;
-
     /** Estimate fee rate needed to get into the next nBlocks
      *  If no answer can be given at nBlocks, return an estimate
      *  at the lowest number of blocks where one can be given
@@ -693,6 +677,9 @@ public:
     bool ReadFeeEstimates(CAutoFile& filein);
 
     size_t DynamicMemoryUsage() const;
+
+    boost::signals2::signal<void (CTransactionRef)> NotifyEntryAdded;
+    boost::signals2::signal<void (CTransactionRef, MemPoolRemovalReason)> NotifyEntryRemoved;
 
 private:
     /** UpdateForDescendants is used by UpdateTransactionsFromBlock to update
@@ -763,96 +750,6 @@ struct TxCoinAgePriorityCompare
         if (a.first == b.first)
             return CompareTxMemPoolEntryByScore()(*(b.second), *(a.second)); //Reverse order to make sort less than
         return a.first < b.first;
-    }
-};
-
-/**
- * DisconnectedBlockTransactions
- * During the reorg, it's desirable to re-add previously confirmed transactions
- * to the mempool, so that anything not re-confirmed in the new chain is
- * available to be mined. However, it's more efficient to wait until the reorg
- * is complete and process all still-unconfirmed transactions at that time,
- * since we expect most confirmed transactions to (typically) still be
- * confirmed in the new chain, and re-accepting to the memory pool is expensive
- * (and therefore better to not do in the middle of reorg-processing).
- * Instead, store the disconnected transactions (in order!) as we go, remove any
- * that are included in blocks in the new chain, and then process the remaining
- * still-unconfirmed transactions at the end.
- */
-
-// multi_index tag names
-struct txid_index {};
-struct insertion_order {};
-
-struct DisconnectedBlockTransactions {
-    typedef boost::multi_index_container<
-        CTransactionRef,
-        boost::multi_index::indexed_by<
-            // sorted by txid
-            boost::multi_index::hashed_unique<
-                boost::multi_index::tag<txid_index>,
-                mempoolentry_txid,
-                SaltedIdHasher
-            >,
-            // sorted by order in the blockchain
-            boost::multi_index::sequenced<
-                boost::multi_index::tag<insertion_order>
-            >
-        >
-    > indexed_disconnected_transactions;
-
-    // It's almost certainly a logic bug if we don't clear out queuedTx before
-    // destruction, as we add to it while disconnecting blocks, and then we
-    // need to re-process remaining transactions to ensure mempool consistency.
-    // For now, assert() that we've emptied out this object on destruction.
-    // This assert() can always be removed if the reorg-processing code were
-    // to be refactored such that this assumption is no longer true (for
-    // instance if there was some other way we cleaned up the mempool after a
-    // reorg, besides draining this object).
-    ~DisconnectedBlockTransactions() { assert(queuedTx.empty()); }
-
-    indexed_disconnected_transactions queuedTx;
-    uint64_t cachedInnerUsage = 0;
-
-    // Estimate the overhead of queuedTx to be 6 pointers + an allocation, as
-    // no exact formula for boost::multi_index_contained is implemented.
-    size_t DynamicMemoryUsage() const {
-        return memusage::MallocUsage(sizeof(CTransactionRef) + 6 * sizeof(void*)) * queuedTx.size() + cachedInnerUsage;
-    }
-
-    void addTransaction(const CTransactionRef& tx)
-    {
-        queuedTx.insert(tx);
-        cachedInnerUsage += memusage::RecursiveDynamicUsage(tx);
-    }
-
-    // Remove entries based on txid_index, and update memory usage.
-    void removeForBlock(const std::vector<CTransactionRef>& vtx)
-    {
-        // Short-circuit in the common case of a block being added to the tip
-        if (queuedTx.empty()) {
-            return;
-        }
-        for (auto const &tx : vtx) {
-            auto it = queuedTx.find(tx->GetHash());
-            if (it != queuedTx.end()) {
-                cachedInnerUsage -= memusage::RecursiveDynamicUsage(*it);
-                queuedTx.erase(it);
-            }
-        }
-    }
-
-    // Remove an entry by insertion_order index, and update memory usage.
-    void removeEntry(indexed_disconnected_transactions::index<insertion_order>::type::iterator entry)
-    {
-        cachedInnerUsage -= memusage::RecursiveDynamicUsage(*entry);
-        queuedTx.get<insertion_order>().erase(entry);
-    }
-
-    void clear()
-    {
-        cachedInnerUsage = 0;
-        queuedTx.clear();
     }
 };
 

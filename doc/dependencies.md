@@ -6,7 +6,7 @@ These are the dependencies currently used by JokeCoin Core. You can find instruc
 | Dependency | Version used | Minimum required | CVEs | Shared | [Bundled Qt library](https://doc.qt.io/qt-5/configure-options.html#third-party-libraries) |
 | --- | --- | --- | --- | --- | --- |
 | Berkeley DB | [4.8.30](https://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads/index.html) | 4.8.x | No |  |  |
-| Boost | [1.71.0](https://www.boost.org/users/download/) | [1.57.0](https://github.com/JokeCoin-Project/JokeCoin/pull/1703) | No |  |  |
+| Boost | [1.64.0](https://www.boost.org/users/download/) | [1.57.0](https://github.com/JokeCoin-Project/JokeCoin/pull/1703) | No |  |  |
 | Clang |  | [3.3+](https://llvm.org/releases/download.html) (C++11 support) |  |  |  |
 | D-Bus | [1.10.18](https://cgit.freedesktop.org/dbus/dbus/tree/NEWS?h=dbus-1.10) |  | No | Yes |  |
 | Expat | [2.2.6](https://libexpat.github.io/) |  | No | Yes |  |
@@ -18,9 +18,11 @@ These are the dependencies currently used by JokeCoin Core. You can find instruc
 | libjpeg |  |  |  |  | [Yes](https://github.com/jokecoin-project/jokecoin/blob/master/depends/packages/qt.mk#L65) |
 | libpng |  |  |  |  | [Yes](https://github.com/jokecoin-project/jokecoin/blob/master/depends/packages/qt.mk#L64) |
 | librsvg | |  |  |  |  |
-| MiniUPnPc | [2.2.2](https://miniupnp.tuxfamily.org/files) |  | No |  |  |
+| MiniUPnPc | [2.0.20180203](http://miniupnp.free.fr/files) |  | No |  |  |
+| OpenSSL | [1.0.1k](https://www.openssl.org/source) |  | Yes |  |  |
 | GMP | [6.1.2](https://gmplib.org/) | | No | | |
 | PCRE |  |  |  |  | [Yes](https://github.com/jokecoin-project/jokecoin/blob/master/depends/packages/qt.mk#L66) |
+| protobuf | [2.6.1](https://github.com/google/protobuf/releases) |  | No |  |  |
 | Python (tests) |  | [3.5](https://www.python.org/downloads) |  |  |  |
 | qrencode | [3.4.4](https://fukuchi.org/works/qrencode) |  | No |  |  |
 | Qt | [5.9.7](https://download.qt.io/official_releases/qt/) | [5.5.1](https://github.com/bitcoin/bitcoin/issues/13478) | No |  |  |

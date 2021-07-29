@@ -13,6 +13,7 @@
 
 #include "sapling/noteencryption.h"
 #include "sapling/sapling.h"
+#include "sapling/proof.h"
 
 #include <boost/variant.hpp>
 

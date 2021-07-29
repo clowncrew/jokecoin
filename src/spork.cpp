@@ -27,7 +27,6 @@ std::vector<CSporkDef> sporkDefs = {
     MAKE_SPORK_DEF(SPORK_18_ZEROCOIN_PUBLICSPEND_V4,        4070908800ULL), // OFF
     MAKE_SPORK_DEF(SPORK_19_COLDSTAKING_MAINTENANCE,        4070908800ULL), // OFF
     MAKE_SPORK_DEF(SPORK_20_SAPLING_MAINTENANCE,            4070908800ULL), // OFF
-    MAKE_SPORK_DEF(SPORK_21_LEGACY_MNS_MAX_HEIGHT,          4070908800ULL), // OFF
 };
 
 CSporkManager sporkManager;
@@ -74,8 +73,8 @@ void CSporkManager::LoadSporksFromDB()
         }
 
         // add spork to memory
-        AddOrUpdateSporkMessage(spork);
-
+        mapSporks[spork.GetHash()] = spork;
+        mapSporksActive[spork.nSporkID] = spork;
         std::time_t result = spork.nValue;
         // If SPORK Value is greater than 1,000,000 assume it's actually a Date and then convert to a more readable format
         std::string sporkName = sporkManager.GetSporkNameByID(spork.nSporkID);
@@ -131,6 +130,7 @@ int CSporkManager::ProcessSporkMsg(CSporkMessage& spork)
         return 0;
     }
 
+    uint256 hash = spork.GetHash();
     std::string sporkName = sporkManager.GetSporkNameByID(spork.nSporkID);
     std::string strStatus;
     {
@@ -172,7 +172,11 @@ int CSporkManager::ProcessSporkMsg(CSporkMessage& spork)
     LogPrintf("%s : got %s spork %d (%s) with value %d (signed at %d)\n", __func__,
               strStatus, spork.nSporkID, sporkName, spork.nValue, spork.nTimeSigned);
 
-    AddOrUpdateSporkMessage(spork);
+    {
+        LOCK(cs);
+        mapSporks[hash] = spork;
+        mapSporksActive[spork.nSporkID] = spork;
+    }
     spork.Relay();
 
     // JokeCoin: add to spork database.
@@ -202,22 +206,17 @@ void CSporkManager::ProcessGetSporks(CNode* pfrom, std::string& strCommand, CDat
 
 bool CSporkManager::UpdateSpork(SporkId nSporkID, int64_t nValue)
 {
-    CSporkMessage spork(nSporkID, nValue, GetTime());
+    CSporkMessage spork = CSporkMessage(nSporkID, nValue, GetTime());
 
-    if (spork.Sign(strMasterPrivKey)) {
+    if(spork.Sign(strMasterPrivKey)){
         spork.Relay();
-        AddOrUpdateSporkMessage(spork);
+        LOCK(cs);
+        mapSporks[spork.GetHash()] = spork;
+        mapSporksActive[nSporkID] = spork;
         return true;
     }
 
     return false;
-}
-
-void CSporkManager::AddOrUpdateSporkMessage(const CSporkMessage& spork)
-{
-    LOCK(cs);
-    mapSporks[spork.GetHash()] = spork;
-    mapSporksActive[spork.nSporkID] = spork;
 }
 
 // grab the spork value, and see if it's off

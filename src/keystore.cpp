@@ -10,7 +10,7 @@
 #include "key.h"
 #include "script/script.h"
 #include "script/standard.h"
-#include "util/system.h"
+#include "util.h"
 
 
 bool CKeyStore::AddKey(const CKey& key)

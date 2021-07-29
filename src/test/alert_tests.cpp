@@ -8,7 +8,7 @@
 //
 
 #include "chainparams.h"
-#include "util/system.h"
+#include "util.h"
 
 #include "test/test_bitcoin.h"
 

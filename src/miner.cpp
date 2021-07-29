@@ -20,7 +20,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "timedata.h"
-#include "util/system.h"
+#include "util.h"
 #include "utilmoneystr.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -39,15 +39,12 @@
 double dHashesPerSec = 0.0;
 int64_t nHPSTimerStart = 0;
 
-std::unique_ptr<CBlockTemplate> CreateNewBlockWithKey(std::unique_ptr<CReserveKey>& reservekey, CWallet* pwallet)
+std::unique_ptr<CBlockTemplate> CreateNewBlockWithKey(CReserveKey* reservekey, CWallet* pwallet)
 {
     CPubKey pubkey;
-    if (!reservekey->GetReservedKey(pubkey)) return nullptr;
-    return CreateNewBlockWithScript(GetScriptForDestination(pubkey.GetID()), pwallet);
-}
+    if (!reservekey->GetReservedKey(pubkey))
+        return nullptr;
 
-std::unique_ptr<CBlockTemplate> CreateNewBlockWithScript(const CScript& coinbaseScript, CWallet* pwallet)
-{
     const int nHeightNext = chainActive.Tip()->nHeight + 1;
 
     // If we're building a late PoW block, don't continue
@@ -59,10 +56,11 @@ std::unique_ptr<CBlockTemplate> CreateNewBlockWithScript(const CScript& coinbase
         return nullptr;
     }
 
-    return BlockAssembler(Params(), DEFAULT_PRINTPRIORITY).CreateNewBlock(coinbaseScript, pwallet, false);
+    CScript scriptPubKey = GetScriptForDestination(pubkey.GetID());
+    return BlockAssembler(Params(), DEFAULT_PRINTPRIORITY).CreateNewBlock(scriptPubKey, pwallet, false);
 }
 
-bool ProcessBlockFound(const std::shared_ptr<const CBlock>& pblock, CWallet& wallet, std::unique_ptr<CReserveKey>& reservekey)
+bool ProcessBlockFound(const std::shared_ptr<const CBlock>& pblock, CWallet& wallet, Optional<CReserveKey>& reservekey)
 {
     LogPrintf("%s\n", pblock->ToString());
     LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0]->vout[0].nValue));
@@ -118,7 +116,10 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
     const int64_t nSpacingMillis = consensus.nTargetSpacing * 1000;
 
     // Each thread has its own key and counter
-    std::unique_ptr<CReserveKey> pReservekey = fProofOfStake ? nullptr : std::make_unique<CReserveKey>(pwallet);
+    Optional<CReserveKey> opReservekey{nullopt};
+    if (!fProofOfStake) {
+        opReservekey = CReserveKey(pwallet);
+    }
 
     // Available UTXO set
     std::vector<CStakeableOutput> availableCoins;
@@ -168,7 +169,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
         std::unique_ptr<CBlockTemplate> pblocktemplate((fProofOfStake ?
                                                         BlockAssembler(Params(), DEFAULT_PRINTPRIORITY).CreateNewBlock(CScript(), pwallet, true, &availableCoins) :
-                                                        CreateNewBlockWithKey(pReservekey, pwallet)));
+                                                        CreateNewBlockWithKey(opReservekey.get_ptr(), pwallet)));
         if (!pblocktemplate) continue;
         std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>(pblocktemplate->block);
 
@@ -176,7 +177,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
         if (fProofOfStake) {
             LogPrintf("%s : proof-of-stake block was signed %s \n", __func__, pblock->GetHash().ToString().c_str());
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
-            if (!ProcessBlockFound(pblock, *pwallet, pReservekey)) {
+            if (!ProcessBlockFound(pblock, *pwallet, opReservekey)) {
                 LogPrintf("%s: New block orphaned\n", __func__);
                 continue;
             }
@@ -185,7 +186,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
         }
 
         // POW - miner main
-        IncrementExtraNonce(pblock, pindexPrev->nHeight + 1, nExtraNonce);
+        IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
         LogPrintf("Running JokeCoinMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
             ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
@@ -194,19 +195,19 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
         // Search
         //
         int64_t nStart = GetTime();
-        arith_uint256& hashTarget = arith_uint256().SetCompact(pblock->nBits);
+        uint256 hashTarget = uint256().SetCompact(pblock->nBits);
         while (true) {
             unsigned int nHashesDone = 0;
 
-            arith_uint256 hash;
+            uint256 hash;
             while (true) {
-                hash = UintToArith256(pblock->GetHash());
+                hash = pblock->GetHash();
                 if (hash <= hashTarget) {
                     // Found a solution
                     SetThreadPriority(THREAD_PRIORITY_NORMAL);
                     LogPrintf("%s:\n", __func__);
                     LogPrintf("proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
-                    ProcessBlockFound(pblock, *pwallet, pReservekey);
+                    ProcessBlockFound(pblock, *pwallet, opReservekey);
                     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
                     // In regression test mode, stop mining after a block is found. This
@@ -303,8 +304,8 @@ void GenerateBitcoins(bool fGenerate, CWallet* pwallet, int nThreads)
 void ThreadStakeMinter()
 {
     boost::this_thread::interruption_point();
-    LogPrintf("ThreadStakeMinter started. Using wallet-0\n");
-    CWallet* pwallet = vpwallets[0];
+    LogPrintf("ThreadStakeMinter started\n");
+    CWallet* pwallet = pwalletMain;
     try {
         BitcoinMiner(pwallet, true);
         boost::this_thread::interruption_point();

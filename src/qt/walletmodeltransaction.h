@@ -7,9 +7,6 @@
 
 #include "walletmodel.h"
 
-#include "amount.h"
-#include "primitives/transaction.h"
-
 #include <QObject>
 
 class SendCoinsRecipient;

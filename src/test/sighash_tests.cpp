@@ -11,7 +11,7 @@
 #include "serialize.h"
 #include "script/script.h"
 #include "script/interpreter.h"
-#include "util/system.h"
+#include "util.h"
 #include "validation.h"
 #include "version.h"
 
@@ -95,7 +95,11 @@ void static RandomScript(CScript &script) {
 
 void static RandomTransaction(CMutableTransaction &tx, bool fSingle) {
     bool isSapling = !(InsecureRand32() % 7);
-    tx.nVersion = isSapling ? CTransaction::TxVersion::SAPLING : CTransaction::TxVersion::LEGACY;
+    if (isSapling) {
+        tx.nVersion = 2;
+    } else {
+        do tx.nVersion = InsecureRand32(); while (tx.nVersion == 2);
+    }
     tx.vin.clear();
     tx.vout.clear();
     tx.sapData->vShieldedSpend.clear();
@@ -228,7 +232,7 @@ BOOST_AUTO_TEST_CASE(sighash_from_data)
           stream >> tx;
 
           CValidationState state;
-          BOOST_CHECK_MESSAGE(CheckTransaction(*tx, state, false), strTest);
+          BOOST_CHECK_MESSAGE(CheckTransaction(*tx, false, state), strTest);
           BOOST_CHECK(state.IsValid());
 
           std::vector<unsigned char> raw = ParseHex(raw_script);

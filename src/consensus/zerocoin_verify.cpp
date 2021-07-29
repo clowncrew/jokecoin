@@ -18,9 +18,8 @@
 #include "zjoke/zjokemodule.h"
 
 
-static bool CheckZerocoinSpend(const CTransactionRef _tx, CValidationState& state)
+bool CheckZerocoinSpend(const CTransaction& tx, bool fVerifySignature, CValidationState& state, bool fFakeSerialAttack)
 {
-    const CTransaction& tx = *_tx;
     //max needed non-mint outputs should be 2 - one for redemption address and a possible 2nd for change
     if (tx.vout.size() > 2) {
         int outs = 0;
@@ -30,7 +29,7 @@ static bool CheckZerocoinSpend(const CTransactionRef _tx, CValidationState& stat
             outs++;
         }
         if (outs > 2 && !tx.IsCoinStake())
-            return state.DoS(100, error("%s: over two non-mint outputs in a zerocoinspend transaction", __func__));
+            return state.DoS(100, error("CheckZerocoinSpend(): over two non-mint outputs in a zerocoinspend transaction"));
     }
 
     //compute the txout hash that is used for the zerocoinspend signatures
@@ -55,12 +54,12 @@ static bool CheckZerocoinSpend(const CTransactionRef _tx, CValidationState& stat
         CTxOut prevOut;
         if (isPublicSpend) {
             if(!GetOutput(txin.prevout.hash, txin.prevout.n, state, prevOut)){
-                return state.DoS(100, error("%s: public zerocoin spend prev output not found, prevTx %s, index %d", __func__, txin.prevout.hash.GetHex(), txin.prevout.n));
+                return state.DoS(100, error("CheckZerocoinSpend(): public zerocoin spend prev output not found, prevTx %s, index %d", txin.prevout.hash.GetHex(), txin.prevout.n));
             }
             libzerocoin::ZerocoinParams* params = consensus.Zerocoin_Params(false);
             PublicCoinSpend publicSpend(params);
             if (!ZJOKEModule::parseCoinSpend(txin, tx, prevOut, publicSpend)){
-                return state.DoS(100, error("%s: public zerocoin spend parse failed", __func__));
+                return state.DoS(100, error("CheckZerocoinSpend(): public zerocoin spend parse failed"));
             }
             newSpend = publicSpend;
         } else {
@@ -69,26 +68,26 @@ static bool CheckZerocoinSpend(const CTransactionRef _tx, CValidationState& stat
 
         //check that the denomination is valid
         if (newSpend.getDenomination() == libzerocoin::ZQ_ERROR)
-            return state.DoS(100, error("%s: Zerocoinspend does not have the correct denomination", __func__));
+            return state.DoS(100, error("Zerocoinspend does not have the correct denomination"));
 
         //check that denomination is what it claims to be in nSequence
         if (newSpend.getDenomination() != txin.nSequence)
-            return state.DoS(100, error("%s: Zerocoinspend nSequence denomination does not match CoinSpend", __func__));
+            return state.DoS(100, error("Zerocoinspend nSequence denomination does not match CoinSpend"));
 
         //make sure the txout has not changed
         if (newSpend.getTxOutHash() != hashTxOut)
-            return state.DoS(100, error("%s: Zerocoinspend does not use the same txout that was used in the SoK", __func__));
+            return state.DoS(100, error("Zerocoinspend does not use the same txout that was used in the SoK"));
 
         if (isPublicSpend) {
             libzerocoin::ZerocoinParams* params = consensus.Zerocoin_Params(false);
             PublicCoinSpend ret(params);
             if (!ZJOKEModule::validateInput(txin, prevOut, tx, ret)){
-                return state.DoS(100, error("%s: public zerocoin spend did not verify", __func__));
+                return state.DoS(100, error("CheckZerocoinSpend(): public zerocoin spend did not verify"));
             }
         }
 
         if (serials.count(newSpend.getCoinSerialNumber()))
-            return state.DoS(100, error("%s: Zerocoinspend serial is used twice in the same tx", __func__));
+            return state.DoS(100, error("Zerocoinspend serial is used twice in the same tx"));
         serials.insert(newSpend.getCoinSerialNumber());
 
         //make sure that there is no over redemption of coins
@@ -97,8 +96,8 @@ static bool CheckZerocoinSpend(const CTransactionRef _tx, CValidationState& stat
     }
 
     if (!tx.IsCoinStake() && nTotalRedeemed < tx.GetValueOut()) {
-        LogPrintf("%s: redeemed = %s , spend = %s \n", __func__, FormatMoney(nTotalRedeemed), FormatMoney(tx.GetValueOut()));
-        return state.DoS(100, error("%s: Transaction spend more than was redeemed in zerocoins", __func__));
+        LogPrintf("redeemed = %s , spend = %s \n", FormatMoney(nTotalRedeemed), FormatMoney(tx.GetValueOut()));
+        return state.DoS(100, error("Transaction spend more than was redeemed in zerocoins"));
     }
 
     return fValidated;
@@ -134,65 +133,6 @@ int CurrentPublicCoinSpendVersion() {
 
 bool CheckPublicCoinSpendVersion(int version) {
     return version == CurrentPublicCoinSpendVersion();
-}
-
-bool ContextualCheckZerocoinTx(const CTransactionRef& tx, CValidationState& state, const Consensus::Params& consensus, int nHeight)
-{
-    // zerocoin enforced via block time. First block with a zc mint is 863735
-    const bool fZerocoinEnforced = (nHeight >= consensus.ZC_HeightStart);
-    const bool fPublicSpendEnforced = consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_ZC_PUBLIC);
-    const bool fRejectMintsAndPrivateSpends = !fZerocoinEnforced || fPublicSpendEnforced;
-    const bool fRejectPublicSpends = !fPublicSpendEnforced || consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_V5_0);
-
-    const bool hasPrivateSpendInputs = !tx->vin.empty() && tx->vin[0].IsZerocoinSpend();
-    const bool hasPublicSpendInputs = !tx->vin.empty() && tx->vin[0].IsZerocoinPublicSpend();
-    const std::string& txId = tx->GetHash().ToString();
-
-    int nSpendCount{0};
-    for (const CTxIn& in : tx->vin) {
-        if (in.IsZerocoinSpend()) {
-            if (fRejectMintsAndPrivateSpends)
-                return state.DoS(100, error("%s: zerocoin spend tx %s not accepted at height %d",
-                                            __func__, txId, nHeight), REJECT_INVALID, "bad-txns-zc-private-spend");
-            if (!hasPrivateSpendInputs)
-                return state.DoS(100, error("%s: zerocoin spend tx %s has mixed spend inputs",
-                                            __func__, txId), REJECT_INVALID, "bad-txns-zc-private-spend-mixed-types");
-            if (++nSpendCount > consensus.ZC_MaxSpendsPerTx)
-                return state.DoS(100, error("%s: zerocoin spend tx %s has more than %d inputs",
-                                            __func__, txId, consensus.ZC_MaxSpendsPerTx), REJECT_INVALID, "bad-txns-zc-private-spend-max-inputs");
-
-        } else if (in.IsZerocoinPublicSpend()) {
-            if (fRejectPublicSpends)
-                return state.DoS(100, error("%s: zerocoin public spend tx %s not accepted at height %d",
-                                            __func__, txId, nHeight), REJECT_INVALID, "bad-txns-zc-public-spend");
-            if (!hasPublicSpendInputs)
-                return state.DoS(100, error("%s: zerocoin spend tx %s has mixed spend inputs",
-                                            __func__, txId), REJECT_INVALID, "bad-txns-zc-public-spend-mixed-types");
-            if (++nSpendCount > consensus.ZC_MaxPublicSpendsPerTx)
-                return state.DoS(100, error("%s: zerocoin spend tx %s has more than %d inputs",
-                                            __func__, txId, consensus.ZC_MaxPublicSpendsPerTx), REJECT_INVALID, "bad-txns-zc-public-spend-max-inputs");
-
-        } else {
-            // this is a transparent input
-            if (hasPrivateSpendInputs || hasPublicSpendInputs)
-                return state.DoS(100, error("%s: zerocoin spend tx %s has mixed spend inputs",
-                                            __func__, txId), REJECT_INVALID, "bad-txns-zc-spend-mixed-types");
-        }
-    }
-
-    if (hasPrivateSpendInputs || hasPublicSpendInputs) {
-        if (!CheckZerocoinSpend(tx, state))
-            return false;   // failure reason logged in validation state
-    }
-
-    for (const CTxOut& o : tx->vout) {
-        if (o.IsZerocoinMint() && fRejectMintsAndPrivateSpends) {
-            return state.DoS(100, error("%s: zerocoin mint tx %s not accepted at height %d",
-                                        __func__, txId, nHeight), REJECT_INVALID, "bad-txns-zc-mint");
-        }
-    }
-
-    return true;
 }
 
 bool ContextualCheckZerocoinSpend(const CTransaction& tx, const libzerocoin::CoinSpend* spend, int nHeight, const uint256& hashBlock)
@@ -235,7 +175,7 @@ bool ContextualCheckZerocoinSpendNoSerialCheck(const CTransaction& tx, const lib
         }
     }
 
-    bool fUseV1Params = spend->getCoinVersion() < libzerocoin::PUBKEY_VERSION;
+    bool fUseV1Params = spend->getCoinVersion() < libzerocoin::PrivateCoin::PUBKEY_VERSION;
 
     //Reject serial's that are not in the acceptable value range
     if (!spend->HasValidSerial(consensus.Zerocoin_Params(fUseV1Params)))  {

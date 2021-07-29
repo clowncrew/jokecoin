@@ -46,9 +46,10 @@ bool CPivStake::GetTxOutFrom(CTxOut& out) const
     return true;
 }
 
-CTxIn CPivStake::GetTxIn() const
+bool CPivStake::CreateTxIn(CWallet* pwallet, CTxIn& txIn, uint256 hashTxOut)
 {
-    return CTxIn(outpointFrom.hash, outpointFrom.n);
+    txIn = CTxIn(outpointFrom.hash, outpointFrom.n);
+    return true;
 }
 
 CAmount CPivStake::GetValue() const
@@ -56,7 +57,7 @@ CAmount CPivStake::GetValue() const
     return outputFrom.nValue;
 }
 
-bool CPivStake::CreateTxOuts(const CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal) const
+bool CPivStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal, const bool onlyP2PK)
 {
     std::vector<valtype> vSolutions;
     txnouttype whichType;
@@ -67,6 +68,7 @@ bool CPivStake::CreateTxOuts(const CWallet* pwallet, std::vector<CTxOut>& vout, 
     if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH && whichType != TX_COLDSTAKE)
         return error("%s: type=%d (%s) not supported for scriptPubKeyKernel", __func__, whichType, GetTxnOutputType(whichType));
 
+    CScript scriptPubKey;
     CKey key;
     if (whichType == TX_PUBKEYHASH || whichType == TX_COLDSTAKE) {
         // if P2PKH or P2CS check that we have the input private key
@@ -74,7 +76,17 @@ bool CPivStake::CreateTxOuts(const CWallet* pwallet, std::vector<CTxOut>& vout, 
             return error("%s: Unable to get staking private key", __func__);
     }
 
-    vout.emplace_back(0, scriptPubKeyKernel);
+    // Consensus check: P2PKH block signatures were not accepted before v5 update.
+    // This can be removed after v5.0 enforcement
+    if (whichType == TX_PUBKEYHASH && onlyP2PK) {
+        // convert to P2PK inputs
+        scriptPubKey << key.GetPubKey() << OP_CHECKSIG;
+    } else {
+        // keep the same script
+        scriptPubKey = scriptPubKeyKernel;
+    }
+
+    vout.emplace_back(0, scriptPubKey);
 
     // Calculate if we need to split the output
     if (pwallet->nStakeSplitThreshold > 0) {
@@ -86,7 +98,7 @@ bool CPivStake::CreateTxOuts(const CWallet* pwallet, std::vector<CTxOut>& vout, 
                 nSplit = txSizeMax;
             for (int i = nSplit; i > 1; i--) {
                 LogPrintf("%s: StakeSplit: nTotal = %d; adding output %d of %d\n", __func__, nTotal, (nSplit-i)+2, nSplit);
-                vout.emplace_back(0, scriptPubKeyKernel);
+                vout.emplace_back(0, scriptPubKey);
             }
         }
     }

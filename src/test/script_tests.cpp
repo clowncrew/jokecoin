@@ -58,7 +58,7 @@ CMutableTransaction BuildCreditingTransaction(const CScript& scriptPubKey)
     txCredit.vout.resize(1);
     txCredit.vin[0].prevout.SetNull();
     txCredit.vin[0].scriptSig = CScript() << CScriptNum(0) << CScriptNum(0);
-    txCredit.vin[0].nSequence = CTxIn::SEQUENCE_FINAL;
+    txCredit.vin[0].nSequence = std::numeric_limits<unsigned int>::max();
     txCredit.vout[0].scriptPubKey = scriptPubKey;
     txCredit.vout[0].nValue = 0;
 
@@ -75,7 +75,7 @@ CMutableTransaction BuildSpendingTransaction(const CScript& scriptSig, const CMu
     txSpend.vin[0].prevout.hash = txCredit.GetHash();
     txSpend.vin[0].prevout.n = 0;
     txSpend.vin[0].scriptSig = scriptSig;
-    txSpend.vin[0].nSequence = CTxIn::SEQUENCE_FINAL;
+    txSpend.vin[0].nSequence = std::numeric_limits<unsigned int>::max();
     txSpend.vout[0].scriptPubKey = CScript();
     txSpend.vout[0].nValue = 0;
 
@@ -94,7 +94,7 @@ void DoTest(const CScript& scriptPubKey, const CScript& scriptSig, int flags, bo
 #if defined(HAVE_CONSENSUS_LIB)
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << tx2;
-    BOOST_CHECK_MESSAGE(bitcoinconsensus_verify_script(scriptPubKey.data(), scriptPubKey.size(), (const unsigned char*)&stream[0], stream.size(), 0, flags, NULL) == expect,message);
+    BOOST_CHECK_MESSAGE(bitcoinconsensus_verify_script(begin_ptr(scriptPubKey), scriptPubKey.size(), (const unsigned char*)&stream[0], stream.size(), 0, flags, NULL) == expect,message);
 #endif
 }
 

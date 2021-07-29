@@ -19,7 +19,7 @@
 #include "net.h"
 #include "netbase.h"
 #include "guiinterface.h"
-#include "util/system.h"
+#include "util.h"
 #include "warnings.h"
 
 #include <stdint.h>

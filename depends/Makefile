@@ -1,33 +1,5 @@
 .NOTPARALLEL :
 
-# Pattern rule to print variables, e.g. make print-top_srcdir
-print-%:
-	@echo $* = $($*)
-
-# When invoking a sub-make, keep only the command line variable definitions
-# matching the pattern in the filter function.
-#
-# e.g. invoking:
-#   $ make A=1 C=1 print-MAKEOVERRIDES print-MAKEFLAGS
-#
-# with the following in the Makefile:
-#   MAKEOVERRIDES := $(filter A=% B=%,$(MAKEOVERRIDES))
-#
-# will print:
-#   MAKEOVERRIDES = A=1
-#   MAKEFLAGS = -- A=1
-#
-# this is because as the GNU make manual says:
-#   The command line variable definitions really appear in the variable
-#   MAKEOVERRIDES, and MAKEFLAGS contains a reference to this variable.
-#
-# and since the GNU make manual also says:
-#   variables defined on the command line are passed to the sub-make through
-#   MAKEFLAGS
-#
-# this means that sub-makes will be invoked as if:
-#   $(MAKE) A=1 blah blah
-MAKEOVERRIDES := $(filter V=%,$(MAKEOVERRIDES))
 SOURCES_PATH ?= $(BASEDIR)/sources
 WORK_PATH = $(BASEDIR)/work
 BASE_CACHE ?= $(BASEDIR)/built
@@ -122,11 +94,6 @@ $(host_arch)_$(host_os)_id_string+=$(shell $(host_CXX) --version 2>/dev/null)
 $(host_arch)_$(host_os)_id_string+=$(shell $(host_RANLIB) --version 2>/dev/null)
 $(host_arch)_$(host_os)_id_string+=$(shell $(host_STRIP) --version 2>/dev/null)
 
-ifneq ($(strip $(FORCE_USE_SYSTEM_CLANG)),)
-build_id_string+=system_clang
-$(host_arch)_$(host_os)_id_string+=system_clang
-endif
-
 qt_packages_$(NO_QT) = $(qt_packages) $(qt_$(host_os)_packages) $(qt_$(host_arch)_$(host_os)_packages)
 wallet_packages_$(NO_WALLET) = $(wallet_packages)
 upnp_packages_$(NO_UPNP) = $(upnp_packages)
@@ -147,17 +114,11 @@ all_packages = $(packages) $(native_packages)
 
 meta_depends = Makefile funcs.mk builders/default.mk hosts/default.mk hosts/$(host_os).mk builders/$(build_os).mk cargo-checksum.sh
 
-$(host_arch)_$(host_os)_native_binutils?=$($(host_os)_native_binutils)
 $(host_arch)_$(host_os)_native_toolchain?=$($(host_os)_native_toolchain)
 
 include funcs.mk
 
-binutils_path=$($($(host_arch)_$(host_os)_native_binutils)_prefixbin)
-ifeq ($(strip $(FORCE_USE_SYSTEM_CLANG)),)
 toolchain_path=$($($(host_arch)_$(host_os)_native_toolchain)_prefixbin)
-else
-toolchain_path=
-endif
 final_build_id_long+=$(shell $(build_SHA256SUM) config.site.in)
 final_build_id+=$(shell echo -n "$(final_build_id_long)" | $(build_SHA256SUM) | cut -c-$(HASH_LENGTH))
 $(host_prefix)/.stamp_$(final_build_id): $(native_packages) $(packages)
@@ -173,10 +134,10 @@ $(host_prefix)/share/config.site : config.site.in $(host_prefix)/.stamp_$(final_
 	$(AT)sed -e 's|@HOST@|$(host)|' \
             -e 's|@CC@|$(toolchain_path)$(host_CC)|' \
             -e 's|@CXX@|$(toolchain_path)$(host_CXX)|' \
-            -e 's|@AR@|$(binutils_path)$(host_AR)|' \
-            -e 's|@RANLIB@|$(binutils_path)$(host_RANLIB)|' \
-            -e 's|@NM@|$(binutils_path)$(host_NM)|' \
-            -e 's|@STRIP@|$(binutils_path)$(host_STRIP)|' \
+            -e 's|@AR@|$(toolchain_path)$(host_AR)|' \
+            -e 's|@RANLIB@|$(toolchain_path)$(host_RANLIB)|' \
+            -e 's|@NM@|$(toolchain_path)$(host_NM)|' \
+            -e 's|@STRIP@|$(toolchain_path)$(host_STRIP)|' \
             -e 's|@build_os@|$(build_os)|' \
             -e 's|@host_os@|$(host_os)|' \
             -e 's|@CFLAGS@|$(strip $(host_CFLAGS) $(host_$(release_type)_CFLAGS))|' \

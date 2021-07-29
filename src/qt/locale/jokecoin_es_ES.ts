@@ -940,10 +940,6 @@ del propietario </translation>
         <translation>Filtrar por</translation>
     </message>
     <message>
-        <source>Amount of JOKE and zJOKE staked.</source>
-        <translation>Cantidad de JOKE y zJOKE por stake.</translation>
-    </message>
-    <message>
         <source>Please wait until the wallet is fully synced to see your correct balance</source>
         <translation>Espere hasta que la wallet esté completamente sincronizada para ver su saldo correcto</translation>
     </message>
@@ -2208,16 +2204,8 @@ Dirección: %4
         <translation>Error: No se puede analizar el archivo de configuración: %1. Utilice sólo la sintaxis key=value.</translation>
     </message>
     <message>
-        <source>Error: Invalid combination of -regtest and -testnet.</source>
-        <translation>Error: Combinación no válida de -regtest y -testnet.</translation>
-    </message>
-    <message>
         <source>Error reading masternode configuration file: %1</source>
         <translation>Error al leer el archivo de configuración de masternode: %1</translation>
-    </message>
-    <message>
-        <source>JokeCoin Core didn't yet exit safely...</source>
-        <translation>El núcleo JokeCoin aún no ha salido de forma segura...</translation>
     </message>
     <message>
         <source>Contact</source>
@@ -3642,23 +3630,6 @@ Ha habido un error al tratar de guardar la libreta de direcciones en %1. Por fav
         <translation>¿Por qué mi JOKE no se pueden gastar?</translation>
     </message>
     <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           Newly received JokeCoin requires 6 confirmations on the network
-                           to become eligible for spending which can take ~6 minutes.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           Your JokeCoin wallet also needs to be completely synchronized
-                           to see and spend balances on the network.
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-Los JokeCoin recién recibidos requieren 6 confirmaciones en la red para ser elegibles para gastos que pueden tomar ~6 minutos.
-&lt;/p&gt;&lt;p align="justify"&gt;
-Tu wallet JokeCoin también necesita estar completamente sincronizada para que pueda  ver y gastar el saldos en la red.
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>3</source>
         <translation>3</translation>
     </message>
@@ -3687,94 +3658,6 @@ Tu wallet JokeCoin también necesita estar completamente sincronizada para que p
         <translation>¿Qué es un Controlador de Masternode?</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;A Masternode Controller wallet is where the 10,000 JOKE collateral can reside during a Controller-Remote masternode setup. It is a wallet that can activate the remote masternode wallet(s) and allows you to keep your collateral coins offline while the remote masternode remains online. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;Una wallet del controlador Masternode es donde la garantía de 10,000 JOKE puede almacenarse durante la configuración de un masternode controlador-remoto. Esta es una wallet que puede activar la wallet (s) del masternode remoto y te permite mantener tus monedas colaterales fuera de línea mientras el masternode remoto permanece en línea. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>
-                           &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-                           A masternode is a computer running a full node JokeCoin core wallet with a
-                           requirement of 10,000 JOKE secured collateral to provide extra services
-                           to the network and in return, receive a portion of the block reward
-                           regularly.  These services include:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           &lt;ul&gt;
-                           &lt;li&gt;Instant transactions (SwiftX)&lt;/li&gt;
-                           &lt;li&gt;A decentralized governance (Proposal Voting)&lt;/li&gt;
-                           &lt;li&gt;A decentralized budgeting system (Treasury)&lt;/li&gt;
-                           &lt;li&gt;Validation of transactions within each block&lt;/li&gt;
-                           &lt;li&gt;Act as an additional full node in the network&lt;/li&gt;
-                           &lt;/ul&gt;
-
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           For providing such services, masternodes are also paid a certain portion
-                           of reward for each block. This can serve as a passive income to the
-                           masternode owners minus their running cost.
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           Masternode Perks:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           &lt;ul&gt;
-                           &lt;li&gt;Participate in JokeCoin Governance&lt;/li&gt;
-                           &lt;li&gt;Earn Masternode Rewards&lt;/li&gt;
-                           &lt;li&gt;Commodity option for future sale&lt;/li&gt;
-                           &lt;li&gt;Help secure the JokeCoin network&lt;/li&gt;
-                           &lt;/ul&gt;
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-
-                           Requirements:
-                           &lt;/p&gt;&lt;p align="justify"&gt;
-                           &lt;ul&gt;
-                           &lt;li&gt;10,000 JOKE per single Masternode instance&lt;/li&gt;
-                           &lt;li&gt;Must be stored in a core wallet&lt;/li&gt;
-                           &lt;li&gt;Need dedicated IP address&lt;/li&gt;
-                           &lt;li&gt;Masternode wallet to remain online&lt;/li&gt;
-                           &lt;/ul&gt;
-                           &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                         </source>
-        <translation>
-&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="justify"&gt;
-Un Masternode es un ordenador que ejecuta una Core Wallet de JokeCoin de nodo
-completo con un requisito de 10.000 JOKE de garantía asegurados para prestar servicios
-adicionales a la red y a cambio, recibir una parte de la recompensa del bloque
-regularmente. Estos servicios incluyen:
-&lt;/p&gt;&lt;p align="justify"&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Transacciones instantáneas (SwiftX)&lt;/li&gt;
-&lt;li&gt;Una gobernanza descentralizada (Propuesta de Votación)&lt;/li&gt;
-&lt;li&gt;Un sistema de presupuestación descentralizado (Tesorería)&lt;/li&gt;
-&lt;li&gt;Validación de transacciones dentro de cada bloque&lt;/li&gt;
-&lt;li&gt;Actuar como un nodo completo adicional en la red&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;/p&gt;&lt;p align="justify"&gt;
-Por la prestación de estos servicios, a los Masternodes también se les paga una cierta parte de recompensa por cada bloque. Esto puede servir como un ingreso pasivo para los
-propietarios de Masternodes menos sus costes de funcionamiento.
-&lt;/p&gt;&lt;p align="justify"&gt;
-
-Ventajas de los Masternodes:
-&lt;/p&gt;&lt;p align="justify"&gt;
-&lt;ul&gt;
-&lt;li&gt;Participar en el gobierno de JokeCoin&lt;/li&gt;
-&lt;li&gt;Gana Recompensas Masternode&lt;/li&gt;
-&lt;li&gt;Opción de productos para venta futura&lt;/li&gt;
-&lt;/li&gt;Ayudar a proteger la red JokeCoin&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/p&gt;&lt;p align="justify"&gt;
-
-Requisitos:
-&lt;/p&gt;
-&lt;p align="justify"&gt;&lt;ul&gt;
-&lt;li&gt;10.000 JOKE por cada instancia de Masternode&lt;/li&gt;
-&lt;li&gt;Debe guardarse en una wallet principal&lt;/li&gt;
-&lt;li&gt;Necesita una dirección IP dedicada&lt;/li&gt;
-&lt;li&gt;La wallet Masternode permanecerá en línea&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Frequently Asked Questions</source>
         <translation>Preguntas Frecuentes</translation>
     </message>
@@ -3782,7 +3665,7 @@ Requisitos:
         <source>You can read more here</source>
         <translation>Puedes leer más aquí</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>SettingsInformationWidget</name>
     <message>
@@ -5010,10 +4893,6 @@ JokeCoin Core Wallet</translation>
         <translation>Escuchar únicamente a la tarjeta de red indicada para conexiones JSON-RPC. Use la notación [host]:puerto para IPv6. Esta opción puede ser especificada varias veces (por defecto: escuchar en todas las tarjetas de red)</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. JokeCoin Core is probably already running.</source>
-        <translation>No se puede obtener un bloqueo sobre el directorio de datos %s. JokeCoin Core esta probablemente en ejecución.</translation>
-    </message>
-    <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
         <translation>Cambiar el comportamiento automático de votación de presupuesto final. modo=auto: Votar sólo por coincidencia exacta de un presupuesto finalizado con el generado por mí. (cadena, por defecto: auto)</translation>
     </message>
@@ -5040,10 +4919,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Enable spork administration functionality with the appropriate private key.</source>
         <translation>Activar la función de administración de sporks con la llave privada apropiada.</translation>
-    </message>
-    <message>
-        <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
-        <translation>Entrar en el modo prueba de regresión, el cual usa una cadena especial en el cual los bloques pueden ser resueltos instantaneamente.</translation>
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
@@ -5076,10 +4951,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks (default: %u)</source>
         <translation>Si paytxfee no esta definido, incluir suficiente comisión de manera que la transacción se vuelva confirmada en promedio dentro de n bloques (predeterminado: %u)</translation>
-    </message>
-    <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>En este modo -genproclimit controla cuantos bloques son generados inmediatamente.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
@@ -5366,10 +5237,6 @@ JokeCoin Core Wallet</translation>
         <translation>Información</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. JokeCoin Core is shutting down.</source>
-        <translation>La prueba de salud de inicialización ha fallado. JokeCoin Core se cerrará.</translation>
-    </message>
-    <message>
         <source>Insufficient funds.</source>
         <translation>Fondos insuficientes.</translation>
     </message>
@@ -5392,10 +5259,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Error: Unsupported argument -checklevel found. Checklevel must be level 4.</source>
         <translation>Error: Se ha especificado un argumento no soportado -checklevel. El Checklevel debe ser siempre 4. </translation>
-    </message>
-    <message>
-        <source>Execute command when the best block changes and its size is over (%s in cmd is replaced by block hash, %d with the block size)</source>
-        <translation>Ejecute el comando cuando el mejor bloque cambie y su tamaño haya terminado (%s en cmd se reemplaza por el hash del bloque, %d con el tamaño de bloque)</translation>
     </message>
     <message>
         <source>Specify custom backup path to add a copy of any wallet backup. If set as dir, every backup generates a timestamped file. If set as file, will rewrite to that file every backup.</source>
@@ -5754,10 +5617,6 @@ JokeCoin Core Wallet</translation>
         <translation>Esto es software experimental.</translation>
     </message>
     <message>
-        <source>This is intended for regression testing tools and app development.</source>
-        <translation>Esto esta destinado para herramientas de prueba de regresión y desarrollo de aplicaciones.</translation>
-    </message>
-    <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
         <translation>Limite para desconexión de peers de mal desempeño (predeterminado: %u)</translation>
     </message>
@@ -5816,10 +5675,6 @@ JokeCoin Core Wallet</translation>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Usar UPnP para mapear el puerto de escucha (predeterminado: %u)</translation>
-    </message>
-    <message>
-        <source>Use the test network</source>
-        <translation>Usar la red de prueba</translation>
     </message>
     <message>
         <source>User Agent comment (%s) contains unsafe characters.</source>

@@ -99,9 +99,6 @@ QT_TRANSLATE_NOOP("jokecoin-core", ""
 "Execute command when the best block changes (%s in cmd is replaced by block "
 "hash)"),
 QT_TRANSLATE_NOOP("jokecoin-core", ""
-"Execute command when the best block changes and its size is over (%s in cmd "
-"is replaced by block hash, %d with the block size)"),
-QT_TRANSLATE_NOOP("jokecoin-core", ""
 "Fees (in %s/Kb) smaller than this are considered zero fee for relaying, "
 "mining and transaction creation (default: %s)"),
 QT_TRANSLATE_NOOP("jokecoin-core", ""
@@ -327,6 +324,7 @@ QT_TRANSLATE_NOOP("jokecoin-core", "Loading masternode cache..."),
 QT_TRANSLATE_NOOP("jokecoin-core", "Loading masternode payment cache..."),
 QT_TRANSLATE_NOOP("jokecoin-core", "Loading sporks..."),
 QT_TRANSLATE_NOOP("jokecoin-core", "Loading wallet..."),
+QT_TRANSLATE_NOOP("jokecoin-core", "Loading/Pruning invalid outputs..."),
 QT_TRANSLATE_NOOP("jokecoin-core", "Location of the auth cookie (default: data dir)"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Lock masternodes from masternode configuration file (default: %u)"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Lookup(): Invalid -proxy address or hostname: '%s'"),
@@ -354,6 +352,7 @@ QT_TRANSLATE_NOOP("jokecoin-core", "Print version and exit"),
 QT_TRANSLATE_NOOP("jokecoin-core", "RPC server options:"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Randomly drop 1 of every <n> network messages"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Randomly fuzz 1 of every <n> network messages"),
+QT_TRANSLATE_NOOP("jokecoin-core", "Reaccepting wallet transactions..."),
 QT_TRANSLATE_NOOP("jokecoin-core", "Rebuild block chain index from current blk000??.dat files"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Relay and mine data carrier transactions (default: %u)"),
 QT_TRANSLATE_NOOP("jokecoin-core", "Relay non-P2SH multisig (default: %u)"),

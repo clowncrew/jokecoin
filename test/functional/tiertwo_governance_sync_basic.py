@@ -4,11 +4,10 @@
 # file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
 from test_framework.test_framework import JokeCoinTier2TestFramework
-from test_framework.messages import COutPoint
 from test_framework.util import (
     assert_equal,
     assert_true,
-    satoshi_round,
+    Decimal,
 )
 
 import time
@@ -23,24 +22,6 @@ Test checking:
 """
 
 class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
-
-    def check_mns_status_legacy(self, node, txhash):
-        status = node.getmasternodestatus()
-        assert_equal(status["txhash"], txhash)
-        assert_equal(status["message"], "Masternode successfully started")
-
-    def check_mns_status(self, node, txhash):
-        status = node.getmasternodestatus()
-        assert_equal(status["proTxHash"], txhash)
-        assert_equal(status["dmnstate"]["PoSePenalty"], 0)
-        assert_equal(status["status"], "Ready")
-
-    def check_mn_list(self, node, txHashSet):
-        # check masternode list from node
-        mnlist = node.listmasternodes()
-        assert_equal(len(mnlist), 3)
-        foundHashes = set([mn["txhash"] for mn in mnlist if mn["txhash"] in txHashSet])
-        assert_equal(len(foundHashes), len(txHashSet))
 
     def check_budget_finalization_sync(self, votesCount, status):
         for i in range(0, len(self.nodes)):
@@ -68,7 +49,7 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
             assert(len(proposals) > 0)
             assert_equal(proposals[0]["Hash"], proposalHash)
 
-    def check_vote_existence(self, proposalName, mnCollateralHash, voteType, voteValid):
+    def check_vote_existence(self, proposalName, mnCollateralHash, voteType):
         for i in range(0, len(self.nodes)):
             node = self.nodes[i]
             votesInfo = node.getbudgetvotes(proposalName)
@@ -77,7 +58,6 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
             for voteInfo in votesInfo:
                 if (voteInfo["mnId"].split("-")[0] == mnCollateralHash) :
                     assert_equal(voteInfo["Vote"], voteType)
-                    assert_equal(voteInfo["fValid"], voteValid)
                     found = True
             assert_true(found, "Error checking vote existence in node " + str(i))
 
@@ -116,18 +96,7 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
 
     def run_test(self):
         self.enable_mocktime()
-        self.setup_3_masternodes_network()
-        txHashSet = set([self.mnOneCollateral.hash, self.mnTwoCollateral.hash, self.proRegTx1])
-        # check mn list from miner
-        self.check_mn_list(self.miner, txHashSet)
-
-        # check status of masternodes
-        self.check_mns_status_legacy(self.remoteOne, self.mnOneCollateral.hash)
-        self.log.info("MN1 active")
-        self.check_mns_status_legacy(self.remoteTwo, self.mnTwoCollateral.hash)
-        self.log.info("MN2 active")
-        self.check_mns_status(self.remoteDMN1, self.proRegTx1)
-        self.log.info("DMN1 active")
+        self.setup_2_masternodes_network()
 
         # Prepare the proposal
         self.log.info("preparing budget proposal..")
@@ -178,34 +147,23 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
         self.stake(7, [self.remoteOne, self.remoteTwo])
 
         # now let's vote for the proposal with the first MN
-        self.log.info("Voting with MN1...")
-        voteResult = self.ownerOne.mnbudgetvote("alias", proposalHash, "yes", self.masternodeOneAlias, True)
+        self.log.info("broadcasting votes for the proposal now..")
+        voteResult = self.ownerOne.mnbudgetvote("alias", proposalHash, "yes", self.masternodeOneAlias)
         assert_equal(voteResult["detail"][0]["result"], "success")
 
         # check that the vote was accepted everywhere
         self.stake(1, [self.remoteOne, self.remoteTwo])
-        self.check_vote_existence(firstProposalName, self.mnOneCollateral.hash, "YES", True)
+        self.check_vote_existence(firstProposalName, self.mnOneTxHash, "YES")
         self.log.info("all good, MN1 vote accepted everywhere!")
 
         # now let's vote for the proposal with the second MN
-        self.log.info("Voting with MN2...")
-        voteResult = self.ownerTwo.mnbudgetvote("alias", proposalHash, "yes", self.masternodeTwoAlias, True)
+        voteResult = self.ownerTwo.mnbudgetvote("alias", proposalHash, "yes", self.masternodeTwoAlias)
         assert_equal(voteResult["detail"][0]["result"], "success")
 
         # check that the vote was accepted everywhere
         self.stake(1, [self.remoteOne, self.remoteTwo])
-        self.check_vote_existence(firstProposalName, self.mnTwoCollateral.hash, "YES", True)
+        self.check_vote_existence(firstProposalName, self.mnTwoTxHash, "YES")
         self.log.info("all good, MN2 vote accepted everywhere!")
-
-        # now let's vote for the proposal with the first DMN
-        self.log.info("Voting with DMN1...")
-        voteResult = self.ownerOne.mnbudgetvote("alias", proposalHash, "yes", self.proRegTx1)
-        assert_equal(voteResult["detail"][0]["result"], "success")
-
-        # check that the vote was accepted everywhere
-        self.stake(1, [self.remoteOne, self.remoteTwo])
-        self.check_vote_existence(firstProposalName, self.proRegTx1, "YES", True)
-        self.log.info("all good, DMN1 vote accepted everywhere!")
 
         # Now check the budget
         blockStart = nextSuperBlockHeight
@@ -216,8 +174,8 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
         expected_budget = [
             self.get_proposal_obj(firstProposalName, firstProposalLink, proposalHash, proposalFeeTxId, blockStart,
                                   blockEnd, firstProposalCycles, RemainingPaymentCount, firstProposalAddress, 1,
-                                  3, 0, 0, satoshi_round(TotalPayment), satoshi_round(firstProposalAmountPerCycle),
-                                  True, True, satoshi_round(Allotted), satoshi_round(Allotted))
+                                  2, 0, 0, Decimal(str(TotalPayment)), Decimal(str(firstProposalAmountPerCycle)),
+                                  True, True, Decimal(str(Allotted)), Decimal(str(Allotted)))
                            ]
         self.check_budgetprojection(expected_budget)
 
@@ -241,19 +199,12 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
 
         self.log.info("budget finalization synced!, now voting for the budget finalization..")
 
-        voteResult = self.ownerOne.mnfinalbudget("vote-many", budgetFinHash, True)
-        assert_equal(voteResult["detail"][0]["result"], "success")
-        self.log.info("Remote One voted successfully.")
-        voteResult = self.ownerTwo.mnfinalbudget("vote-many", budgetFinHash, True)
-        assert_equal(voteResult["detail"][0]["result"], "success")
-        self.log.info("Remote Two voted successfully.")
-        voteResult = self.remoteDMN1.mnfinalbudget("vote", budgetFinHash)
-        assert_equal(voteResult["detail"][0]["result"], "success")
-        self.log.info("DMN voted successfully.")
+        self.ownerOne.mnfinalbudget("vote-many", budgetFinHash)
+        self.ownerTwo.mnfinalbudget("vote-many", budgetFinHash)
         self.stake(2, [self.remoteOne, self.remoteTwo])
 
         self.log.info("checking finalization votes..")
-        self.check_budget_finalization_sync(3, "OK")
+        self.check_budget_finalization_sync(2, "OK")
 
         self.stake(8, [self.remoteOne, self.remoteTwo])
         addrInfo = self.miner.listreceivedbyaddress(0, False, False, firstProposalAddress)
@@ -265,26 +216,7 @@ class MasternodeGovernanceBasicTest(JokeCoinTier2TestFramework):
         expected_budget[0]["RemainingPaymentCount"] -= 1
         self.check_budgetprojection(expected_budget)
 
-        self.stake(1, [self.remoteOne, self.remoteTwo])
 
-        # now let's verify that votes expire properly.
-        # Drop one MN and one DMN
-        self.log.info("expiring MN1..")
-        self.spend_collateral(self.ownerOne, self.mnOneCollateral, self.miner)
-        self.wait_until_mn_vinspent(self.mnOneCollateral.hash, 30, [self.remoteTwo])
-        self.stake(15, [self.remoteTwo]) # create blocks to remove staled votes
-        time.sleep(2) # wait a little bit
-        self.check_vote_existence(firstProposalName, self.mnOneCollateral.hash, "YES", False)
-        self.log.info("MN1 vote expired after collateral spend, all good")
-
-        self.log.info("expiring DMN1..")
-        lm = self.ownerOne.listmasternodes(self.proRegTx1)[0]
-        self.spend_collateral(self.ownerOne, COutPoint(lm["collateralHash"], lm["collateralIndex"]), self.miner)
-        self.wait_until_mn_vinspent(self.proRegTx1, 30, [self.remoteTwo])
-        self.stake(15, [self.remoteTwo]) # create blocks to remove staled votes
-        time.sleep(2) # wait a little bit
-        self.check_vote_existence(firstProposalName, self.proRegTx1, "YES", False)
-        self.log.info("DMN vote expired after collateral spend, all good")
 
 
 

@@ -23,8 +23,6 @@ void RegisterRawTransactionRPCCommands(CRPCTable& tableRPC);
 void RegisterMasternodeRPCCommands(CRPCTable& tableRPC);
 /** Register budget RPC commands */
 void RegisterBudgetRPCCommands(CRPCTable& tableRPC);
-/** Register Evo RPC commands */
-void RegisterEvoRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable& tableRPC)
 {
@@ -35,7 +33,6 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& tableRPC)
     RegisterRawTransactionRPCCommands(tableRPC);
     RegisterMasternodeRPCCommands(tableRPC);
     RegisterBudgetRPCCommands(tableRPC);
-    RegisterEvoRPCCommands(tableRPC);
 }
 
 #endif

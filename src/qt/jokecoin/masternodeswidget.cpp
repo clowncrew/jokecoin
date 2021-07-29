@@ -21,7 +21,7 @@
 #include "sync.h"
 #include "wallet/wallet.h"
 #include "askpassphrasedialog.h"
-#include "util/system.h"
+#include "util.h"
 #include "qt/jokecoin/optionbutton.h"
 #include <iostream>
 #include <fstream>
@@ -77,7 +77,7 @@ MasterNodesWidget::MasterNodesWidget(JokeCoinGUI *parent) :
             new MNHolder(isLightTheme()),
             this
     );
-    mnModel = new MNModel(this, walletModel);
+    mnModel = new MNModel(this);
 
     this->setStyleSheet(parent->styleSheet());
 
@@ -452,7 +452,7 @@ void MasterNodesWidget::onDeleteMNClicked()
             bool convertOK = false;
             unsigned int indexOut = outIndex.toUInt(&convertOK);
             if (convertOK) {
-                COutPoint collateralOut(uint256S(txId.toStdString()), indexOut);
+                COutPoint collateralOut(uint256(txId.toStdString()), indexOut);
                 walletModel->unlockCoin(collateralOut);
             }
 

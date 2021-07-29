@@ -59,7 +59,7 @@ public:
 
         } else {
             READWRITE(coinVersion);
-            if (coinVersion < libzerocoin::PUBKEY_VERSION) {
+            if (coinVersion < libzerocoin::PrivateCoin::PUBKEY_VERSION) {
                 READWRITE(coinSerialNumber);
             }
             else {

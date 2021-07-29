@@ -21,7 +21,7 @@ import tempfile
 TMPDIR_PREFIX = "jokecoin_func_test_"
 
 # Matches on the date format at the start of the log event
-TIMESTAMP_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z")
+TIMESTAMP_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}")
 
 LogEvent = namedtuple('LogEvent', ['timestamp', 'source', 'event'])
 
