@@ -1,3 +1,0 @@
-usr/local/bin/jokecoind usr/bin
-usr/local/bin/jokecoin-cli usr/bin
-debian/examples/jokecoin.conf etc/jokecoin
